@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
+import { sendPushToAll } from "@/lib/push"
 
 export type MatchFormState =
   | { errors?: Record<string, string[]>; message?: string }
@@ -44,11 +45,20 @@ export async function createMatch(
   const scheduledAt = new Date(`${date}T${time}:00`)
   if (isNaN(scheduledAt.getTime())) return { errors: { date: ["Nieprawidłowa data."] } }
 
-  await prisma.match.create({
+  const match = await prisma.match.create({
     data: { seasonId, homeTeamId, awayTeamId, scheduledAt, venue, round, playerLimit },
+    include: { homeTeam: true, awayTeam: true },
   })
 
   revalidatePath("/mecze")
+
+  const dateStr = new Date(match.scheduledAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })
+  sendPushToAll({
+    title: "Nowy mecz zaplanowany",
+    body:  `${match.homeTeam.name} vs ${match.awayTeam.name} — ${dateStr}`,
+    url:   `/mecze/${match.id}`,
+  }).catch(() => {})
+
   redirect("/mecze")
 }
 
@@ -78,7 +88,10 @@ export async function saveMatchResult(
     return { message: "Błąd danych bramek." }
   }
 
-  const match = await prisma.match.findUnique({ where: { id: matchId } })
+  const match = await prisma.match.findUnique({
+    where:   { id: matchId },
+    include: { homeTeam: true, awayTeam: true },
+  })
   if (!match) return { message: "Mecz nie istnieje." }
 
   await prisma.match.update({
@@ -105,6 +118,13 @@ export async function saveMatchResult(
   revalidatePath("/mecze")
   revalidatePath(`/mecze/${matchId}`)
   revalidatePath("/")
+
+  sendPushToAll({
+    title: "Wyniki meczu",
+    body:  `${match.homeTeam.name} ${homeScore}:${awayScore} ${match.awayTeam.name}`,
+    url:   `/mecze/${matchId}`,
+  }).catch(() => {})
+
   redirect(`/mecze/${matchId}`)
 }
 
@@ -132,7 +152,10 @@ export async function updateMatchLineup(
     return { message: "Błąd danych składu." }
   }
 
-  const match = await prisma.match.findUnique({ where: { id: matchId } })
+  const match = await prisma.match.findUnique({
+    where:   { id: matchId },
+    include: { homeTeam: true, awayTeam: true },
+  })
   if (!match) return { message: "Mecz nie istnieje." }
 
   await prisma.$transaction(async (tx) => {
@@ -146,5 +169,12 @@ export async function updateMatchLineup(
   })
 
   revalidatePath(`/mecze/${matchId}`)
+
+  sendPushToAll({
+    title: "Skład ogłoszony",
+    body:  `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+    url:   `/mecze/${matchId}`,
+  }).catch(() => {})
+
   redirect(`/mecze/${matchId}`)
 }

@@ -7,6 +7,7 @@ import { getOptionalSession } from "@/lib/dal"
 import { logout } from "@/app/actions/auth"
 import { prisma } from "@/lib/prisma"
 import VoteBanner from "./vote-banner"
+import PushButton from "./push-button"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -110,6 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       <span className="sm:hidden">Profil</span>
                       <span className="hidden sm:inline">Mój profil</span>
                     </Link>
+                    <PushButton />
                     <form action={logout}>
                       <button type="submit" className="rounded-md px-2 sm:px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
                         Wyloguj

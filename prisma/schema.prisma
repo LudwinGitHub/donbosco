@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum MatchStatus {
+  SCHEDULED
+  PLAYED
+  CANCELLED
+  POSTPONED
+}
+
+enum Role {
+  ORGANIZER
+  PLAYER
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  WAITLIST
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role     @default(PLAYER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  registrations MatchRegistration[]
+  player        Player?
+  drawVotes     DrawVote[]
+
+  @@map("users")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  nickname  String?
+  photoUrl  String?
+  userId    String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  teamPlayers   TeamPlayer[]
+  matchLineups  MatchLineup[]
+  goalsScored   Goal[]        @relation("scorer")
+  goalsAssisted Goal[]        @relation("assister")
+  mvpMatches    Match[]       @relation("matchMvp")
+
+  @@map("players")
+}
+
+model Season {
+  id        String    @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  teams   Team[]
+  matches Match[]
+
+  @@map("seasons")
+}
+
+model Team {
+  id       String  @id @default(cuid())
+  name     String
+  color    String
+  seasonId String
+  season   Season  @relation(fields: [seasonId], references: [id])
+
+  teamPlayers  TeamPlayer[]
+  homeMatches  Match[]       @relation("homeTeam")
+  awayMatches  Match[]       @relation("awayTeam")
+  goals        Goal[]
+  matchLineups MatchLineup[]
+
+  @@map("teams")
+}
+
+// Przypisanie gracza do drużyny w sezonie
+model TeamPlayer {
+  playerId String
+  teamId   String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, teamId])
+  @@map("team_players")
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  seasonId    String
+  season      Season      @relation(fields: [seasonId], references: [id])
+  homeTeamId  String
+  homeTeam    Team        @relation("homeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId  String
+  awayTeam    Team        @relation("awayTeam", fields: [awayTeamId], references: [id])
+  homeScore   Int?
+  awayScore   Int?
+  scheduledAt DateTime
+  playedAt    DateTime?
+  status      MatchStatus @default(SCHEDULED)
+  venue       String?
+  round       Int?
+  playerLimit Int         @default(14)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  mvpPlayerId String?
+  mvpPlayer   Player?     @relation("matchMvp", fields: [mvpPlayerId], references: [id], onDelete: SetNull)
+
+  goals         Goal[]
+  matchLineups  MatchLineup[]
+  registrations MatchRegistration[]
+  draw          MatchDraw?
+
+  @@map("matches")
+}
+
+model MatchRegistration {
+  id        String             @id @default(cuid())
+  matchId   String
+  match     Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    RegistrationStatus
+  createdAt DateTime           @default(now())
+
+  @@unique([matchId, userId])
+  @@map("match_registrations")
+}
+
+// Bramka – strzelec, opcjonalna asysta, minuta
+model Goal {
+  id         String   @id @default(cuid())
+  matchId    String
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id])
+  scorerId   String
+  scorer     Player   @relation("scorer", fields: [scorerId], references: [id])
+  assisterId String?
+  assister   Player?  @relation("assister", fields: [assisterId], references: [id])
+  minute     Int?
+  isOwnGoal  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@map("goals")
+}
+
+model MatchDraw {
+  id             String     @id @default(cuid())
+  matchId        String     @unique
+  match          Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  optionATeam1   String[]
+  optionATeam2   String[]
+  optionARating1 Float
+  optionARating2 Float
+  optionBTeam1   String[]
+  optionBTeam2   String[]
+  optionBRating1 Float
+  optionBRating2 Float
+  votes          DrawVote[]
+  createdAt      DateTime   @default(now())
+
+  @@map("match_draws")
+}
+
+model DrawVote {
+  matchId String
+  userId  String
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  draw    MatchDraw @relation(fields: [matchId], references: [matchId], onDelete: Cascade)
+  choice  String
+
+  @@id([matchId, userId])
+  @@map("draw_votes")
+}
+
+// Skład na mecz – kto faktycznie grał
+model MatchLineup {
+  matchId  String
+  playerId String
+  teamId   String
+  match    Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player   Player @relation(fields: [playerId], references: [id])
+  team     Team   @relation(fields: [teamId], references: [id])
+
+  @@id([matchId, playerId])
+  @@map("match_lineups")
+}

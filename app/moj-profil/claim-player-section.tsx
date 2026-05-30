@@ -1,6 +1,7 @@
 "use client"
-import { useState, useActionState } from "react"
+import { useState, useActionState, useEffect } from "react"
 import { claimPlayerProfile, type PlayerFormState } from "@/app/actions/players"
+import { toast } from "sonner"
 
 type Player = {
   id: string
@@ -12,6 +13,11 @@ type Player = {
 export default function ClaimPlayerSection({ players }: { players: Player[] }) {
   const [search, setSearch] = useState("")
   const [state, action, pending] = useActionState<PlayerFormState, FormData>(claimPlayerProfile, undefined)
+
+  useEffect(() => {
+    if (state?.success)        toast.success("Profil powiązany z kontem")
+    else if (state?.message)   toast.error(state.message)
+  }, [state])
 
   const filtered = players.filter((p) => {
     const q = search.toLowerCase()

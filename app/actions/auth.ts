@@ -52,7 +52,7 @@ export async function login(state: AuthFormState, formData: FormData): Promise<A
   }
 
   await createSession(user.id, user.role)
-  redirect("/")
+  redirect(`/?toast=${encodeURIComponent("Zalogowano pomyślnie")}`)
 }
 
 export async function signup(state: AuthFormState, formData: FormData): Promise<AuthFormState> {
@@ -80,7 +80,7 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
   })
 
   await createSession(user.id, user.role)
-  redirect("/")
+  redirect(`/?toast=${encodeURIComponent("Konto utworzone — witaj!")}`)
 }
 
 export async function logout() {

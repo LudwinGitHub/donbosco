@@ -1,6 +1,7 @@
 "use client"
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { createMatch, type MatchFormState } from "@/app/actions/matches"
+import { toast } from "sonner"
 
 type Team = { id: string; name: string; color: string }
 
@@ -17,6 +18,10 @@ export default function NewMatchForm({
     createMatch,
     undefined
   )
+
+  useEffect(() => {
+    if (state?.message) toast.error(state.message)
+  }, [state])
 
   return (
     <form action={action} className="space-y-5">

@@ -2,12 +2,15 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import Link from "next/link"
 import Image from "next/image"
+import { Suspense } from "react"
 import "./globals.css"
 import { getOptionalSession } from "@/lib/dal"
 import { logout } from "@/app/actions/auth"
 import { prisma } from "@/lib/prisma"
 import VoteBanner from "./vote-banner"
 import PushButton from "./push-button"
+import ToastConsumer from "./toast-consumer"
+import { Toaster } from "sonner"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -168,6 +171,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
 
         <main className="mx-auto max-w-5xl px-4 py-4 sm:py-8">{children}</main>
+        <Toaster richColors position="bottom-right" />
+        <Suspense><ToastConsumer /></Suspense>
       </body>
     </html>
   )

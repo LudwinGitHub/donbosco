@@ -59,7 +59,7 @@ export async function createMatch(
     url:   `/mecze/${match.id}`,
   }).catch(() => {})
 
-  redirect("/mecze")
+  redirect(`/mecze?toast=${encodeURIComponent("Mecz zaplanowany")}`)
 }
 
 // ─── Wpisz wyniki ─────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ export async function saveMatchResult(
     url:   `/mecze/${matchId}`,
   }).catch(() => {})
 
-  redirect(`/mecze/${matchId}`)
+  redirect(`/mecze/${matchId}?toast=${encodeURIComponent("Wyniki zapisane")}`)
 }
 
 // ─── Edytuj skład ─────────────────────────────────────────────────────────────
@@ -176,5 +176,5 @@ export async function updateMatchLineup(
     url:   `/mecze/${matchId}`,
   }).catch(() => {})
 
-  redirect(`/mecze/${matchId}`)
+  redirect(`/mecze/${matchId}?toast=${encodeURIComponent("Skład zaktualizowany")}`)
 }

@@ -1,7 +1,8 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useActionState } from "react"
 import { saveMatchResult, type MatchFormState, type GoalInput } from "@/app/actions/matches"
+import { toast } from "sonner"
 
 type Player = { id: string; firstName: string; lastName: string; nickname: string | null }
 type Team = { id: string; name: string; color: string; players: Player[] }
@@ -30,6 +31,10 @@ export default function ResultsForm({
     initialGoals.map((g, i) => ({ ...g, key: String(i) }))
   )
   const [nextKey, setNextKey] = useState(initialGoals.length)
+
+  useEffect(() => {
+    if (state?.message) toast.error(state.message)
+  }, [state])
 
   const addGoal = () => {
     setGoals((prev) => [

@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect, useActionState } from "react"
+import { toast } from "sonner"
 import {
   updatePlayer,
   mergePlayers,
@@ -116,9 +117,30 @@ function PlayerTableRow({
   const [linkState,       linkAction,       linkPending]       = useActionState<PlayerFormState, FormData>(linkPlayerToUser,   undefined)
   const [delUserState,    delUserAction,    delUserPending]    = useActionState<PlayerFormState, FormData>(deleteUserAccount,  undefined)
 
-  useEffect(() => { if (editState?.success)  onClose() }, [editState?.success])
-  useEffect(() => { if (mergeState?.success) onClose() }, [mergeState?.success])
-  useEffect(() => { if (linkState?.success)  onClose() }, [linkState?.success])
+  useEffect(() => {
+    if (editState?.success)        { toast.success("Gracz zaktualizowany");    onClose() }
+    else if (editState?.message)     toast.error(editState.message)
+  }, [editState])
+
+  useEffect(() => {
+    if (mergeState?.success)       { toast.success("Gracze scaleni");          onClose() }
+    else if (mergeState?.message)    toast.error(mergeState.message)
+  }, [mergeState])
+
+  useEffect(() => {
+    if (deleteState?.success)        toast.success("Gracz usunięty")
+    else if (deleteState?.message)   toast.error(deleteState.message)
+  }, [deleteState])
+
+  useEffect(() => {
+    if (linkState?.success)        { toast.success("Konto powiązane");         onClose() }
+    else if (linkState?.message)     toast.error(linkState.message)
+  }, [linkState])
+
+  useEffect(() => {
+    if (delUserState?.success)       toast.success("Konto użytkownika usunięte")
+    else if (delUserState?.message)  toast.error(delUserState.message)
+  }, [delUserState])
 
   const mergeOptions = allPlayers.filter((p) => p.id !== player.id)
   const linkOptions  = player.linkedUser

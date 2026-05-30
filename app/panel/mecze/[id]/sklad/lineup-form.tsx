@@ -1,6 +1,7 @@
 "use client"
-import { useState, useActionState } from "react"
+import { useState, useActionState, useEffect } from "react"
 import { updateMatchLineup, type MatchFormState, type LineupEntryInput } from "@/app/actions/matches"
+import { toast } from "sonner"
 
 type Player = { id: string; firstName: string; lastName: string; nickname: string | null }
 type Team   = { id: string; name: string; color: string }
@@ -29,6 +30,10 @@ export default function LineupForm({
 
   const [homeChecked, setHomeChecked] = useState<Set<string>>(new Set(initialHomeLineup))
   const [awayChecked, setAwayChecked] = useState<Set<string>>(new Set(initialAwayLineup))
+
+  useEffect(() => {
+    if (state?.message) toast.error(state.message)
+  }, [state])
 
   const toggle = (
     id: string,

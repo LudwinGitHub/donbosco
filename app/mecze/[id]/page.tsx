@@ -2,6 +2,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getMatchById, type GoalDetail, type LineupEntry } from "@/lib/matches"
 import { getOptionalSession } from "@/lib/dal"
+import { prisma } from "@/lib/prisma"
+import RegistrationSection from "./registration-section"
+import DeleteMatchButton from "./delete-match-button"
 
 export default async function MatchDetailPage({
   params,
@@ -9,15 +12,22 @@ export default async function MatchDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [match, session] = await Promise.all([
+  const [match, session, registrations] = await Promise.all([
     getMatchById(id),
     getOptionalSession(),
+    prisma.matchRegistration.findMany({
+      where:   { matchId: id },
+      include: { user: { select: { firstName: true, lastName: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
   ])
   const isOrganizer = session?.role === "ORGANIZER"
 
   if (!match) notFound()
 
-  const played = match.status === "PLAYED"
+  const played    = match.status === "PLAYED"
+  const confirmed = registrations.filter((r) => r.status === "CONFIRMED")
+  const waitlist  = registrations.filter((r) => r.status === "WAITLIST")
   const homeLineup = match.matchLineups.filter((l) => l.teamId === match.homeTeam.id)
   const awayLineup = match.matchLineups.filter((l) => l.teamId === match.awayTeam.id)
   const hasLineup = homeLineup.length > 0 || awayLineup.length > 0
@@ -46,6 +56,7 @@ export default async function MatchDetailPage({
             >
               {match.status === "PLAYED" ? "Edytuj wyniki" : "Wpisz wyniki"}
             </Link>
+            <DeleteMatchButton matchId={id} />
           </div>
         )}
       </div>
@@ -108,6 +119,16 @@ export default async function MatchDetailPage({
           </div>
         </section>
       )}
+
+      {/* Registration */}
+      <RegistrationSection
+        matchId={id}
+        playerLimit={match.playerLimit}
+        matchStatus={match.status}
+        confirmed={confirmed}
+        waitlist={waitlist}
+        currentUserId={session?.userId ?? null}
+      />
     </div>
   )
 }

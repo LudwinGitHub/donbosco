@@ -18,7 +18,7 @@ export async function getMatches(seasonId: string): Promise<MatchListItem[]> {
   return prisma.match.findMany({
     where: { seasonId },
     include: { homeTeam: true, awayTeam: true },
-    orderBy: [{ round: "asc" }, { scheduledAt: "asc" }],
+    orderBy: [{ round: "desc" }, { scheduledAt: "desc" }],
   })
 }
 

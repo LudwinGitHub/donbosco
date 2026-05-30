@@ -128,6 +128,19 @@ export async function saveMatchResult(
   redirect(`/mecze/${matchId}?toast=${encodeURIComponent("Wyniki zapisane")}`)
 }
 
+// ─── Usuń mecz ────────────────────────────────────────────────────────────────
+
+export async function deleteMatch(matchId: string): Promise<void> {
+  const session = await verifySession()
+  if (session.role !== "ORGANIZER") return
+
+  await prisma.match.delete({ where: { id: matchId } })
+
+  revalidatePath("/mecze")
+  revalidatePath("/")
+  redirect(`/mecze?toast=${encodeURIComponent("Mecz usunięty")}`)
+}
+
 // ─── Edytuj skład ─────────────────────────────────────────────────────────────
 
 export type LineupEntryInput = {

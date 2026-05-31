@@ -8,6 +8,8 @@ import DeleteMatchButton from "./delete-match-button"
 import Countdown from "./countdown"
 import CommentsSection from "./comments-section"
 import MvpVoteSection from "./mvp-vote"
+import { getActiveBadges } from "@/lib/badges"
+import BadgeChip from "@/app/ui/badge-chip"
 
 export default async function MatchDetailPage({
   params,
@@ -70,6 +72,10 @@ export default async function MatchDetailPage({
   const played    = match.status === "PLAYED"
   const confirmed = registrations.filter((r) => r.status === "CONFIRMED")
   const waitlist  = registrations.filter((r) => r.status === "WAITLIST")
+
+  const badges = played && match.matchLineups.length > 0
+    ? await getActiveBadges()
+    : new Map()
   const homeLineup = match.matchLineups.filter((l) => l.teamId === match.homeTeam.id)
   const awayLineup = match.matchLineups.filter((l) => l.teamId === match.awayTeam.id)
   const hasLineup = homeLineup.length > 0 || awayLineup.length > 0
@@ -88,7 +94,12 @@ export default async function MatchDetailPage({
   const myPlayerInLineup = session
     ? match.matchLineups.find((l) => l.player.userId === session.userId)
     : null
-  const canVote = !!myPlayerInLineup
+
+  const votingDeadline = match.playedAt
+    ? new Date(match.playedAt.getTime() + 3 * 24 * 60 * 60 * 1000)
+    : null
+  const votingOpen = votingDeadline ? new Date() < votingDeadline : false
+  const canVote = !!myPlayerInLineup && votingOpen && !match.mvpPlayer?.id
 
   return (
     <div className="space-y-6">
@@ -249,8 +260,8 @@ export default async function MatchDetailPage({
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Skład</h2>
           <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-zinc-100">
-              <LineupColumn players={homeLineup} teamName={match.homeTeam.name} teamColor={match.homeTeam.color} />
-              <LineupColumn players={awayLineup} teamName={match.awayTeam.name} teamColor={match.awayTeam.color} />
+              <LineupColumn players={homeLineup} teamName={match.homeTeam.name} teamColor={match.homeTeam.color} mvpPlayerId={match.mvpPlayer?.id ?? null} badges={badges} />
+              <LineupColumn players={awayLineup} teamName={match.awayTeam.name} teamColor={match.awayTeam.color} mvpPlayerId={match.mvpPlayer?.id ?? null} badges={badges} />
             </div>
           </div>
         </section>
@@ -264,6 +275,8 @@ export default async function MatchDetailPage({
           votes={mvpVotes.map((v) => ({ nomineeId: v.nomineeId, count: v._count.nomineeId }))}
           myVoteNomineeId={myMvpVote?.nomineeId ?? null}
           canVote={canVote}
+          votingDeadline={votingDeadline?.toISOString() ?? null}
+          votingClosed={!votingOpen || !!match.mvpPlayer?.id}
         />
       )}
 
@@ -373,25 +386,40 @@ function LineupColumn({
   players,
   teamName,
   teamColor,
+  mvpPlayerId,
+  badges,
 }: {
   players: LineupEntry[]
   teamName: string
   teamColor: string
+  mvpPlayerId: string | null
+  badges: Map<string, { type: import("@/lib/badges").BadgeType }[]>
 }) {
   return (
-    <div className="p-4 space-y-1">
+    <div className="p-4 space-y-1.5">
       <div className="flex items-center gap-1.5 mb-3">
         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: teamColor }} />
         <span className="text-xs font-semibold text-zinc-500">{teamName}</span>
       </div>
-      {players.map((l) => (
-        <p key={l.player.id} className="text-sm text-zinc-700">
-          {l.player.firstName} {l.player.lastName}
-          {l.player.nickname && (
-            <span className="ml-1 text-xs text-zinc-400">„{l.player.nickname}"</span>
-          )}
-        </p>
-      ))}
+      {players.map((l) => {
+        const playerBadges = badges.get(l.player.id) ?? []
+        return (
+          <div key={l.player.id} className="flex flex-wrap items-center gap-1">
+            {mvpPlayerId === l.player.id && (
+              <span title="MVP meczu">⭐</span>
+            )}
+            <span className="text-sm text-zinc-700">
+              {l.player.firstName} {l.player.lastName}
+              {l.player.nickname && (
+                <span className="ml-1 text-xs text-zinc-400">„{l.player.nickname}"</span>
+              )}
+            </span>
+            {playerBadges.map((b, i) => (
+              <BadgeChip key={i} type={b.type} />
+            ))}
+          </div>
+        )
+      })}
     </div>
   )
 }

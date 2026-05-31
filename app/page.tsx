@@ -23,7 +23,7 @@ export default async function HomePage({
         prisma.match.findFirst({
           where:   { seasonId: activeSeason.id, status: "PLAYED" },
           orderBy: { scheduledAt: "desc" },
-          include: { homeTeam: true, awayTeam: true },
+          include: { homeTeam: true, awayTeam: true, mvpPlayer: { select: { id: true, firstName: true, lastName: true } } },
         }),
         prisma.match.findFirst({
           where:   { seasonId: activeSeason.id, status: "SCHEDULED", scheduledAt: { gt: now } },
@@ -87,7 +87,12 @@ export default async function HomePage({
                     <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: lastMatch.awayTeam.color }} />
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                {lastMatch.mvpPlayer && (
+                  <p className="mt-1.5 text-xs text-zinc-500">
+                    ⭐ MVP: <span className="font-medium text-zinc-700">{lastMatch.mvpPlayer.firstName} {lastMatch.mvpPlayer.lastName}</span>
+                  </p>
+                )}
+                <p className="mt-1.5 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
                   {fmtDate(lastMatch.scheduledAt)} →
                 </p>
               </Link>

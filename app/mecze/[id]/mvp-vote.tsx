@@ -18,6 +18,8 @@ type MvpVoteProps = {
   votes: Array<{ nomineeId: string; count: number }>
   myVoteNomineeId: string | null
   canVote: boolean
+  votingDeadline: string | null
+  votingClosed: boolean
 }
 
 export default function MvpVoteSection({
@@ -26,6 +28,8 @@ export default function MvpVoteSection({
   votes,
   myVoteNomineeId,
   canVote,
+  votingDeadline,
+  votingClosed,
 }: MvpVoteProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -59,11 +63,24 @@ export default function MvpVoteSection({
     })
   }
 
+  const deadlineLabel = votingDeadline
+    ? new Date(votingDeadline).toLocaleString("pl-PL", {
+        day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+      })
+    : null
+
   return (
     <section className="space-y-2">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-        Głosowanie MVP
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+          Głosowanie MVP
+        </h2>
+        {votingClosed ? (
+          <span className="text-xs text-zinc-400">Głosowanie zakończone</span>
+        ) : deadlineLabel ? (
+          <span className="text-xs text-zinc-400">Do: {deadlineLabel}</span>
+        ) : null}
+      </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
         <div className="divide-y divide-zinc-50">

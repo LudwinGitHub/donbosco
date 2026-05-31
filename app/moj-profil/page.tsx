@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import ClaimPlayerSection from "./claim-player-section"
 import ChangePasswordSection from "./change-password-form"
 import { createVerificationToken } from "@/app/actions/auth"
+import { getActiveBadges } from "@/lib/badges"
+import BadgeChip from "@/app/ui/badge-chip"
 
 export default async function MyProfilePage({
   searchParams,
@@ -15,7 +17,7 @@ export default async function MyProfilePage({
 
   const now = new Date()
 
-  const [user, myRegistrations, myPayments] = await Promise.all([
+  const [user, myRegistrations, myPayments, mvpCount, badges] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.userId },
       include: {
@@ -58,6 +60,8 @@ export default async function MyProfilePage({
       },
       orderBy: { match: { scheduledAt: "desc" } },
     }),
+    prisma.match.count({ where: { mvpPlayer: { userId: session.userId } } }),
+    getActiveBadges(),
   ])
 
   if (!user) return <p className="text-zinc-500">Użytkownik nie istnieje.</p>
@@ -278,12 +282,21 @@ export default async function MyProfilePage({
                     <span className="ml-2 text-base font-normal text-zinc-400">„{p.nickname}"</span>
                   )}
                 </p>
+                {(() => {
+                  const myBadges = badges.get(p.id) ?? []
+                  return myBadges.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {myBadges.map((b, i) => <BadgeChip key={i} type={b.type} />)}
+                    </div>
+                  ) : null
+                })()}
               </div>
 
-              <div className="grid grid-cols-3 gap-4 border-t border-zinc-100 pt-4">
+              <div className="grid grid-cols-4 gap-4 border-t border-zinc-100 pt-4">
                 <StatCell label="Mecze"  value={p.matchLineups.length} />
                 <StatCell label="Gole"   value={p.goalsScored.length} />
                 <StatCell label="Asysty" value={p.goalsAssisted.length} />
+                <StatCell label="MVP"    value={mvpCount} />
               </div>
             </div>
 

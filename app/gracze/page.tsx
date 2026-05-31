@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { getAllSeasons } from "@/lib/standings"
 import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
+import { getActiveBadges, type PlayerBadge } from "@/lib/badges"
+import BadgeChip from "@/app/ui/badge-chip"
 
 export default async function PlayersPage({
   searchParams,
@@ -14,7 +16,10 @@ export default async function PlayersPage({
     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
   )
 
-  const players = await getPlayersWithStats(seasonId)
+  const [players, badges] = await Promise.all([
+    getPlayersWithStats(seasonId),
+    getActiveBadges(seasonId),
+  ])
   const currentSeason = seasons.find((s) => s.id === seasonId) ?? null
 
   return (
@@ -68,12 +73,17 @@ export default async function PlayersPage({
                   <tr key={p.id} className="transition-colors hover:bg-zinc-50">
                     <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
-                        {p.firstName} {p.lastName}
-                      </Link>
-                      {p.nickname && (
-                        <span className="ml-1.5 text-xs text-zinc-400">„{p.nickname}"</span>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
+                          {p.firstName} {p.lastName}
+                        </Link>
+                        {p.nickname && (
+                          <span className="text-xs text-zinc-400">„{p.nickname}"</span>
+                        )}
+                        {(badges.get(p.id) ?? []).map((b, i) => (
+                          <BadgeChip key={i} type={b.type} />
+                        ))}
+                      </div>
                     </td>
                     {seasonId && (
                       <td className="px-4 py-3 hidden sm:table-cell">

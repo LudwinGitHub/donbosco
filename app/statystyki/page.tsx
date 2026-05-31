@@ -3,16 +3,25 @@ import {
   getMatchHighlights,
   getTopSingleMatchScorers,
   getSeasonOverviews,
+  getFullScorerRanking,
+  getTeamStats,
   type MatchHighlight,
   type PlayerMatchRecord,
   type SeasonOverview,
+  type ScorerRankingRow,
+  type TeamStatsRow,
 } from "@/lib/stats"
+import { getActiveSeason } from "@/lib/standings"
 
 export default async function StatystykiPage() {
-  const [{ highestScoring, biggestWin }, topScorers, seasons] = await Promise.all([
+  const activeSeason = await getActiveSeason()
+
+  const [{ highestScoring, biggestWin }, topScorers, seasons, allTimeScorerRanking, teamStats] = await Promise.all([
     getMatchHighlights(),
     getTopSingleMatchScorers(5),
     getSeasonOverviews(),
+    getFullScorerRanking(),
+    activeSeason ? getTeamStats(activeSeason.id) : Promise.resolve([]),
   ])
 
   return (
@@ -21,6 +30,37 @@ export default async function StatystykiPage() {
         <h1 className="text-2xl font-bold">Statystyki</h1>
         <p className="mt-0.5 text-sm text-zinc-500">Rekordy i podsumowania wszystkich sezonów</p>
       </div>
+
+      {/* All-time scorer ranking */}
+      {allTimeScorerRanking.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Klasyfikacja strzelców</h2>
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                  <th className="px-4 py-3 text-right w-8">#</th>
+                  <th className="px-4 py-3 text-left">Gracz</th>
+                  <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>
+                  <th className="px-4 py-3 text-center w-14" title="Gole">G</th>
+                  <th className="px-4 py-3 text-center w-14" title="Asysty">A</th>
+                  <th className="px-4 py-3 text-center w-14 hidden sm:table-cell" title="Mecze">M</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {allTimeScorerRanking.slice(0, 5).map((r, i) => (
+                  <TopScorerRow key={r.playerId} row={r} rank={i + 1} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="text-right">
+            <Link href="/statystyki/strzelcy" className="text-sm text-zinc-500 hover:text-zinc-700 hover:underline">
+              Zobacz pełną klasyfikację →
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Match records */}
       <section className="space-y-3">
@@ -85,6 +125,33 @@ export default async function StatystykiPage() {
           </table>
         </div>
       </section>
+
+      {/* Team stats (active season) */}
+      {activeSeason && teamStats.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            Statystyki drużyn — {activeSeason.name}
+          </h2>
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                  <th className="px-4 py-3 text-left">Drużyna</th>
+                  <th className="px-4 py-3 text-center w-28 hidden sm:table-cell">Śr. goli zdobytych</th>
+                  <th className="px-4 py-3 text-center w-28 hidden sm:table-cell">Śr. straconych</th>
+                  <th className="px-4 py-3 text-center w-28">Śr. goli</th>
+                  <th className="px-4 py-3 text-center w-24">Czyste konta</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {teamStats.map((t) => (
+                  <TeamStatsRow key={t.teamId} row={t} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
@@ -194,6 +261,56 @@ function SeasonRow({ season: s }: { season: SeasonOverview }) {
           <span className="text-zinc-300">—</span>
         )}
       </td>
+    </tr>
+  )
+}
+
+function TopScorerRow({ row: r, rank }: { row: ScorerRankingRow; rank: number }) {
+  return (
+    <tr className="hover:bg-zinc-50 transition-colors">
+      <td className="px-4 py-3 text-right text-xs text-zinc-300">{rank}</td>
+      <td className="px-4 py-3">
+        <Link href={`/gracze/${r.playerId}`} className="font-medium text-zinc-900 hover:underline">
+          {r.firstName} {r.lastName}
+        </Link>
+        {r.nickname && (
+          <p className="text-xs text-zinc-400">{r.nickname}</p>
+        )}
+      </td>
+      <td className="px-4 py-3 hidden sm:table-cell">
+        {r.teamName ? (
+          <div className="flex items-center gap-1.5">
+            {r.teamColor && (
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: r.teamColor }} />
+            )}
+            <span className="text-zinc-600">{r.teamName}</span>
+          </div>
+        ) : (
+          <span className="text-zinc-300">—</span>
+        )}
+      </td>
+      <td className="px-4 py-3 text-center font-bold text-zinc-900">{r.goals}</td>
+      <td className="px-4 py-3 text-center text-zinc-600">{r.assists}</td>
+      <td className="px-4 py-3 text-center text-zinc-400 hidden sm:table-cell">{r.matches}</td>
+    </tr>
+  )
+}
+
+function TeamStatsRow({ row: t }: { row: TeamStatsRow }) {
+  return (
+    <tr className="hover:bg-zinc-50 transition-colors">
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: t.teamColor }} />
+          <span className="font-medium text-zinc-800">{t.teamName}</span>
+        </div>
+      </td>
+      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{t.avgGoalsScored}</td>
+      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{t.avgGoalsConceded}</td>
+      <td className="px-4 py-3 text-center text-zinc-600 sm:hidden">
+        {t.avgGoalsScored} / {t.avgGoalsConceded}
+      </td>
+      <td className="px-4 py-3 text-center font-medium text-zinc-700">{t.cleanSheets}</td>
     </tr>
   )
 }

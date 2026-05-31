@@ -29,19 +29,22 @@ enum RegistrationStatus {
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         Role     @default(PLAYER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          Role     @default(PLAYER)
+  emailVerified Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  registrations     MatchRegistration[]
-  player            Player?
-  drawVotes         DrawVote[]
-  pushSubscriptions PushSubscription[]
+  registrations          MatchRegistration[]
+  player                 Player?
+  drawVotes              DrawVote[]
+  pushSubscriptions      PushSubscription[]
+  comments               MatchComment[]
+  emailVerificationToken EmailVerificationToken?
 
   @@map("users")
 }
@@ -145,6 +148,7 @@ model Match {
   matchLineups  MatchLineup[]
   registrations MatchRegistration[]
   draw          MatchDraw?
+  comments      MatchComment[]
 
   @@map("matches")
 }
@@ -207,6 +211,28 @@ model DrawVote {
 
   @@id([matchId, userId])
   @@map("draw_votes")
+}
+
+model MatchComment {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+
+  @@map("match_comments")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique @default(cuid())
+  expiresAt DateTime
+
+  @@map("email_verification_tokens")
 }
 
 // Skład na mecz – kto faktycznie grał

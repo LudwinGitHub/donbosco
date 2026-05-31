@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
+import { sendPushToUser } from "@/lib/push"
 
 export async function signUp(matchId: string) {
   const session = await verifySession()
@@ -38,6 +39,8 @@ export async function signOut(matchId: string) {
   })
   if (!registration) return
 
+  let promotedUserId: string | null = null
+
   await prisma.$transaction(async (tx) => {
     await tx.matchRegistration.delete({ where: { id: registration.id } })
 
@@ -51,9 +54,24 @@ export async function signOut(matchId: string) {
           where: { id: firstWaiting.id },
           data: { status: "CONFIRMED" },
         })
+        promotedUserId = firstWaiting.userId
       }
     }
   })
+
+  if (promotedUserId) {
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { homeTeam: true, awayTeam: true },
+    })
+    if (match) {
+      sendPushToUser(promotedUserId, {
+        title: "Masz miejsce na meczu!",
+        body: `Twoje miejsce na liście rezerwowej zostało potwierdzone — ${match.homeTeam.name} vs ${match.awayTeam.name}`,
+        url: `/mecze/${matchId}`,
+      }).catch(() => {})
+    }
+  }
 
   revalidatePath(`/mecze/${matchId}`)
 }

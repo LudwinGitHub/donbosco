@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { createSession, deleteSession } from "@/lib/session"
+import { verifySession } from "@/lib/dal"
+import { sendVerificationEmail } from "@/lib/email"
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -76,8 +78,12 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
 
   const passwordHash = await bcrypt.hash(password, 12)
   const user = await prisma.user.create({
-    data: { firstName, lastName, email, passwordHash, role: "PLAYER" },
+    data: { firstName, lastName, email, passwordHash, role: "PLAYER", emailVerified: false },
   })
+
+  createVerificationToken(user.id).then((token) => {
+    sendVerificationEmail(user.email, user.firstName, token).catch(() => {})
+  }).catch(() => {})
 
   await createSession(user.id, user.role)
   redirect(`/?toast=${encodeURIComponent("Konto utworzone — witaj!")}`)
@@ -86,4 +92,57 @@ export async function signup(state: AuthFormState, formData: FormData): Promise<
 export async function logout() {
   await deleteSession()
   redirect("/logowanie")
+}
+
+// ─── Verification token ───────────────────────────────────────────────────────
+
+export async function createVerificationToken(userId: string): Promise<string> {
+  // Delete any existing token first
+  await prisma.emailVerificationToken.deleteMany({ where: { userId } })
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const record = await prisma.emailVerificationToken.create({
+    data: { userId, expiresAt },
+  })
+  return record.token
+}
+
+// ─── Change password ──────────────────────────────────────────────────────────
+
+const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1, { message: "Podaj aktualne hasło." }),
+  newPassword: z
+    .string()
+    .min(8, { message: "Hasło musi mieć co najmniej 8 znaków." })
+    .regex(/[a-zA-Z]/, { message: "Hasło musi zawierać co najmniej jedną literę." })
+    .regex(/[0-9]/, { message: "Hasło musi zawierać co najmniej jedną cyfrę." }),
+  confirmPassword: z.string(),
+})
+
+export async function changePassword(
+  state: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const session = await verifySession()
+
+  const parsed = ChangePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  })
+  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
+  const { currentPassword, newPassword, confirmPassword } = parsed.data
+
+  if (newPassword !== confirmPassword)
+    return { errors: { confirmPassword: ["Hasła nie są identyczne."] } }
+
+  const user = await prisma.user.findUnique({ where: { id: session.userId } })
+  if (!user) return { message: "Użytkownik nie istnieje." }
+
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash)
+  if (!ok) return { errors: { currentPassword: ["Nieprawidłowe aktualne hasło."] } }
+
+  const hash = await bcrypt.hash(newPassword, 12)
+  await prisma.user.update({ where: { id: session.userId }, data: { passwordHash: hash } })
+
+  redirect(`/moj-profil?toast=${encodeURIComponent("Hasło zostało zmienione")}`)
 }

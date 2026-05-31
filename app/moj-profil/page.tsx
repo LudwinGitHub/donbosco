@@ -2,6 +2,8 @@ import Link from "next/link"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import ClaimPlayerSection from "./claim-player-section"
+import ChangePasswordSection from "./change-password-form"
+import { createVerificationToken } from "@/app/actions/auth"
 
 export default async function MyProfilePage() {
   const session = await verifySession()
@@ -42,6 +44,13 @@ export default async function MyProfilePage() {
   ])
 
   if (!user) return <p className="text-zinc-500">Użytkownik nie istnieje.</p>
+
+  let verificationUrl: string | undefined
+  if (!user.emailVerified) {
+    const token = await createVerificationToken(user.id)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+    verificationUrl = `${appUrl}/weryfikacja?token=${token}`
+  }
 
   const upcomingRegs = myRegistrations.filter(
     (r) => r.match.status === "SCHEDULED" && r.match.scheduledAt > now
@@ -97,6 +106,19 @@ export default async function MyProfilePage() {
           <p className="mt-1 text-sm text-zinc-500">{user.email}</p>
         </div>
 
+        {!user.emailVerified && verificationUrl && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+            <p className="text-sm font-semibold text-amber-800">Zweryfikuj swój adres email</p>
+            <p className="text-xs text-amber-700">Kliknij poniższy link, aby aktywować konto. Link wygasa po 24 godzinach.</p>
+            <a
+              href={verificationUrl}
+              className="block truncate text-xs font-mono text-amber-900 underline break-all"
+            >
+              {verificationUrl}
+            </a>
+          </div>
+        )}
+
         <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Profil gracza</p>
@@ -116,6 +138,8 @@ export default async function MyProfilePage() {
         </div>
 
         {registrationsSection}
+
+        <ChangePasswordSection />
       </div>
     )
   }
@@ -133,6 +157,19 @@ export default async function MyProfilePage() {
         <p className="mt-1 text-sm text-zinc-500">{user.email}</p>
       </div>
 
+      {!user.emailVerified && verificationUrl && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+          <p className="text-sm font-semibold text-amber-800">Zweryfikuj swój adres email</p>
+          <p className="text-xs text-amber-700">Kliknij poniższy link, aby aktywować konto. Link wygasa po 24 godzinach.</p>
+          <a
+            href={verificationUrl}
+            className="block truncate text-xs font-mono text-amber-900 underline break-all"
+          >
+            {verificationUrl}
+          </a>
+        </div>
+      )}
+
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
         Nie masz jeszcze powiązanego profilu gracza. Znajdź się na liście poniżej, żeby zobaczyć swoje statystyki.
       </div>
@@ -142,6 +179,8 @@ export default async function MyProfilePage() {
       </div>
 
       {registrationsSection}
+
+      <ChangePasswordSection />
     </div>
   )
 }

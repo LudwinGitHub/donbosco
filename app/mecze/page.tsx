@@ -14,9 +14,9 @@ const STATUS_LABEL: Record<string, string> = {
 export default async function MatchesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sezon?: string }>
+  searchParams: Promise<{ sezon?: string; widok?: string }>
 }) {
-  const { sezon: seasonId } = await searchParams
+  const { sezon: seasonId, widok } = await searchParams
   const [activeSeason, allSeasons, session] = await Promise.all([
     getActiveSeason(),
     getAllSeasons(),
@@ -91,24 +91,58 @@ export default async function MatchesPage({
           ))}
       </div>
 
-      {byRound.length === 0 && (
-        <p className="text-zinc-400">Brak zaplanowanych meczów.</p>
-      )}
+      {/* View tabs */}
+      <div className="flex gap-1.5">
+        <ViewTab
+          href={`/mecze${seasonId ? `?sezon=${seasonId}` : ""}`}
+          label="Rundy"
+          active={widok !== "terminarz"}
+        />
+        <ViewTab
+          href={`/mecze?${seasonId ? `sezon=${seasonId}&` : ""}widok=terminarz`}
+          label="Terminarz"
+          active={widok === "terminarz"}
+        />
+      </div>
 
-      {byRound.map(({ round, matches: roundMatches }) => (
-        <section key={round ?? "no-round"} className="space-y-2">
-          {round !== null && (
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-              Kolejka {round}
-            </h2>
+      {widok === "terminarz" ? (
+        <div className="space-y-6">
+          {groupByMonth(matches).map(({ month, matches: monthMatches }) => (
+            <section key={month} className="space-y-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400 capitalize">
+                {month}
+              </h2>
+              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
+                {monthMatches.map((m) => (
+                  <TerminarzRow key={m.id} match={m} />
+                ))}
+              </div>
+            </section>
+          ))}
+          {matches.length === 0 && <p className="text-zinc-400">Brak meczów.</p>}
+        </div>
+      ) : (
+        <>
+          {byRound.length === 0 && (
+            <p className="text-zinc-400">Brak zaplanowanych meczów.</p>
           )}
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
-            {roundMatches.map((m) => (
-              <MatchRow key={m.id} match={m} confirmedCount={countByMatchId[m.id] ?? 0} />
-            ))}
-          </div>
-        </section>
-      ))}
+
+          {byRound.map(({ round, matches: roundMatches }) => (
+            <section key={round ?? "no-round"} className="space-y-2">
+              {round !== null && (
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                  Kolejka {round}
+                </h2>
+              )}
+              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
+                {roundMatches.map((m) => (
+                  <MatchRow key={m.id} match={m} confirmedCount={countByMatchId[m.id] ?? 0} />
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      )}
     </div>
   )
 }
@@ -252,4 +286,100 @@ function formatTime(date: Date) {
     hour: "2-digit",
     minute: "2-digit",
   })
+}
+
+function groupByMonth(matches: MatchListItem[]) {
+  const map = new Map<string, MatchListItem[]>()
+  for (const m of matches) {
+    const key = new Date(m.scheduledAt).toLocaleDateString("pl-PL", {
+      month: "long",
+      year: "numeric",
+    })
+    if (!map.has(key)) map.set(key, [])
+    map.get(key)!.push(m)
+  }
+  return [...map.entries()]
+    .sort(
+      ([, a], [, b]) =>
+        new Date(a[0].scheduledAt).getTime() - new Date(b[0].scheduledAt).getTime()
+    )
+    .map(([month, matches]) => ({ month, matches }))
+}
+
+function ViewTab({
+  href,
+  label,
+  active,
+}: {
+  href: string
+  label: string
+  active: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? "bg-zinc-900 text-white"
+          : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+      }`}
+    >
+      {label}
+    </Link>
+  )
+}
+
+function TerminarzRow({ match: m }: { match: MatchListItem }) {
+  const date = new Date(m.scheduledAt)
+  const dayName = date.toLocaleDateString("pl-PL", { weekday: "short" })
+  const dayNum = date.getDate()
+  const played = m.status === "PLAYED"
+  const cancelled = m.status === "CANCELLED" || m.status === "POSTPONED"
+
+  return (
+    <Link
+      href={`/mecze/${m.id}`}
+      className="flex items-center gap-4 px-4 py-3 hover:bg-zinc-50 transition-colors group"
+    >
+      {/* Date column */}
+      <div className="shrink-0 w-12 text-center">
+        <p className="text-xs text-zinc-400 capitalize">{dayName}</p>
+        <p className="text-xl font-bold text-zinc-900 leading-tight">{dayNum}</p>
+      </div>
+      {/* Teams */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span
+            className="h-2 w-2 rounded-full shrink-0"
+            style={{ backgroundColor: m.homeTeam.color }}
+          />
+          <span className="text-sm font-medium text-zinc-800 truncate">{m.homeTeam.name}</span>
+          {played ? (
+            <span className="shrink-0 text-sm font-bold tabular-nums text-zinc-900">
+              {m.homeScore}:{m.awayScore}
+            </span>
+          ) : (
+            <span className="shrink-0 text-xs text-zinc-400">vs</span>
+          )}
+          <span className="text-sm font-medium text-zinc-800 truncate">{m.awayTeam.name}</span>
+          <span
+            className="h-2 w-2 rounded-full shrink-0"
+            style={{ backgroundColor: m.awayTeam.color }}
+          />
+        </div>
+        {!played && !cancelled && (
+          <p className="text-xs text-zinc-400 mt-0.5">
+            {formatTime(m.scheduledAt)}
+            {m.venue ? ` · ${m.venue}` : ""}
+          </p>
+        )}
+        {cancelled && (
+          <p className="text-xs text-zinc-400 mt-0.5">
+            {m.status === "CANCELLED" ? "Odwołany" : "Przełożony"}
+          </p>
+        )}
+      </div>
+      <span className="text-zinc-300 group-hover:text-zinc-400 text-sm shrink-0">›</span>
+    </Link>
+  )
 }

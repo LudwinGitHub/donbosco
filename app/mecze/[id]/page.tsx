@@ -5,6 +5,8 @@ import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import RegistrationSection from "./registration-section"
 import DeleteMatchButton from "./delete-match-button"
+import Countdown from "./countdown"
+import CommentsSection from "./comments-section"
 
 export default async function MatchDetailPage({
   params,
@@ -12,11 +14,16 @@ export default async function MatchDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [match, session, registrations] = await Promise.all([
+  const [match, session, registrations, comments] = await Promise.all([
     getMatchById(id),
     getOptionalSession(),
     prisma.matchRegistration.findMany({
       where:   { matchId: id },
+      include: { user: { select: { firstName: true, lastName: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.matchComment.findMany({
+      where: { matchId: id },
       include: { user: { select: { firstName: true, lastName: true } } },
       orderBy: { createdAt: "asc" },
     }),
@@ -56,6 +63,14 @@ export default async function MatchDetailPage({
             >
               {match.status === "PLAYED" ? "Edytuj wyniki" : "Wpisz wyniki"}
             </Link>
+            {match.status !== "PLAYED" && (
+              <Link
+                href={`/panel/mecze/${id}/edytuj`}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+              >
+                Edytuj mecz
+              </Link>
+            )}
             <DeleteMatchButton matchId={id} />
           </div>
         )}
@@ -97,6 +112,13 @@ export default async function MatchDetailPage({
         </div>
       </div>
 
+      {/* Countdown */}
+      {match.status === "SCHEDULED" && match.scheduledAt > new Date() && (
+        <div className="flex justify-center">
+          <Countdown scheduledAt={match.scheduledAt.toISOString()} />
+        </div>
+      )}
+
       {/* Goals */}
       {played && match.goals.length > 0 && (
         <section className="space-y-2">
@@ -128,6 +150,14 @@ export default async function MatchDetailPage({
         confirmed={confirmed}
         waitlist={waitlist}
         currentUserId={session?.userId ?? null}
+      />
+
+      {/* Comments */}
+      <CommentsSection
+        matchId={id}
+        comments={comments}
+        currentUserId={session?.userId ?? null}
+        isOrganizer={session?.role === "ORGANIZER"}
       />
     </div>
   )

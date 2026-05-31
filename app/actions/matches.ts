@@ -141,6 +141,61 @@ export async function deleteMatch(matchId: string): Promise<void> {
   redirect(`/mecze?toast=${encodeURIComponent("Mecz usunięty")}`)
 }
 
+// ─── Edytuj mecz ─────────────────────────────────────────────────────────────
+
+export async function editMatch(
+  state: MatchFormState,
+  formData: FormData
+): Promise<MatchFormState> {
+  const session = await verifySession()
+  if (session.role !== "ORGANIZER") return { message: "Brak uprawnień." }
+
+  const matchId = formData.get("matchId") as string
+  const date = formData.get("date") as string
+  const time = formData.get("time") as string
+  const venue = ((formData.get("venue") as string) || "").trim() || null
+  const roundRaw = formData.get("round") as string
+  const round = roundRaw ? parseInt(roundRaw, 10) : null
+  const playerLimitRaw = formData.get("playerLimit") as string
+  const playerLimit = playerLimitRaw ? parseInt(playerLimitRaw, 10) : 14
+  const status = formData.get("status") as "SCHEDULED" | "CANCELLED" | "POSTPONED"
+
+  if (!date || !time) return { errors: { date: ["Podaj datę i godzinę meczu."] } }
+  if (!["SCHEDULED", "CANCELLED", "POSTPONED"].includes(status))
+    return { errors: { status: ["Nieprawidłowy status."] } }
+
+  const scheduledAt = new Date(`${date}T${time}:00`)
+  if (isNaN(scheduledAt.getTime())) return { errors: { date: ["Nieprawidłowa data."] } }
+
+  const existing = await prisma.match.findUnique({
+    where: { id: matchId },
+    include: { homeTeam: true, awayTeam: true },
+  })
+  if (!existing) return { message: "Mecz nie istnieje." }
+
+  await prisma.match.update({
+    where: { id: matchId },
+    data: { scheduledAt, venue, round, playerLimit, status },
+  })
+
+  revalidatePath("/mecze")
+  revalidatePath(`/mecze/${matchId}`)
+  revalidatePath("/")
+
+  // Push notification when match is cancelled or postponed
+  if (status !== existing.status && (status === "CANCELLED" || status === "POSTPONED")) {
+    const label = status === "CANCELLED" ? "Mecz odwołany" : "Mecz przełożony"
+    const dateStr = new Date(scheduledAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })
+    sendPushToAll({
+      title: label,
+      body: `${existing.homeTeam.name} vs ${existing.awayTeam.name} — ${dateStr}`,
+      url: `/mecze/${matchId}`,
+    }).catch(() => {})
+  }
+
+  redirect(`/mecze/${matchId}?toast=${encodeURIComponent("Mecz zaktualizowany")}`)
+}
+
 // ─── Edytuj skład ─────────────────────────────────────────────────────────────
 
 export type LineupEntryInput = {

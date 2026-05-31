@@ -105,8 +105,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         <Link href="/panel/losowanie" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
                           Losowanie
                         </Link>
+                        <Link href="/panel/sezony" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
+                          Sezony
+                        </Link>
                         <Link href="/panel/gracze" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                          Panel
+                          Gracze
                         </Link>
                       </>
                     )}
@@ -150,8 +153,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/panel/losowanie" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
                     Losowanie
                   </Link>
+                  <Link href="/panel/sezony" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
+                    Sezony
+                  </Link>
                   <Link href="/panel/gracze" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                    Panel
+                    Gracze
                   </Link>
                 </>
               )}

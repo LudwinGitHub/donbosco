@@ -26,9 +26,17 @@ export default async function StatystykiPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold">Statystyki</h1>
-        <p className="mt-0.5 text-sm text-zinc-500">Rekordy i podsumowania wszystkich sezonów</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Statystyki</h1>
+          <p className="mt-0.5 text-sm text-zinc-500">Rekordy i podsumowania wszystkich sezonów</p>
+        </div>
+        <Link
+          href="/statystyki/h2h"
+          className="shrink-0 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+        >
+          Bezpośrednie starcia →
+        </Link>
       </div>
 
       {/* All-time scorer ranking */}

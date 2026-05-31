@@ -53,9 +53,10 @@ export async function createMatch(
   revalidatePath("/mecze")
 
   const dateStr = new Date(match.scheduledAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })
+  const timeStr = new Date(match.scheduledAt).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
   sendPushToAll({
-    title: "Nowy mecz zaplanowany",
-    body:  `${match.homeTeam.name} vs ${match.awayTeam.name} — ${dateStr}`,
+    title: "Nowy mecz — zapisz się! ⚽",
+    body:  `${match.homeTeam.name} vs ${match.awayTeam.name} · ${dateStr} o ${timeStr}`,
     url:   `/mecze/${match.id}`,
   }).catch(() => {})
 

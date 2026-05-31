@@ -137,9 +137,10 @@ model Match {
   status      MatchStatus @default(SCHEDULED)
   venue       String?
   round       Int?
-  playerLimit Int         @default(14)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  playerLimit   Int         @default(14)
+  reminderSent  Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   mvpPlayerId String?
   mvpPlayer   Player?     @relation("matchMvp", fields: [mvpPlayerId], references: [id], onDelete: SetNull)

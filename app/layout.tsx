@@ -12,6 +12,8 @@ import PushButton from "./push-button"
 import ToastConsumer from "./toast-consumer"
 import { Toaster } from "sonner"
 import { NavLinks, PanelDropdown, MobileMenu } from "./nav-links"
+import ThemeProvider from "./theme-provider"
+import ThemeToggle from "./theme-toggle"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -67,7 +69,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pl" className={geist.variable}>
       <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
-        <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-sm shadow-sm shadow-zinc-100/60">
+        <ThemeProvider>
+        <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-sm shadow-sm shadow-zinc-100/60 dark:bg-zinc-950/95 dark:border-zinc-800 dark:shadow-zinc-900/60">
           <div className="mx-auto max-w-5xl px-4">
             <div className="flex items-center justify-between h-14">
 
@@ -132,6 +135,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </>
                 )}
 
+                <ThemeToggle />
                 <MobileMenu
                   navLinks={navLinks}
                   panelLinks={panelLinks}
@@ -158,6 +162,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <main className="mx-auto max-w-5xl px-4 py-4 sm:py-8">{children}</main>
         <Toaster richColors position="bottom-right" />
         <Suspense><ToastConsumer /></Suspense>
+        </ThemeProvider>
       </body>
     </html>
   )

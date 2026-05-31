@@ -1,9 +1,7 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Class-based dark mode variant */
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -12,15 +10,56 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Light mode ── */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #f4f4f5; /* zinc-100 */
+  background-image: radial-gradient(circle, #d4d4d8 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: #18181b;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── Dark mode ── */
+.dark body {
+  background-color: #09090b; /* zinc-950 */
+  background-image: radial-gradient(circle, #27272a 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: #e4e4e7;
+}
+
+/* ── Dark mode: neutral surface overrides ── */
+
+/* White/light surfaces → dark surfaces */
+.dark .bg-white { background-color: #18181b !important; } /* zinc-900 */
+.dark .bg-zinc-50 { background-color: #18181b !important; }
+
+/* Borders */
+.dark .border-zinc-200 { border-color: #3f3f46 !important; }
+.dark .border-zinc-100 { border-color: #27272a !important; }
+.dark .border-b { border-bottom-color: #27272a; }
+
+/* Divide lines */
+.dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) { border-color: #27272a !important; }
+.dark .divide-zinc-50 > :not([hidden]) ~ :not([hidden]) { border-color: #27272a !important; }
+
+/* Hover backgrounds */
+.dark .hover\:bg-zinc-50:hover { background-color: #27272a !important; }
+.dark .hover\:bg-zinc-100:hover { background-color: #3f3f46 !important; }
+
+/* Text: dark text needs to become light */
+.dark .text-zinc-900 { color: #fafafa !important; }
+.dark .text-zinc-800 { color: #f4f4f5 !important; }
+.dark .text-zinc-700 { color: #e4e4e7 !important; }
+.dark .text-zinc-600 { color: #a1a1aa !important; }
+
+/* Form inputs */
+.dark input:not([type="radio"]):not([type="checkbox"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+.dark select,
+.dark textarea {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #fafafa !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder { color: #71717a; }

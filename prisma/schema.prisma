@@ -52,6 +52,7 @@ model User {
   comments               MatchComment[]
   emailVerificationToken EmailVerificationToken?
   payments               MatchPayment[]
+  mvpVotesGiven          MatchMvpVote[] @relation("mvpVoter")
 
   @@map("users")
 }
@@ -83,7 +84,8 @@ model Player {
   matchLineups  MatchLineup[]
   goalsScored   Goal[]        @relation("scorer")
   goalsAssisted Goal[]        @relation("assister")
-  mvpMatches    Match[]       @relation("matchMvp")
+  mvpMatches       Match[]        @relation("matchMvp")
+  mvpVotesReceived MatchMvpVote[] @relation("mvpNominee")
 
   @@map("players")
 }
@@ -158,6 +160,7 @@ model Match {
   draw          MatchDraw?
   comments      MatchComment[]
   payments      MatchPayment[]
+  mvpVotes      MatchMvpVote[]
 
   @@map("matches")
 }
@@ -272,4 +275,18 @@ model MatchPayment {
 
   @@unique([matchId, userId])
   @@map("match_payments")
+}
+
+model MatchMvpVote {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  voterId   String
+  voter     User     @relation("mvpVoter", fields: [voterId], references: [id], onDelete: Cascade)
+  nomineeId String
+  nominee   Player   @relation("mvpNominee", fields: [nomineeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, voterId])
+  @@map("match_mvp_votes")
 }

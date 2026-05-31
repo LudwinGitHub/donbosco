@@ -7,6 +7,7 @@ import RegistrationSection from "./registration-section"
 import DeleteMatchButton from "./delete-match-button"
 import Countdown from "./countdown"
 import CommentsSection from "./comments-section"
+import MvpVoteSection from "./mvp-vote"
 
 export default async function MatchDetailPage({
   params,
@@ -50,12 +51,44 @@ export default async function MatchDetailPage({
     ? `MECZ-${match.id.slice(0, 8).toUpperCase()}-${paymentUser.firstName}-${paymentUser.lastName}`
     : null
 
+  const [mvpVotes, myMvpVote] = match.status === "PLAYED"
+    ? await Promise.all([
+        prisma.matchMvpVote.groupBy({
+          by: ["nomineeId"],
+          where: { matchId: id },
+          _count: { nomineeId: true },
+          orderBy: { _count: { nomineeId: "desc" } },
+        }),
+        session
+          ? prisma.matchMvpVote.findUnique({
+              where: { matchId_voterId: { matchId: id, voterId: session.userId } },
+            })
+          : Promise.resolve(null),
+      ])
+    : [[], null]
+
   const played    = match.status === "PLAYED"
   const confirmed = registrations.filter((r) => r.status === "CONFIRMED")
   const waitlist  = registrations.filter((r) => r.status === "WAITLIST")
   const homeLineup = match.matchLineups.filter((l) => l.teamId === match.homeTeam.id)
   const awayLineup = match.matchLineups.filter((l) => l.teamId === match.awayTeam.id)
   const hasLineup = homeLineup.length > 0 || awayLineup.length > 0
+
+  const lineupWithStats = match.matchLineups.map((l) => ({
+    playerId: l.player.id,
+    firstName: l.player.firstName,
+    lastName: l.player.lastName,
+    nickname: l.player.nickname ?? null,
+    teamName: l.team.name,
+    teamColor: l.team.color,
+    goals: match.goals.filter((g) => g.scorer.id === l.player.id && !g.isOwnGoal).length,
+    assists: match.goals.filter((g) => g.assister?.id === l.player.id).length,
+  }))
+
+  const myPlayerInLineup = session
+    ? match.matchLineups.find((l) => l.player.userId === session.userId)
+    : null
+  const canVote = !!myPlayerInLineup
 
   return (
     <div className="space-y-6">
@@ -221,6 +254,17 @@ export default async function MatchDetailPage({
             </div>
           </div>
         </section>
+      )}
+
+      {/* MVP Voting */}
+      {played && match.matchLineups.length > 0 && (
+        <MvpVoteSection
+          matchId={id}
+          lineup={lineupWithStats}
+          votes={mvpVotes.map((v) => ({ nomineeId: v.nomineeId, count: v._count.nomineeId }))}
+          myVoteNomineeId={myMvpVote?.nomineeId ?? null}
+          canVote={canVote}
+        />
       )}
 
       {/* Registration */}

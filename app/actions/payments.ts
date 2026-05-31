@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
+import { sendPushToUser } from "@/lib/push"
 
 async function requireOrganizer() {
   const session = await verifySession()
@@ -11,10 +12,19 @@ async function requireOrganizer() {
 
 export async function markPaymentPaid(matchId: string, userId: string) {
   await requireOrganizer()
-  await prisma.matchPayment.update({
-    where:  { matchId_userId: { matchId, userId } },
-    data:   { status: "PAID", paidAt: new Date() },
+
+  const payment = await prisma.matchPayment.update({
+    where:   { matchId_userId: { matchId, userId } },
+    data:    { status: "PAID", paidAt: new Date() },
+    include: { match: { include: { homeTeam: true, awayTeam: true } } },
   })
+
+  sendPushToUser(userId, {
+    title: "Płatność potwierdzona ✓",
+    body:  `${payment.match.homeTeam.name} vs ${payment.match.awayTeam.name} — wpłata ${payment.amount} zł przyjęta`,
+    url:   "/moj-profil?tab=platnosci",
+  }).catch(() => {})
+
   revalidatePath(`/panel/mecze/${matchId}/platnosci`)
   revalidatePath("/moj-profil")
   revalidatePath(`/mecze/${matchId}`)

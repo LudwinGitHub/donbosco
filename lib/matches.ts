@@ -33,7 +33,8 @@ export type GoalDetail = {
 
 export type LineupEntry = {
   teamId: string
-  player: { id: string; firstName: string; lastName: string; nickname: string | null }
+  player: { id: string; userId: string | null; firstName: string; lastName: string; nickname: string | null }
+  team: { id: string; name: string; color: string }
 }
 
 export type MatchDetail = MatchListItem & {
@@ -53,7 +54,7 @@ export async function getMatchById(id: string): Promise<MatchDetail | null> {
         orderBy: { minute: "asc" },
       },
       matchLineups: {
-        include: { player: true },
+        include: { player: true, team: true },
         orderBy: { player: { lastName: "asc" } },
       },
       mvpPlayer: {

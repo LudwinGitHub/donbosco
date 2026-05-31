@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { sendPushToAll } from "@/lib/push"
+import { sendEmailToMany, newMatchEmail, matchResultEmail } from "@/lib/email"
 
 export type MatchFormState =
   | { errors?: Record<string, string[]>; message?: string }
@@ -59,6 +60,13 @@ export async function createMatch(
     body:  `${match.homeTeam.name} vs ${match.awayTeam.name} · ${dateStr} o ${timeStr}`,
     url:   `/mecze/${match.id}`,
   }).catch(() => {})
+
+  prisma.user.findMany({ where: { emailVerified: true }, select: { email: true } })
+    .then((users) => {
+      const { subject, html } = newMatchEmail(match)
+      return sendEmailToMany(users.map((u) => u.email), subject, html)
+    })
+    .catch(() => {})
 
   redirect(`/mecze?toast=${encodeURIComponent("Mecz zaplanowany")}`)
 }
@@ -141,6 +149,35 @@ export async function saveMatchResult(
     title: "Wyniki meczu",
     body:  `${match.homeTeam.name} ${homeScore}:${awayScore} ${match.awayTeam.name}`,
     url:   `/mecze/${matchId}`,
+  }).catch(() => {})
+
+  // Email z wynikami do zapisanych graczy
+  prisma.matchRegistration.findMany({
+    where:   { matchId, status: "CONFIRMED" },
+    include: { user: { select: { email: true, emailVerified: true } } },
+  }).then(async (registrations) => {
+    const emails = registrations
+      .filter((r) => r.user.emailVerified)
+      .map((r) => r.user.email)
+    if (emails.length === 0) return
+
+    const allGoals = await prisma.goal.findMany({
+      where:   { matchId },
+      include: { scorer: true, assister: true },
+      orderBy: { minute: "asc" },
+    })
+    const goalData = allGoals.map((g) => ({
+      scorer:   `${g.scorer.firstName} ${g.scorer.lastName}`,
+      assister: g.assister ? `${g.assister.firstName} ${g.assister.lastName}` : null,
+      minute:   g.minute,
+      isOwnGoal: g.isOwnGoal,
+      isHome:   g.isOwnGoal ? g.teamId !== match.homeTeamId : g.teamId === match.homeTeamId,
+    }))
+    const { subject, html } = matchResultEmail(
+      { ...match, homeScore, awayScore },
+      goalData,
+    )
+    return sendEmailToMany(emails, subject, html)
   }).catch(() => {})
 
   redirect(`/mecze/${matchId}?toast=${encodeURIComponent("Wyniki zapisane")}`)

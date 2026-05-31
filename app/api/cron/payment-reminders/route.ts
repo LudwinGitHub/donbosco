@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendPushToUser } from "@/lib/push"
+import { sendEmail, paymentDueEmail } from "@/lib/email"
 
 export const dynamic = "force-dynamic"
 
@@ -31,19 +32,34 @@ export async function GET(request: NextRequest) {
     },
     include: {
       match: { include: { homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } } },
+      user:  { select: { email: true, firstName: true, lastName: true, emailVerified: true } },
     },
   })
 
   if (unpaid.length === 0) return NextResponse.json({ sent: 0 })
 
   await Promise.allSettled(
-    unpaid.map((p) =>
-      sendPushToUser(p.userId, {
+    unpaid.map(async (p) => {
+      const amount = p.amount.toNumber()
+      const paymentTitle = `MECZ-${p.matchId.slice(0, 8).toUpperCase()}-${p.user.firstName}-${p.user.lastName}`
+
+      await sendPushToUser(p.userId, {
         title: "Pamiętaj o płatności za mecz 💳",
-        body:  `${p.match.homeTeam.name} vs ${p.match.awayTeam.name} — ${p.amount} zł · BLIK: 600 068 826`,
+        body:  `${p.match.homeTeam.name} vs ${p.match.awayTeam.name} — ${amount} zł · BLIK: 600 068 826`,
         url:   `/mecze/${p.matchId}`,
       })
-    )
+
+      if (p.user.emailVerified) {
+        const { subject, html } = paymentDueEmail({
+          matchId:      p.matchId,
+          homeTeam:     p.match.homeTeam.name,
+          awayTeam:     p.match.awayTeam.name,
+          amount,
+          paymentTitle,
+        })
+        await sendEmail(p.user.email, subject, html)
+      }
+    })
   )
 
   return NextResponse.json({ sent: unpaid.length })

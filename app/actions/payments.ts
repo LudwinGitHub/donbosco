@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { sendPushToUser } from "@/lib/push"
+import { sendEmail, paymentConfirmedEmail } from "@/lib/email"
 
 async function requireOrganizer() {
   const session = await verifySession()
@@ -23,6 +24,19 @@ export async function markPaymentPaid(matchId: string, userId: string) {
     title: "Płatność potwierdzona ✓",
     body:  `${payment.match.homeTeam.name} vs ${payment.match.awayTeam.name} — wpłata ${payment.amount} zł przyjęta`,
     url:   "/moj-profil?tab=platnosci",
+  }).catch(() => {})
+
+  prisma.user.findUnique({
+    where:  { id: userId },
+    select: { email: true, emailVerified: true },
+  }).then((user) => {
+    if (!user?.emailVerified) return
+    const { subject, html } = paymentConfirmedEmail({
+      homeTeam: payment.match.homeTeam.name,
+      awayTeam: payment.match.awayTeam.name,
+      amount:   payment.amount.toNumber(),
+    })
+    return sendEmail(user.email, subject, html)
   }).catch(() => {})
 
   revalidatePath(`/panel/mecze/${matchId}/platnosci`)

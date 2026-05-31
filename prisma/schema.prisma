@@ -26,6 +26,12 @@ enum RegistrationStatus {
   WAITLIST
 }
 
+enum PaymentStatus {
+  UNPAID
+  PAID
+  EXEMPT
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -45,6 +51,7 @@ model User {
   pushSubscriptions      PushSubscription[]
   comments               MatchComment[]
   emailVerificationToken EmailVerificationToken?
+  payments               MatchPayment[]
 
   @@map("users")
 }
@@ -150,6 +157,7 @@ model Match {
   registrations MatchRegistration[]
   draw          MatchDraw?
   comments      MatchComment[]
+  payments      MatchPayment[]
 
   @@map("matches")
 }
@@ -247,4 +255,21 @@ model MatchLineup {
 
   @@id([matchId, playerId])
   @@map("match_lineups")
+}
+
+model MatchPayment {
+  id          String        @id @default(cuid())
+  matchId     String
+  match       Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Decimal       @db.Decimal(10, 2)
+  status      PaymentStatus @default(UNPAID)
+  paidAt      DateTime?
+  paymentNote String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([matchId, userId])
+  @@map("match_payments")
 }

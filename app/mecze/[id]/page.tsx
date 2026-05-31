@@ -32,6 +32,24 @@ export default async function MatchDetailPage({
 
   if (!match) notFound()
 
+  const myPayment = (session && match.status === "PLAYED")
+    ? await prisma.matchPayment.findUnique({
+        where: { matchId_userId: { matchId: match.id, userId: session.userId } },
+      })
+    : null
+
+  const paymentUser = myPayment
+    ? await prisma.user.findUnique({
+        where: { id: session!.userId },
+        select: { firstName: true, lastName: true },
+      })
+    : null
+
+  const paymentAmount = myPayment ? myPayment.amount.toNumber() : null
+  const paymentTitle = paymentUser
+    ? `MECZ-${match.id.slice(0, 8).toUpperCase()}-${paymentUser.firstName}-${paymentUser.lastName}`
+    : null
+
   const played    = match.status === "PLAYED"
   const confirmed = registrations.filter((r) => r.status === "CONFIRMED")
   const waitlist  = registrations.filter((r) => r.status === "WAITLIST")
@@ -69,6 +87,14 @@ export default async function MatchDetailPage({
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
               >
                 Edytuj mecz
+              </Link>
+            )}
+            {match.status === "PLAYED" && (
+              <Link
+                href={`/panel/mecze/${id}/platnosci`}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+              >
+                Płatności
               </Link>
             )}
             <DeleteMatchButton matchId={id} />
@@ -126,6 +152,61 @@ export default async function MatchDetailPage({
           <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
             <GoalTimeline goals={match.goals} homeTeam={match.homeTeam} awayTeam={match.awayTeam} />
           </div>
+        </section>
+      )}
+
+      {/* Payment card */}
+      {myPayment && (
+        <section>
+          {myPayment.status === "UNPAID" && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-900">💳 Twoja płatność</h2>
+                <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                  Do zapłaty
+                </span>
+              </div>
+              <hr className="border-amber-200" />
+              <p className="text-sm text-zinc-700">
+                Do zapłaty: <span className="font-semibold">{paymentAmount} zł</span>
+              </p>
+              <div className="space-y-1 text-sm text-zinc-700">
+                <p>BLIK: <span className="font-medium">600 068 826</span></p>
+                <p>Odbiorca: <span className="font-medium">Don Bosco Premier League</span></p>
+                <p>Tytuł: <span className="font-medium">{paymentTitle}</span></p>
+              </div>
+            </div>
+          )}
+          {myPayment.status === "PAID" && (
+            <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-900">Twoja płatność</h2>
+                <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                  Opłacone
+                </span>
+              </div>
+              {myPayment.paidAt && (
+                <p className="mt-1 text-xs text-zinc-500">
+                  Opłacono:{" "}
+                  {new Date(myPayment.paidAt).toLocaleDateString("pl-PL", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+              )}
+            </div>
+          )}
+          {myPayment.status === "EXEMPT" && (
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-900">Twoja płatność</h2>
+                <span className="rounded-full bg-zinc-200 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                  Zwolniony
+                </span>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

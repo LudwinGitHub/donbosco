@@ -116,9 +116,26 @@ export async function saveMatchResult(
     })
   }
 
+  // Stwórz płatności dla graczy w składzie z powiązanym kontem
+  const MATCH_COST = 25
+  const lineup = await prisma.matchLineup.findMany({
+    where:   { matchId },
+    include: { player: { select: { userId: true } } },
+  })
+  const userIds = [...new Set(
+    lineup.map((l) => l.player.userId).filter((id): id is string => id !== null)
+  )]
+  if (userIds.length > 0) {
+    await prisma.matchPayment.createMany({
+      data:            userIds.map((userId) => ({ matchId, userId, amount: MATCH_COST })),
+      skipDuplicates:  true,
+    })
+  }
+
   revalidatePath("/mecze")
   revalidatePath(`/mecze/${matchId}`)
   revalidatePath("/")
+  revalidatePath("/moj-profil")
 
   sendPushToAll({
     title: "Wyniki meczu",

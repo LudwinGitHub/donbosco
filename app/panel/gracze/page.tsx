@@ -12,7 +12,7 @@ export default async function AdminPlayersPage() {
       include: {
         matchLineups: { select: { matchId: true } },
         goalsScored:  { where: { isOwnGoal: false }, select: { id: true } },
-        user:         { select: { id: true, email: true } },
+        user:         { select: { id: true, email: true, role: true } },
       },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),
@@ -30,7 +30,7 @@ export default async function AdminPlayersPage() {
     nickname:    p.nickname,
     matchCount:  p.matchLineups.length,
     goalCount:   p.goalsScored.length,
-    linkedUser:  p.user ? { id: p.user.id, email: p.user.email } : null,
+    linkedUser:  p.user ? { id: p.user.id, email: p.user.email, role: p.user.role } : null,
   }))
 
   return (

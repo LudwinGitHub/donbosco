@@ -195,3 +195,22 @@ export async function deleteUserAccount(
   revalidatePath("/panel/gracze")
   return { success: true }
 }
+
+export async function setUserRole(
+  state: PlayerFormState,
+  formData: FormData
+): Promise<PlayerFormState> {
+  const session = await verifySession()
+  if (session.role !== "ORGANIZER") return { message: "Brak uprawnień." }
+
+  const userId = formData.get("userId") as string
+  const role   = formData.get("role") as string
+  if (!userId || !role) return { message: "Brak danych." }
+  if (role !== "PLAYER" && role !== "ORGANIZER") return { message: "Nieprawidłowa rola." }
+  if (userId === session.userId) return { message: "Nie można zmieniać własnej roli." }
+
+  await prisma.user.update({ where: { id: userId }, data: { role } })
+
+  revalidatePath("/panel/gracze")
+  return { success: true }
+}

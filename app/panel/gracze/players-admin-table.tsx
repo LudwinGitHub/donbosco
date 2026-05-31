@@ -7,6 +7,7 @@ import {
   deletePlayer,
   linkPlayerToUser,
   deleteUserAccount,
+  setUserRole,
   type PlayerFormState,
 } from "@/app/actions/players"
 
@@ -17,7 +18,7 @@ type PlayerRow = {
   nickname: string | null
   matchCount: number
   goalCount: number
-  linkedUser: { id: string; email: string } | null
+  linkedUser: { id: string; email: string; role: string } | null
 }
 
 type UnlinkedUser = {
@@ -116,6 +117,7 @@ function PlayerTableRow({
   const [deleteState,     deleteAction,     deletePending]     = useActionState<PlayerFormState, FormData>(deletePlayer,       undefined)
   const [linkState,       linkAction,       linkPending]       = useActionState<PlayerFormState, FormData>(linkPlayerToUser,   undefined)
   const [delUserState,    delUserAction,    delUserPending]    = useActionState<PlayerFormState, FormData>(deleteUserAccount,  undefined)
+  const [roleState,       roleAction,       rolePending]       = useActionState<PlayerFormState, FormData>(setUserRole,        undefined)
 
   useEffect(() => {
     if (editState?.success)        { toast.success("Gracz zaktualizowany");    onClose() }
@@ -141,6 +143,11 @@ function PlayerTableRow({
     if (delUserState?.success)       toast.success("Konto użytkownika usunięte")
     else if (delUserState?.message)  toast.error(delUserState.message)
   }, [delUserState])
+
+  useEffect(() => {
+    if (roleState?.success)          toast.success("Rola zaktualizowana")
+    else if (roleState?.message)     toast.error(roleState.message)
+  }, [roleState])
 
   const mergeOptions = allPlayers.filter((p) => p.id !== player.id)
   const linkOptions  = player.linkedUser
@@ -247,10 +254,30 @@ function PlayerTableRow({
       <td className="px-4 py-3 text-center text-zinc-600">{player.goalCount}</td>
       <td className="px-4 py-3">
         {player.linkedUser ? (
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="rounded bg-green-50 px-1.5 py-0.5 text-xs text-green-700">
               {player.linkedUser.email}
             </span>
+            <form action={roleAction} className="inline-flex">
+              <input type="hidden" name="userId" value={player.linkedUser.id} />
+              <input type="hidden" name="role" value={player.linkedUser.role === "ORGANIZER" ? "PLAYER" : "ORGANIZER"} />
+              <button
+                type="submit"
+                disabled={rolePending}
+                title={player.linkedUser.role === "ORGANIZER" ? "Cofnij uprawnienia admina" : "Nadaj uprawnienia admina"}
+                onClick={(e) => {
+                  const action = player.linkedUser!.role === "ORGANIZER" ? "Cofnąć uprawnienia admina" : "Nadać uprawnienia admina"
+                  if (!confirm(`${action} dla ${player.linkedUser!.email}?`)) e.preventDefault()
+                }}
+                className={`rounded px-1.5 py-0.5 text-xs disabled:opacity-40 transition-colors ${
+                  player.linkedUser.role === "ORGANIZER"
+                    ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                    : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                }`}
+              >
+                {rolePending ? "…" : player.linkedUser.role === "ORGANIZER" ? "Admin" : "Gracz"}
+              </button>
+            </form>
             <form action={delUserAction}>
               <input type="hidden" name="userId" value={player.linkedUser.id} />
               <button
@@ -265,9 +292,6 @@ function PlayerTableRow({
                 {delUserPending ? "…" : "✕"}
               </button>
             </form>
-            {delUserState?.message && (
-              <p className="text-xs text-red-500">{delUserState.message}</p>
-            )}
           </div>
         ) : (
           <span className="text-zinc-300 text-xs">—</span>

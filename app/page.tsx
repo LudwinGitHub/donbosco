@@ -178,7 +178,7 @@ export default async function HomePage({
         <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
           <p className="text-amber-800 font-medium">
             Nie jesteś zapisany na następny mecz:{" "}
-            <span className="font-semibold">{nextMatch.homeTeam.name} vs {nextMatch.awayTeam.name}</span>
+            <span className="font-semibold">{fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)}</span>
           </p>
           <Link
             href={`/mecze/${nextMatch.id}`}

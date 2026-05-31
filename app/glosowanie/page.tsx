@@ -134,6 +134,9 @@ export default async function GlosowaniePage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">Głosowanie</h1>
 
+      {/* ── Skład (jeśli aktywne — nad MVP) ── */}
+      {drawSection}
+
       {/* ── MVP ── */}
       {mvpMatch ? (
         <section className="space-y-3">
@@ -184,8 +187,8 @@ export default async function GlosowaniePage() {
         </section>
       )}
 
-      {/* ── Skład ── */}
-      {drawSection ?? (
+      {/* ── Skład (gdy brak aktywnego) ── */}
+      {!drawSection && (
         <section>
           <h2 className="text-lg font-bold">Głosowanie na skład</h2>
           <div className="mt-3 rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center text-sm text-zinc-400">

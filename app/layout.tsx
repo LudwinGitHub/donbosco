@@ -11,6 +11,7 @@ import VoteBanner from "./vote-banner"
 import PushButton from "./push-button"
 import ToastConsumer from "./toast-consumer"
 import { Toaster } from "sonner"
+import { NavLinks, PanelDropdown, MobileMenu } from "./nav-links"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -28,6 +29,12 @@ const navLinks = [
   { href: "/gracze",      label: "Gracze" },
   { href: "/statystyki",  label: "Statystyki" },
   { href: "/glosowanie",  label: "Głosowanie" },
+]
+
+const panelLinks = [
+  { href: "/panel/losowanie", label: "Losowanie", icon: "🎲" },
+  { href: "/panel/sezony",    label: "Sezony",    icon: "🏆" },
+  { href: "/panel/gracze",    label: "Gracze",    icon: "👥" },
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -60,109 +67,81 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pl" className={geist.variable}>
       <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
-        <header className="border-b border-zinc-200 bg-white">
+        <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-sm shadow-sm shadow-zinc-100/60">
           <div className="mx-auto max-w-5xl px-4">
-
-            {/* Main row: logo + desktop-nav + auth */}
-            <div className="flex items-center justify-between py-1.5">
+            <div className="flex items-center justify-between h-14">
 
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 sm:gap-3">
+              <Link href="/" className="flex items-center gap-2.5 shrink-0">
                 <Image
                   src="/logo-cropped.png"
                   alt="Don Bosco Premier League"
-                  width={83} height={83}
+                  width={40} height={40}
                   quality={100} priority unoptimized
-                  className="w-[52px] h-[52px] sm:w-[83px] sm:h-[83px]"
+                  className="w-8 h-8 sm:w-10 sm:h-10"
                 />
                 <span className="font-extrabold tracking-tight leading-tight">
-                  <span className="text-base sm:text-xl">Don Bosco</span>
-                  <span className="hidden sm:block text-xs font-semibold tracking-widest uppercase text-zinc-500 mt-0.5">
+                  <span className="text-sm sm:text-base">Don Bosco</span>
+                  <span className="hidden sm:block text-[10px] font-semibold tracking-widest uppercase text-zinc-400">
                     Premier League
                   </span>
                 </span>
               </Link>
 
               {/* Desktop nav */}
-              <nav className="hidden sm:flex gap-1">
-                {navLinks.map((l) => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
-              </nav>
+              <NavLinks links={navLinks} />
 
-              {/* Auth */}
-              <div className="flex items-center gap-1 sm:gap-2 sm:ml-3 sm:pl-3 sm:border-l sm:border-zinc-200">
+              {/* Right side: panel dropdown + auth + mobile hamburger */}
+              <div className="flex items-center gap-1">
+                {session?.role === "ORGANIZER" && (
+                  <PanelDropdown links={panelLinks} />
+                )}
+
                 {session ? (
                   <>
-                    {session.role === "ORGANIZER" && (
-                      <>
-                        <Link href="/panel/losowanie" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                          Losowanie
-                        </Link>
-                        <Link href="/panel/sezony" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                          Sezony
-                        </Link>
-                        <Link href="/panel/gracze" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                          Gracze
-                        </Link>
-                      </>
-                    )}
-                    <Link href="/moj-profil" className="rounded-md px-2 sm:px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
-                      <span className="sm:hidden">Profil</span>
-                      <span className="hidden sm:inline">Mój profil</span>
+                    <Link
+                      href="/moj-profil"
+                      className="hidden md:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    >
+                      Mój profil
                     </Link>
                     <PushButton />
-                    <form action={logout}>
-                      <button type="submit" className="rounded-md px-2 sm:px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+                    <form action={logout} className="hidden md:block">
+                      <button
+                        type="submit"
+                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                      >
                         Wyloguj
                       </button>
                     </form>
                   </>
                 ) : (
                   <>
-                    <Link href="/rejestracja" className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+                    <Link
+                      href="/rejestracja"
+                      className="hidden md:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    >
                       Zarejestruj się
                     </Link>
-                    <Link href="/logowanie" className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700">
+                    <Link
+                      href="/logowanie"
+                      className="hidden md:block rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+                    >
                       Zaloguj się
                     </Link>
                   </>
                 )}
+
+                <MobileMenu
+                  navLinks={navLinks}
+                  panelLinks={panelLinks}
+                  isLoggedIn={!!session}
+                  isOrganizer={session?.role === "ORGANIZER"}
+                  logoutAction={logout}
+                />
               </div>
+
             </div>
-
-            {/* Mobile nav row */}
-            <nav className="sm:hidden flex border-t border-zinc-100 py-1 gap-0.5 overflow-x-auto">
-              {navLinks.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                >
-                  {l.label}
-                </Link>
-              ))}
-              {session?.role === "ORGANIZER" && (
-                <>
-                  <Link href="/panel/losowanie" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                    Losowanie
-                  </Link>
-                  <Link href="/panel/sezony" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                    Sezony
-                  </Link>
-                  <Link href="/panel/gracze" className="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50">
-                    Gracze
-                  </Link>
-                </>
-              )}
-            </nav>
-
           </div>
         </header>
 

@@ -26,11 +26,13 @@ export const metadata: Metadata = {
 const VOTE_WINDOW_MS = 3 * 60 * 60 * 1000
 
 const navLinks = [
-  { href: "/",            label: "Tabela" },
-  { href: "/mecze",       label: "Mecze" },
-  { href: "/gracze",      label: "Gracze" },
-  { href: "/statystyki",  label: "Statystyki" },
-  { href: "/glosowanie",  label: "Głosowanie" },
+  { href: "/",             label: "Tabela" },
+  { href: "/mecze",        label: "Mecze" },
+  { href: "/gracze",       label: "Gracze" },
+  { href: "/statystyki",   label: "Statystyki" },
+  { href: "/glosowanie",   label: "Głosowanie" },
+  { href: "/ogloszenia",   label: "Ogłoszenia" },
+  { href: "/czat",         label: "Czat" },
 ]
 
 const panelLinks = [

@@ -10,10 +10,14 @@ export default async function HomePage({
   searchParams: Promise<{ sezon?: string }>
 }) {
   const { sezon: seasonId } = await searchParams
-  const [activeSeason, allSeasons, session] = await Promise.all([
+  const [activeSeason, allSeasons, session, latestAnnouncements] = await Promise.all([
     getActiveSeason(),
     getAllSeasons(),
     getOptionalSession(),
+    prisma.announcement.findMany({
+      orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+      take: 3,
+    }),
   ])
 
   const now = new Date()
@@ -174,6 +178,38 @@ export default async function HomePage({
             ) : (
               <p className="mt-3 text-sm text-zinc-400">Brak danych.</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Ogłoszenia ── */}
+      {latestAnnouncements.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">Ogłoszenia</h2>
+            <Link href="/ogloszenia" className="text-xs text-zinc-500 hover:text-zinc-800 transition-colors">
+              Zobacz wszystkie →
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {latestAnnouncements.map((a) => (
+              <div
+                key={a.id}
+                className={`rounded-xl border px-4 py-3 ${
+                  a.isPinned
+                    ? "border-amber-200 bg-amber-50"
+                    : "border-zinc-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  {a.isPinned && (
+                    <span className="text-xs font-semibold text-amber-600">📌</span>
+                  )}
+                  <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
+                </div>
+                <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{a.content}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}

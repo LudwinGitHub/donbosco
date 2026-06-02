@@ -53,6 +53,8 @@ model User {
   emailVerificationToken EmailVerificationToken?
   payments               MatchPayment[]
   mvpVotesGiven          MatchMvpVote[] @relation("mvpVoter")
+  announcements          Announcement[]
+  chatMessages           ChatMessage[]
 
   @@map("users")
 }
@@ -289,4 +291,27 @@ model MatchMvpVote {
 
   @@unique([matchId, voterId])
   @@map("match_mvp_votes")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  isPinned  Boolean  @default(false)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("chat_messages")
 }

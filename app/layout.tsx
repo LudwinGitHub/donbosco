@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist } from "next/font/google"
 import Link from "next/link"
 import Image from "next/image"
@@ -22,6 +22,12 @@ export const metadata: Metadata = {
   title: "Don Bosco Premier League",
   description: "Amatorska liga piłkarska",
   icons: { icon: "/logo-cropped.png" },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 const VOTE_WINDOW_MS = 3 * 60 * 60 * 1000

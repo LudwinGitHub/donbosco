@@ -251,6 +251,23 @@ export function paymentConfirmedEmail(data: {
   }
 }
 
+export function urgentAnnouncementEmail(data: {
+  title: string
+  content: string
+}): { subject: string; html: string } {
+  const subject = `🚨 Pilne ogłoszenie: ${data.title}`
+  return {
+    subject,
+    html: base(data.title, `
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 20px;margin:0 0 20px;display:inline-block">
+        <span style="font-size:12px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.05em">🚨 Pilne ogłoszenie</span>
+      </div>
+      <p style="margin:0 0 16px;font-size:15px;color:#3f3f46;white-space:pre-wrap">${data.content}</p>
+      ${btn("Zobacz ogłoszenia", `${APP_URL}/ogloszenia`)}
+    `),
+  }
+}
+
 // Zachowana funkcja weryfikacji email ─────────────────────────────────────────
 
 export async function sendVerificationEmail(to: string, firstName: string, token: string): Promise<void> {

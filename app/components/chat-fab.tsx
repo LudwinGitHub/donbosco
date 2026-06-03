@@ -84,7 +84,13 @@ export default function ChatFab({
     <>
       {/* Okienko czatu */}
       {open && (
-        <div className="fixed bottom-[88px] right-4 left-4 sm:left-auto sm:right-6 sm:w-96 z-50 flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden" style={{ height: "420px" }}>
+        <div
+          className="fixed right-4 left-4 sm:left-auto sm:right-6 sm:w-96 z-[60] flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden"
+          style={{
+            bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))",
+            height: "min(420px, calc(100dvh - 8rem - env(safe-area-inset-bottom, 0px)))",
+          }}
+        >
           {/* Nagłówek */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50 shrink-0">
             <div className="flex items-center gap-2">
@@ -184,7 +190,8 @@ export default function ChatFab({
       {/* Przycisk FAB */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-zinc-900 text-white shadow-lg hover:bg-zinc-700 active:scale-95 transition-all flex items-center justify-center"
+        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-zinc-900 text-white shadow-lg hover:bg-zinc-700 active:scale-95 transition-all flex items-center justify-center"
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
         aria-label={open ? "Zamknij czat" : "Otwórz czat"}
       >
         {open ? (

@@ -2,6 +2,8 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
+import { sendPushToAll } from "@/lib/push"
+import { sendEmailToMany, urgentAnnouncementEmail } from "@/lib/email"
 
 export type AnnouncementFormState = { error?: string } | undefined
 
@@ -33,6 +35,21 @@ export async function addAnnouncement(
     console.error("[addAnnouncement]", e)
     return { error: "Błąd zapisu do bazy danych." }
   }
+
+  const pushTitle =
+    priority === "URGENT"    ? "🚨 Pilne ogłoszenie" :
+    priority === "IMPORTANT" ? "⚠️ Ważne ogłoszenie"  :
+                               "📢 Nowe ogłoszenie"
+
+  void sendPushToAll({ title: pushTitle, body: title, url: "/ogloszenia" })
+
+  if (priority === "URGENT") {
+    const users = await prisma.user.findMany({ select: { email: true } })
+    const emails = users.map((u) => u.email)
+    const { subject, html } = urgentAnnouncementEmail({ title, content })
+    void sendEmailToMany(emails, subject, html)
+  }
+
   revalidatePath("/")
   revalidatePath("/ogloszenia")
   return undefined

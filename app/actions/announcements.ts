@@ -25,9 +25,14 @@ export async function addAnnouncement(
   if (title.length > 100)    return { error: "Tytuł może mieć maksymalnie 100 znaków." }
   if (content.length > 1000) return { error: "Treść może mieć maksymalnie 1000 znaków." }
 
-  await prisma.announcement.create({
-    data: { title, content, isPinned, priority, authorId: session.userId },
-  })
+  try {
+    await prisma.announcement.create({
+      data: { title, content, isPinned, priority, authorId: session.userId },
+    })
+  } catch (e) {
+    console.error("[addAnnouncement]", e)
+    return { error: "Błąd zapisu do bazy danych." }
+  }
   revalidatePath("/")
   revalidatePath("/ogloszenia")
   return undefined

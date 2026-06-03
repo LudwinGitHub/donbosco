@@ -70,3 +70,29 @@ export async function togglePin(id: string, isPinned: boolean): Promise<void> {
   revalidatePath("/")
   revalidatePath("/ogloszenia")
 }
+
+export async function toggleReaction(
+  announcementId: string,
+  type: "LIKE" | "HEART" | "ANGRY"
+): Promise<void> {
+  const session = await verifySession()
+
+  const existing = await prisma.announcementReaction.findUnique({
+    where: { announcementId_userId: { announcementId, userId: session.userId } },
+  })
+
+  if (existing) {
+    if (existing.type === type) {
+      await prisma.announcementReaction.delete({ where: { id: existing.id } })
+    } else {
+      await prisma.announcementReaction.update({ where: { id: existing.id }, data: { type } })
+    }
+  } else {
+    await prisma.announcementReaction.create({
+      data: { announcementId, userId: session.userId, type },
+    })
+  }
+
+  revalidatePath("/")
+  revalidatePath("/ogloszenia")
+}

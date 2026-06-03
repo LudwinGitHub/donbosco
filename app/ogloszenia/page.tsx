@@ -7,7 +7,10 @@ export default async function AnnouncementsPage() {
     getOptionalSession(),
     prisma.announcement.findMany({
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
-      include: { author: { select: { firstName: true, lastName: true } } },
+      include: {
+        author: { select: { firstName: true, lastName: true } },
+        reactions: { select: { type: true, userId: true } },
+      },
     }),
   ])
 
@@ -19,6 +22,7 @@ export default async function AnnouncementsPage() {
       </div>
       <AnnouncementsSection
         announcements={announcements}
+        currentUserId={session?.userId ?? null}
         isOrganizer={session?.role === "ORGANIZER"}
       />
     </div>

@@ -60,18 +60,17 @@ export async function createMatch(
 
   const dateStr = new Date(match.scheduledAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })
   const timeStr = new Date(match.scheduledAt).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
-  sendPushToAll({
-    title: "Nowy mecz — zapisz się! ⚽",
-    body:  `${match.homeTeam.name} vs ${match.awayTeam.name} · ${dateStr} o ${timeStr}`,
-    url:   `/mecze/${match.id}`,
-  }).catch(() => {})
 
-  prisma.user.findMany({ where: { emailVerified: true }, select: { email: true } })
-    .then((users) => {
-      const { subject, html } = newMatchEmail(match)
-      return sendEmailToMany(users.map((u) => u.email), subject, html)
-    })
-    .catch(() => {})
+  const users = await prisma.user.findMany({ where: { emailVerified: true }, select: { email: true } })
+  const { subject, html } = newMatchEmail(match)
+  await Promise.allSettled([
+    sendPushToAll({
+      title: "Nowy mecz — zapisz się! ⚽",
+      body:  `${match.homeTeam.name} vs ${match.awayTeam.name} · ${dateStr} o ${timeStr}`,
+      url:   `/mecze/${match.id}`,
+    }),
+    sendEmailToMany(users.map((u) => u.email), subject, html),
+  ])
 
   redirect(`/mecze?toast=${encodeURIComponent("Mecz zaplanowany")}`)
 }

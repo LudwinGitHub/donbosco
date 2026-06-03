@@ -33,8 +33,6 @@ export async function createMatch(
   const date = formData.get("date") as string
   const time = formData.get("time") as string
   const venue = ((formData.get("venue") as string) || "").trim() || null
-  const roundRaw = formData.get("round") as string
-  const round = roundRaw ? parseInt(roundRaw, 10) : null
   const playerLimitRaw = formData.get("playerLimit") as string
   const playerLimit = playerLimitRaw ? parseInt(playerLimitRaw, 10) : 14
 
@@ -45,6 +43,13 @@ export async function createMatch(
 
   const scheduledAt = new Date(`${date}T${time}:00`)
   if (isNaN(scheduledAt.getTime())) return { errors: { date: ["Nieprawidłowa data."] } }
+
+  const lastMatch = await prisma.match.findFirst({
+    where:   { seasonId },
+    orderBy: { round: "desc" },
+    select:  { round: true },
+  })
+  const round = lastMatch?.round != null ? lastMatch.round + 1 : 1
 
   const match = await prisma.match.create({
     data: { seasonId, homeTeamId, awayTeamId, scheduledAt, venue, round, playerLimit },

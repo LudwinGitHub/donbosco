@@ -106,33 +106,17 @@ export default function NewMatchForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <label htmlFor="venue" className="block text-sm font-medium text-zinc-700">
-            Boisko <span className="text-zinc-400">(opcjonalnie)</span>
-          </label>
-          <input
-            id="venue"
-            name="venue"
-            type="text"
-            placeholder="np. Boisko przy Don Bosco"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="round" className="block text-sm font-medium text-zinc-700">
-            Kolejka <span className="text-zinc-400">(opcjonalnie)</span>
-          </label>
-          <input
-            id="round"
-            name="round"
-            type="number"
-            min="1"
-            placeholder="nr kolejki"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
-          />
-        </div>
+      <div className="space-y-1">
+        <label htmlFor="venue" className="block text-sm font-medium text-zinc-700">
+          Boisko
+        </label>
+        <input
+          id="venue"
+          name="venue"
+          type="text"
+          defaultValue="boisko Don Bosco"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
+        />
       </div>
 
       <div className="space-y-1">

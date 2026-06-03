@@ -125,6 +125,8 @@ export default async function GlosowaniePage() {
           userVote={userVote as "A" | "B" | null}
           isLoggedIn={!!session}
           maxVotes={14}
+          homeTeamName={draw.match.homeTeam.name}
+          awayTeamName={draw.match.awayTeam.name}
         />
       </section>
     )
@@ -140,19 +142,30 @@ export default async function GlosowaniePage() {
       {/* ── MVP ── */}
       {mvpMatch ? (
         <section className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between gap-2">
             <div>
               <h2 className="text-lg font-bold">MVP meczu</h2>
-              <p className="mt-0.5 text-sm text-zinc-500">
-                {mvpMatch.homeTeam.name} vs {mvpMatch.awayTeam.name}
-                {mvpMatch.round !== null && ` · kolejka ${mvpMatch.round}`}
+              <p className="mt-0.5 text-sm font-medium text-zinc-700">
+                {mvpMatch.homeTeam.name}
+                {mvpMatch.homeScore != null && mvpMatch.awayScore != null && (
+                  <span className="mx-1.5 font-bold text-zinc-900">
+                    {mvpMatch.homeScore}:{mvpMatch.awayScore}
+                  </span>
+                )}
+                {mvpMatch.awayTeam.name}
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {mvpMatch.round !== null && `Kolejka ${mvpMatch.round} · `}
+                {mvpMatch.playedAt
+                  ? mvpMatch.playedAt.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })
+                  : ""}
               </p>
             </div>
             <Link
               href={`/mecze/${mvpMatch.id}`}
-              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors shrink-0"
             >
-              Szczegóły meczu →
+              Szczegóły →
             </Link>
           </div>
 

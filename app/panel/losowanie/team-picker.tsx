@@ -30,6 +30,8 @@ export default function TeamPicker({
   const [drawA,    setDrawA]    = useState<BalancedTeams | null>(null)
   const [drawB,    setDrawB]    = useState<BalancedTeams | null>(null)
   const [matchId,  setMatchId]  = useState(matches[0]?.id ?? "")
+
+  const selectedMatch = matches.find((m) => m.id === matchId) ?? null
   const [saved,    setSaved]    = useState(false)
   const [isPending, startTransition] = useTransition()
 
@@ -180,6 +182,8 @@ export default function TeamPicker({
           draw={drawA}
           canReroll={selected.size >= 2}
           onReroll={() => reroll("A")}
+          team1Name={selectedMatch?.homeTeamName}
+          team2Name={selectedMatch?.awayTeamName}
         />
 
         {/* ── Col 3: Option B ── */}
@@ -189,6 +193,8 @@ export default function TeamPicker({
           draw={drawB}
           canReroll={selected.size >= 2}
           onReroll={() => reroll("B")}
+          team1Name={selectedMatch?.homeTeamName}
+          team2Name={selectedMatch?.awayTeamName}
         />
       </div>
 
@@ -203,16 +209,18 @@ export default function TeamPicker({
               onChange={(e) => { setMatchId(e.target.value); setSaved(false) }}
               className="flex-1 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-800 outline-none focus:border-zinc-500"
             >
-              {matches.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.round ? `Kolejka ${m.round} — ` : ""}
-                  {m.homeTeamName} vs {m.awayTeamName} ·{" "}
-                  {new Date(m.scheduledAt).toLocaleDateString("pl-PL", {
-                    day:   "numeric",
-                    month: "short",
-                  })}
-                </option>
-              ))}
+              {matches.map((m) => {
+                const d = new Date(m.scheduledAt)
+                const date = d.toLocaleDateString("pl-PL", { weekday: "short", day: "numeric", month: "short" })
+                const time = d.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+                return (
+                  <option key={m.id} value={m.id}>
+                    {m.homeTeamName} vs {m.awayTeamName}
+                    {m.round ? ` (kol. ${m.round})` : ""}
+                    {" — "}{date}, {time}
+                  </option>
+                )
+              })}
             </select>
           )}
           <button
@@ -236,12 +244,16 @@ function DrawColumn({
   draw,
   canReroll,
   onReroll,
+  team1Name,
+  team2Name,
 }: {
   label: string
   color: string
   draw: BalancedTeams | null
   canReroll: boolean
   onReroll: () => void
+  team1Name?: string
+  team2Name?: string
 }) {
   return (
     <div className="space-y-3">
@@ -267,9 +279,9 @@ function DrawColumn({
         <div className="space-y-2">
           <BalanceBar ratingA={draw.ratingA} ratingB={draw.ratingB} />
           <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-            <TeamList label="Drużyna 1" players={draw.teamA} />
+            <TeamList label={team1Name ?? "Drużyna 1"} players={draw.teamA} />
             <div className="border-t border-zinc-100" />
-            <TeamList label="Drużyna 2" players={draw.teamB} />
+            <TeamList label={team2Name ?? "Drużyna 2"} players={draw.teamB} />
           </div>
         </div>
       )}

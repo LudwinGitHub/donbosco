@@ -11,7 +11,7 @@ export default async function LosowaniePage() {
   const [players, matches] = await Promise.all([
     getPlayersWithStats(),
     prisma.match.findMany({
-      where:   { status: { in: ["SCHEDULED", "POSTPONED"] } },
+      where:   { status: "SCHEDULED" },
       include: { homeTeam: true, awayTeam: true },
       orderBy: { scheduledAt: "asc" },
       take:    20,

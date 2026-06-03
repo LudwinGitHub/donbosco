@@ -17,6 +17,8 @@ type VotePanelProps = {
   userVote:        "A" | "B" | null
   isLoggedIn:      boolean
   maxVotes:        number
+  homeTeamName:    string
+  awayTeamName:    string
 }
 
 type VotingState = "upcoming" | "active" | "closed"
@@ -26,6 +28,7 @@ export default function VotePanel(props: VotePanelProps) {
     matchId, scheduledAtISO, windowOpenAtISO,
     optionA, optionB, votesA, votesB, totalVotes,
     userVote, isLoggedIn, maxVotes,
+    homeTeamName, awayTeamName,
   } = props
 
   const [timeDisplay, setTimeDisplay] = useState("")
@@ -116,6 +119,8 @@ export default function VotePanel(props: VotePanelProps) {
           isLoggedIn={isLoggedIn}
           isPending={isPending}
           onVote={() => vote(userVote === "A" ? null : "A")}
+          homeTeamName={homeTeamName}
+          awayTeamName={awayTeamName}
         />
         <OptionCard
           label="Opcja B"
@@ -128,6 +133,8 @@ export default function VotePanel(props: VotePanelProps) {
           isLoggedIn={isLoggedIn}
           isPending={isPending}
           onVote={() => vote(userVote === "B" ? null : "B")}
+          homeTeamName={homeTeamName}
+          awayTeamName={awayTeamName}
         />
       </div>
 
@@ -148,17 +155,20 @@ export default function VotePanel(props: VotePanelProps) {
 function OptionCard({
   label, accentColor, option, votes, totalVotes,
   isChosen, votingState, isLoggedIn, isPending, onVote,
+  homeTeamName, awayTeamName,
 }: {
-  label:       string
-  accentColor: string
-  option:      DrawOption
-  votes:       number
-  totalVotes:  number
-  isChosen:    boolean
-  votingState: VotingState
-  isLoggedIn:  boolean
-  isPending:   boolean
-  onVote:      () => void
+  label:         string
+  accentColor:   string
+  option:        DrawOption
+  votes:         number
+  totalVotes:    number
+  isChosen:      boolean
+  votingState:   VotingState
+  isLoggedIn:    boolean
+  isPending:     boolean
+  onVote:        () => void
+  homeTeamName:  string
+  awayTeamName:  string
 }) {
   const pct      = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
   const otherVotes = totalVotes - votes
@@ -187,8 +197,8 @@ function OptionCard({
 
       {/* Player lists */}
       <div className="p-4 space-y-3">
-        <TeamMini label="Drużyna 1" players={option.team1} />
-        <TeamMini label="Drużyna 2" players={option.team2} />
+        <TeamMini label={homeTeamName} players={option.team1} />
+        <TeamMini label={awayTeamName} players={option.team2} />
       </div>
 
       {/* Vote button — only when active and logged in */}

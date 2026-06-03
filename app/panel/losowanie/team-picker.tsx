@@ -211,14 +211,15 @@ export default function TeamPicker({
             >
               {matches.map((m) => {
                 const d = new Date(m.scheduledAt)
-                const date = d.toLocaleDateString("pl-PL", { weekday: "short", day: "numeric", month: "short" })
-                const time = d.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+                const dd = String(d.getDate()).padStart(2, "0")
+                const mm = String(d.getMonth() + 1).padStart(2, "0")
+                const hh = String(d.getHours()).padStart(2, "0")
+                const mi = String(d.getMinutes()).padStart(2, "0")
+                const label = m.round
+                  ? `Kolejka ${m.round} — ${dd}.${mm}, ${hh}:${mi}`
+                  : `${dd}.${mm}, ${hh}:${mi}`
                 return (
-                  <option key={m.id} value={m.id}>
-                    {m.homeTeamName} vs {m.awayTeamName}
-                    {m.round ? ` (kol. ${m.round})` : ""}
-                    {" — "}{date}, {time}
-                  </option>
+                  <option key={m.id} value={m.id}>{label}</option>
                 )
               })}
             </select>

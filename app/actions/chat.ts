@@ -1,9 +1,24 @@
 "use server"
-import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { verifySession } from "@/lib/dal"
+import { verifySession, getOptionalSession } from "@/lib/dal"
 
 export type ChatFormState = { error?: string } | undefined
+
+export async function getChatMessages() {
+  const [session, messages] = await Promise.all([
+    getOptionalSession(),
+    prisma.chatMessage.findMany({
+      orderBy: { createdAt: "asc" },
+      take: 100,
+      include: { user: { select: { firstName: true, lastName: true } } },
+    }),
+  ])
+  return {
+    messages,
+    currentUserId: session?.userId ?? null,
+    isOrganizer: session?.role === "ORGANIZER",
+  }
+}
 
 export async function sendChatMessage(
   state: ChatFormState,
@@ -17,7 +32,6 @@ export async function sendChatMessage(
   await prisma.chatMessage.create({
     data: { text, userId: session.userId },
   })
-  revalidatePath("/czat")
   return undefined
 }
 
@@ -27,5 +41,4 @@ export async function deleteChatMessage(id: string): Promise<void> {
   if (!msg) return
   if (msg.userId !== session.userId && session.role !== "ORGANIZER") return
   await prisma.chatMessage.delete({ where: { id } })
-  revalidatePath("/czat")
 }

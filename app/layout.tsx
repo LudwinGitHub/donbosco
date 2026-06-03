@@ -14,6 +14,7 @@ import { Toaster } from "sonner"
 import { NavLinks, PanelDropdown, MobileMenu } from "./nav-links"
 import ThemeProvider from "./theme-provider"
 import ThemeToggle from "./theme-toggle"
+import ChatFab from "./components/chat-fab"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -32,7 +33,6 @@ const navLinks = [
   { href: "/statystyki",   label: "Statystyki" },
   { href: "/glosowanie",   label: "Głosowanie" },
   { href: "/ogloszenia",   label: "Ogłoszenia" },
-  { href: "/czat",         label: "Czat" },
 ]
 
 const panelLinks = [
@@ -162,8 +162,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
 
         <main className="mx-auto max-w-5xl px-4 py-4 sm:py-8">{children}</main>
-        <Toaster richColors position="bottom-right" />
+        <Toaster richColors position="bottom-left" />
         <Suspense><ToastConsumer /></Suspense>
+        <ChatFab
+          currentUserId={session?.userId ?? null}
+          isOrganizer={session?.role === "ORGANIZER"}
+        />
         </ThemeProvider>
       </body>
     </html>

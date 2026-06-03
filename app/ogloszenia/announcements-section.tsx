@@ -7,13 +7,26 @@ import {
   type AnnouncementFormState,
 } from "@/app/actions/announcements"
 
+type Priority = "NORMAL" | "IMPORTANT" | "URGENT"
+
 type Announcement = {
   id: string
   title: string
   content: string
   isPinned: boolean
+  priority: Priority
   createdAt: Date
   author: { firstName: string; lastName: string }
+}
+
+const PRIORITY_CONFIG: Record<Priority, {
+  card: string
+  badge: string
+  label: string
+}> = {
+  NORMAL:    { card: "border-zinc-200 bg-white",       badge: "bg-zinc-100 text-zinc-500",       label: "Normalne" },
+  IMPORTANT: { card: "border-orange-200 bg-orange-50", badge: "bg-orange-100 text-orange-600",   label: "Ważne" },
+  URGENT:    { card: "border-red-300 bg-red-50",       badge: "bg-red-100 text-red-600",         label: "Pilne" },
 }
 
 function fmtDate(date: Date) {
@@ -74,11 +87,22 @@ export default function AnnouncementsSection({
               required
               className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 resize-none"
             />
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
-                <input type="checkbox" name="isPinned" className="rounded" />
-                Przypnij ogłoszenie
-              </label>
+            <div className="flex flex-wrap items-center gap-3 justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  name="priority"
+                  defaultValue="NORMAL"
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 bg-white"
+                >
+                  <option value="NORMAL">Normalne</option>
+                  <option value="IMPORTANT">Ważne</option>
+                  <option value="URGENT">Pilne</option>
+                </select>
+                <label className="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
+                  <input type="checkbox" name="isPinned" className="rounded" />
+                  Przypnij
+                </label>
+              </div>
               <button
                 type="submit"
                 disabled={submitting}
@@ -99,47 +123,53 @@ export default function AnnouncementsSection({
         </div>
       ) : (
         <div className="space-y-3">
-          {announcements.map((a) => (
-            <div
-              key={a.id}
-              className={`rounded-xl border bg-white p-4 space-y-2 ${
-                a.isPinned ? "border-amber-300 bg-amber-50" : "border-zinc-200"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {a.isPinned && (
-                    <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                      Przypięte
-                    </span>
-                  )}
-                  <h3 className="font-semibold text-zinc-900">{a.title}</h3>
-                </div>
-                {isOrganizer && (
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => handleTogglePin(a.id, a.isPinned)}
-                      disabled={pending}
-                      className="text-xs text-zinc-400 hover:text-amber-600 transition-colors disabled:opacity-50"
-                    >
-                      {a.isPinned ? "Odepnij" : "Przypnij"}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(a.id)}
-                      disabled={pending}
-                      className="text-xs text-zinc-400 hover:text-red-500 transition-colors disabled:opacity-50"
-                    >
-                      Usuń
-                    </button>
+          {announcements.map((a) => {
+            const cfg = PRIORITY_CONFIG[a.priority]
+            return (
+              <div
+                key={a.id}
+                className={`rounded-xl border p-4 space-y-2 ${cfg.card}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {a.priority !== "NORMAL" && (
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                        {cfg.label}
+                      </span>
+                    )}
+                    {a.isPinned && (
+                      <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+                        Przypięte
+                      </span>
+                    )}
+                    <h3 className="font-semibold text-zinc-900">{a.title}</h3>
                   </div>
-                )}
+                  {isOrganizer && (
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => handleTogglePin(a.id, a.isPinned)}
+                        disabled={pending}
+                        className="text-xs text-zinc-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+                      >
+                        {a.isPinned ? "Odepnij" : "Przypnij"}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        disabled={pending}
+                        className="text-xs text-zinc-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                      >
+                        Usuń
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-zinc-700 whitespace-pre-wrap">{a.content}</p>
+                <p className="text-xs text-zinc-400">
+                  {a.author.firstName} {a.author.lastName} · {fmtDate(a.createdAt)}
+                </p>
               </div>
-              <p className="text-sm text-zinc-700 whitespace-pre-wrap">{a.content}</p>
-              <p className="text-xs text-zinc-400">
-                {a.author.firstName} {a.author.lastName} · {fmtDate(a.createdAt)}
-              </p>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

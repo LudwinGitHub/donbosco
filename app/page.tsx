@@ -192,24 +192,31 @@ export default async function HomePage({
             </Link>
           </div>
           <div className="space-y-2">
-            {latestAnnouncements.map((a) => (
-              <div
-                key={a.id}
-                className={`rounded-xl border px-4 py-3 ${
-                  a.isPinned
-                    ? "border-amber-200 bg-amber-50"
-                    : "border-zinc-200 bg-white"
-                }`}
-              >
-                <div className="flex items-center gap-2 flex-wrap">
-                  {a.isPinned && (
-                    <span className="text-xs font-semibold text-amber-600">📌</span>
-                  )}
-                  <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
+            {latestAnnouncements.map((a) => {
+              const cardCls =
+                a.priority === "URGENT"    ? "border-red-300 bg-red-50" :
+                a.priority === "IMPORTANT" ? "border-orange-200 bg-orange-50" :
+                "border-zinc-200 bg-white"
+              const badgeCls =
+                a.priority === "URGENT"    ? "text-xs font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded-full" :
+                a.priority === "IMPORTANT" ? "text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full" :
+                null
+              const badgeLabel =
+                a.priority === "URGENT" ? "Pilne" :
+                a.priority === "IMPORTANT" ? "Ważne" : null
+              return (
+                <div key={a.id} className={`rounded-xl border px-4 py-3 ${cardCls}`}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {badgeCls && <span className={badgeCls}>{badgeLabel}</span>}
+                    {a.isPinned && (
+                      <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Przypięte</span>
+                    )}
+                    <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
+                  </div>
+                  <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{a.content}</p>
                 </div>
-                <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{a.content}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

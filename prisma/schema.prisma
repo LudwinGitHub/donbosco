@@ -32,6 +32,12 @@ enum PaymentStatus {
   EXEMPT
 }
 
+enum AnnouncementPriority {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -294,14 +300,15 @@ model MatchMvpVote {
 }
 
 model Announcement {
-  id        String   @id @default(cuid())
+  id        String               @id @default(cuid())
   title     String
   content   String
-  isPinned  Boolean  @default(false)
+  isPinned  Boolean              @default(false)
+  priority  AnnouncementPriority @default(NORMAL)
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  author    User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
 
   @@map("announcements")
 }

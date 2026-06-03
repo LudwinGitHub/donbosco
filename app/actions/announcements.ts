@@ -12,9 +12,13 @@ export async function addAnnouncement(
   const session = await verifySession()
   if (session.role !== "ORGANIZER") return { error: "Brak uprawnień." }
 
-  const title   = ((formData.get("title")   as string) ?? "").trim()
-  const content = ((formData.get("content") as string) ?? "").trim()
+  const title    = ((formData.get("title")    as string) ?? "").trim()
+  const content  = ((formData.get("content")  as string) ?? "").trim()
   const isPinned = formData.get("isPinned") === "on"
+  const rawPriority = formData.get("priority") as string
+  const priority = ["NORMAL", "IMPORTANT", "URGENT"].includes(rawPriority)
+    ? (rawPriority as "NORMAL" | "IMPORTANT" | "URGENT")
+    : "NORMAL"
 
   if (!title)   return { error: "Tytuł nie może być pusty." }
   if (!content) return { error: "Treść nie może być pusta." }
@@ -22,7 +26,7 @@ export async function addAnnouncement(
   if (content.length > 1000) return { error: "Treść może mieć maksymalnie 1000 znaków." }
 
   await prisma.announcement.create({
-    data: { title, content, isPinned, authorId: session.userId },
+    data: { title, content, isPinned, priority, authorId: session.userId },
   })
   revalidatePath("/")
   revalidatePath("/ogloszenia")

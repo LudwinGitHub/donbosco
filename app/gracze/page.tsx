@@ -58,19 +58,19 @@ export default async function PlayersPage({
           <div className="grid grid-cols-3 gap-3">
             <StatCard
               label="Król strzelców" emoji="⚽"
-              borderClass="border-t-amber-400" statColorClass="text-amber-500"
+              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
               players={players} sortKey="goals"
               format={(p) => `${p.goals} ${goalLabel(p.goals)}`}
             />
             <StatCard
               label="Król asyst" emoji="🎯"
-              borderClass="border-t-blue-400" statColorClass="text-blue-500"
+              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
               players={players} sortKey="assists"
               format={(p) => `${p.assists} ${assistLabel(p.assists)}`}
             />
             <StatCard
               label="Najwięcej meczów" emoji="📅"
-              borderClass="border-t-violet-400" statColorClass="text-violet-500"
+              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
               players={players} sortKey="played"
               format={(p) => `${p.played} ${matchLabel(p.played)}`}
             />

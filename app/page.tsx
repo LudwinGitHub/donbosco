@@ -152,33 +152,40 @@ export default async function HomePage({
           </div>
 
           {/* Top scorer */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
-            {topScorer && topScorer.goals > 0 ? (
-              <div className="mt-3">
-                <Link href={`/gracze/${topScorer.id}`} className="hover:underline">
-                  <p className="font-semibold text-zinc-900 leading-tight">
-                    {topScorer.firstName} {topScorer.lastName}
-                  </p>
-                  {topScorer.nickname && (
-                    <p className="text-xs text-zinc-400">„{topScorer.nickname}"</p>
-                  )}
-                </Link>
-                {topScorer.team && (
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: topScorer.team.color }} />
-                    <span className="text-xs text-zinc-500">{topScorer.team.name}</span>
-                  </div>
-                )}
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-zinc-900">{topScorer.goals}</span>
-                  <span className="text-xs text-zinc-400">{goalLabel(topScorer.goals)}</span>
-                </div>
+          {topScorer && topScorer.goals > 0 ? (
+            <Link href={`/gracze/${topScorer.id}`} className="block rounded-xl border border-zinc-200 border-t-2 border-t-amber-400 bg-white p-4 transition-colors hover:bg-zinc-50">
+              <div className="flex items-start justify-between gap-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
+                <span className="text-lg leading-none">⚽</span>
               </div>
-            ) : (
+              <p className="mt-2 truncate font-bold text-zinc-900 leading-tight">
+                {topScorer.firstName} {topScorer.lastName}
+              </p>
+              {topScorer.nickname && (
+                <p className="truncate text-xs text-zinc-400">„{topScorer.nickname}"</p>
+              )}
+              {topScorer.team ? (
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: topScorer.team.color }} />
+                  <span className="truncate text-xs text-zinc-500">{topScorer.team.name}</span>
+                </div>
+              ) : (
+                <div className="mt-1 h-4" />
+              )}
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-amber-500">{topScorer.goals}</span>
+                <span className="text-xs text-zinc-400">{goalLabel(topScorer.goals)}</span>
+                {topScorer.assists > 0 && (
+                  <span className="text-xs text-zinc-400">· {topScorer.assists} asyst</span>
+                )}
+              </div>
+            </Link>
+          ) : (
+            <div className="rounded-xl border border-zinc-200 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
               <p className="mt-3 text-sm text-zinc-400">Brak danych.</p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 

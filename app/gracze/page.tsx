@@ -7,9 +7,9 @@ import BadgeChip from "@/app/ui/badge-chip"
 export default async function PlayersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sezon?: string }>
+  searchParams: Promise<{ sezon?: string; sort?: string }>
 }) {
-  const { sezon: seasonId } = await searchParams
+  const { sezon: seasonId, sort } = await searchParams
 
   const seasons = await getAllSeasons()
   const sortedSeasons = [...seasons].sort(
@@ -21,6 +21,12 @@ export default async function PlayersPage({
     getActiveBadges(seasonId),
   ])
   const currentSeason = seasons.find((s) => s.id === seasonId) ?? null
+
+  const displayPlayers = (() => {
+    if (sort === "goals")   return [...players].sort((a, b) => b.goals   - a.goals   || b.assists - a.assists || a.lastName.localeCompare(b.lastName))
+    if (sort === "assists") return [...players].sort((a, b) => b.assists - a.assists || b.goals   - a.goals   || a.lastName.localeCompare(b.lastName))
+    return players
+  })()
 
   return (
     <div className="space-y-5">
@@ -50,12 +56,27 @@ export default async function PlayersPage({
         <>
           {/* 3 stat cards — all-time or season-specific */}
           <div className="grid grid-cols-3 gap-3">
-            <StatCard label="Król strzelców"   players={players} sortKey="goals"   format={(p) => `${p.goals} ${goalLabel(p.goals)}`} />
-            <StatCard label="Król asyst"        players={players} sortKey="assists" format={(p) => `${p.assists} ${assistLabel(p.assists)}`} />
-            <StatCard label="Najwięcej meczów"  players={players} sortKey="played"  format={(p) => `${p.played} ${matchLabel(p.played)}`} />
+            <StatCard
+              label="Król strzelców" emoji="⚽"
+              borderClass="border-t-amber-400" statColorClass="text-amber-500"
+              players={players} sortKey="goals"
+              format={(p) => `${p.goals} ${goalLabel(p.goals)}`}
+            />
+            <StatCard
+              label="Król asyst" emoji="🎯"
+              borderClass="border-t-blue-400" statColorClass="text-blue-500"
+              players={players} sortKey="assists"
+              format={(p) => `${p.assists} ${assistLabel(p.assists)}`}
+            />
+            <StatCard
+              label="Najwięcej meczów" emoji="📅"
+              borderClass="border-t-violet-400" statColorClass="text-violet-500"
+              players={players} sortKey="played"
+              format={(p) => `${p.played} ${matchLabel(p.played)}`}
+            />
           </div>
 
-          {/* Player table */}
+          {/* Players table */}
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
             <table className="w-full text-sm">
               <thead>
@@ -63,13 +84,13 @@ export default async function PlayersPage({
                   <th className="px-4 py-3 text-right w-8">#</th>
                   <th className="px-4 py-3 text-left">Gracz</th>
                   {seasonId && <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>}
-                  <th className="px-4 py-3 text-center w-14" title="Mecze">M</th>
-                  <th className="px-4 py-3 text-center w-14" title="Gole">G</th>
-                  <th className="px-4 py-3 text-center w-14" title="Asysty">A</th>
+                  <SortHeader label="M" title="Mecze"  sortKey="played"  currentSort={sort} seasonId={seasonId} />
+                  <SortHeader label="G" title="Gole"   sortKey="goals"   currentSort={sort} seasonId={seasonId} />
+                  <SortHeader label="A" title="Asysty" sortKey="assists" currentSort={sort} seasonId={seasonId} />
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {players.map((p, i) => (
+                {displayPlayers.map((p, i) => (
                   <tr key={p.id} className="transition-colors hover:bg-zinc-50">
                     <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
                     <td className="px-4 py-3">
@@ -116,6 +137,21 @@ export default async function PlayersPage({
               </tbody>
             </table>
           </div>
+          {/* Badge legend */}
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Legenda odznak</p>
+            <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
+              {BADGE_LEGEND.map(({ emoji, label, description }) => (
+                <div key={label} className="flex items-start gap-2">
+                  <span className="shrink-0 text-sm leading-5">{emoji}</span>
+                  <p className="text-xs text-zinc-500 leading-5">
+                    <span className="font-semibold text-zinc-700">{label}</span>
+                    {" — "}{description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </>
       )}
     </div>
@@ -137,13 +173,33 @@ function SeasonTab({ href, label, active }: { href: string; label: string; activ
   )
 }
 
+const BADGE_LEGEND = [
+  { emoji: "⚽", label: "Striker",       description: "Najlepszy strzelec aktywnego sezonu" },
+  { emoji: "🎯", label: "Playmaker",     description: "Najlepszy asystent aktywnego sezonu" },
+  { emoji: "🔥", label: "Hero (gole)",   description: "Najwięcej goli w ostatnim meczu" },
+  { emoji: "💫", label: "Hero (asysty)", description: "Najwięcej asyst w ostatnim meczu" },
+  { emoji: "🎩", label: "Hat-trick",     description: "3+ gole w ostatnim meczu" },
+  { emoji: "🔥", label: "On Fire",       description: "Gol lub asysta w każdym z ostatnich 3 wystąpień" },
+  { emoji: "🎯", label: "Seria asyst",   description: "Asysta w każdym z ostatnich 3 wystąpień" },
+  { emoji: "🦾", label: "Iron Man",      description: "Grał we wszystkich meczach sezonu (min. 5)" },
+  { emoji: "🎖", label: "Weteran",       description: "Najwięcej występów all-time (min. 10)" },
+  { emoji: "⭐", label: "MVP Legend",    description: "Tytuł MVP zdobyty 3 lub więcej razy" },
+  { emoji: "🤝", label: "Deadly Duo",    description: "Najlepsza para strzelec+asystent sezonu (min. 2 wspólne akcje)" },
+]
+
 function StatCard({
   label,
+  emoji,
+  borderClass,
+  statColorClass,
   players,
   sortKey,
   format,
 }: {
   label: string
+  emoji: string
+  borderClass: string
+  statColorClass: string
   players: PlayerWithStats[]
   sortKey: "goals" | "assists" | "played"
   format: (p: PlayerWithStats) => string
@@ -152,22 +208,54 @@ function StatCard({
   if (!leader || leader[sortKey] === 0) return null
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
-      <p className="mt-1 font-semibold text-zinc-900 leading-tight">
+    <Link
+      href={`/gracze/${leader.id}`}
+      className={`block rounded-xl border border-zinc-200 border-t-2 bg-white p-4 transition-colors hover:bg-zinc-50 ${borderClass}`}
+    >
+      <div className="flex items-start justify-between gap-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
+        <span className="text-lg leading-none">{emoji}</span>
+      </div>
+      <p className="mt-2 truncate font-bold text-zinc-900 leading-tight">
         {leader.firstName} {leader.lastName}
-        {leader.nickname && (
-          <span className="ml-1 text-xs font-normal text-zinc-400">„{leader.nickname}"</span>
-        )}
       </p>
-      {leader.team && (
-        <div className="mt-0.5 flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: leader.team.color }} />
-          <span className="text-xs text-zinc-500">{leader.team.name}</span>
-        </div>
+      {leader.nickname && (
+        <p className="truncate text-xs text-zinc-400">„{leader.nickname}"</p>
       )}
-      <p className="mt-2 text-2xl font-bold text-zinc-900">{format(leader)}</p>
-    </div>
+      {leader.team ? (
+        <div className="mt-1 flex items-center gap-1.5">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: leader.team.color }} />
+          <span className="truncate text-xs text-zinc-500">{leader.team.name}</span>
+        </div>
+      ) : (
+        <div className="mt-1 h-4" />
+      )}
+      <p className={`mt-2 text-2xl font-black ${statColorClass}`}>{format(leader)}</p>
+    </Link>
+  )
+}
+
+function SortHeader({
+  label, title, sortKey, currentSort, seasonId,
+}: {
+  label: string; title: string; sortKey: string; currentSort?: string; seasonId?: string
+}) {
+  const isActive = currentSort === sortKey || (!currentSort && sortKey === "played")
+  const params = new URLSearchParams()
+  if (seasonId) params.set("sezon", seasonId)
+  params.set("sort", sortKey)
+  return (
+    <th className="px-4 py-3 text-center w-14" title={title}>
+      <Link
+        href={`/gracze?${params.toString()}`}
+        className={`inline-flex items-center gap-0.5 transition-colors ${
+          isActive ? "text-zinc-900" : "hover:text-zinc-600"
+        }`}
+      >
+        {label}
+        {isActive && <span className="text-[9px]">▼</span>}
+      </Link>
+    </th>
   )
 }
 

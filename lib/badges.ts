@@ -6,9 +6,7 @@ export type BadgeType =
   | "hat-trick"
   | "on-fire" | "assist-streak"
   | "iron-man" | "veteran"
-  | "champion"
   | "mvp-legend"
-  | "goals-5" | "goals-10" | "goals-15"
   | "deadly-duo"
 
 export type PlayerBadge = { type: BadgeType }
@@ -29,7 +27,6 @@ export async function getActiveBadges(seasonId?: string | null): Promise<Map<str
     allGoals,
     allPlayedMatches,
     mvpGroupBy,
-    lastInactiveSeason,
   ] = await Promise.all([
     seasonId
       ? Promise.resolve({ id: seasonId } as { id: string } | null)
@@ -56,11 +53,6 @@ export async function getActiveBadges(seasonId?: string | null): Promise<Map<str
       by:      ["mvpPlayerId"],
       where:   { mvpPlayerId: { not: null }, status: "PLAYED" },
       _count:  { mvpPlayerId: true },
-    }),
-    prisma.season.findFirst({
-      where:   { isActive: false },
-      orderBy: { startDate: "desc" },
-      select:  { id: true },
     }),
   ])
 
@@ -145,13 +137,6 @@ export async function getActiveBadges(seasonId?: string | null): Promise<Map<str
     for (const c of seasonAssists.values()) maxA = Math.max(maxA, c)
     if (maxA > 0) for (const [pid, c] of seasonAssists) if (c === maxA) add(pid, "playmaker")
 
-    // Goal milestones (highest tier wins)
-    for (const [pid, c] of seasonGoals) {
-      if (c >= 15)     add(pid, "goals-15")
-      else if (c >= 10) add(pid, "goals-10")
-      else if (c >= 5)  add(pid, "goals-5")
-    }
-
     // Deadly Duo
     if (seasonDuo.size > 0) {
       const best = [...seasonDuo.entries()].sort((a, b) => b[1] - a[1])[0]
@@ -204,30 +189,6 @@ export async function getActiveBadges(seasonId?: string | null): Promise<Map<str
 
   for (const row of mvpGroupBy) {
     if (row.mvpPlayerId && row._count.mvpPlayerId >= 3) add(row.mvpPlayerId, "mvp-legend")
-  }
-
-  // ── Champion: players of winning team in last completed season ────────────
-
-  if (lastInactiveSeason) {
-    const prevMatches = allPlayedMatches.filter(m => m.seasonId === lastInactiveSeason.id)
-    const pts = new Map<string, number>()
-    for (const m of prevMatches) {
-      if (m.homeScore === null || m.awayScore === null) continue
-      const h = pts.get(m.homeTeamId) ?? 0
-      const a = pts.get(m.awayTeamId) ?? 0
-      if (m.homeScore > m.awayScore)      { pts.set(m.homeTeamId, h + 3); pts.set(m.awayTeamId, a) }
-      else if (m.homeScore < m.awayScore) { pts.set(m.homeTeamId, h);     pts.set(m.awayTeamId, a + 3) }
-      else                                { pts.set(m.homeTeamId, h + 1); pts.set(m.awayTeamId, a + 1) }
-    }
-    if (pts.size > 0) {
-      const winnerTeamId = [...pts.entries()].sort((a, b) => b[1] - a[1])[0][0]
-      const seasonPlayerTeam = playerTeamInSeason.get(lastInactiveSeason.id)
-      if (seasonPlayerTeam) {
-        for (const [pid, teamId] of seasonPlayerTeam) {
-          if (teamId === winnerTeamId) add(pid, "champion")
-        }
-      }
-    }
   }
 
   return result

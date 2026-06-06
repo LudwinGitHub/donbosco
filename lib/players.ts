@@ -1,5 +1,58 @@
 import { prisma } from "./prisma"
 
+export type PlayerForm = "up" | "down" | "stable"
+
+export async function getPlayerForms(): Promise<Map<string, PlayerForm>> {
+  const last3 = await prisma.match.findMany({
+    where: { status: "PLAYED" },
+    orderBy: { scheduledAt: "desc" },
+    take: 3,
+    select: { id: true },
+  })
+
+  if (last3.length < 2) return new Map()
+
+  const matchIds = last3.map((m) => m.id)
+  const chronological = [...matchIds].reverse()
+
+  const [lineups, goals] = await Promise.all([
+    prisma.matchLineup.findMany({
+      where: { matchId: { in: matchIds } },
+      select: { playerId: true, matchId: true },
+    }),
+    prisma.goal.findMany({
+      where: { matchId: { in: matchIds }, isOwnGoal: false },
+      select: { scorerId: true, assisterId: true, matchId: true },
+    }),
+  ])
+
+  const scoreMap = new Map<string, Map<string, number>>()
+  for (const l of lineups) {
+    if (!scoreMap.has(l.playerId)) scoreMap.set(l.playerId, new Map())
+    if (!scoreMap.get(l.playerId)!.has(l.matchId))
+      scoreMap.get(l.playerId)!.set(l.matchId, 0)
+  }
+  for (const g of goals) {
+    const s = scoreMap.get(g.scorerId)
+    if (s?.has(g.matchId)) s.set(g.matchId, s.get(g.matchId)! + 1)
+    if (g.assisterId) {
+      const a = scoreMap.get(g.assisterId)
+      if (a?.has(g.matchId)) a.set(g.matchId, a.get(g.matchId)! + 1)
+    }
+  }
+
+  const result = new Map<string, PlayerForm>()
+  for (const [playerId, matchScores] of scoreMap.entries()) {
+    const played = chronological.filter((id) => matchScores.has(id))
+    if (played.length < 2) continue
+    const last = matchScores.get(played[played.length - 1])!
+    const prev = matchScores.get(played[played.length - 2])!
+    result.set(playerId, last > prev ? "up" : last < prev ? "down" : "stable")
+  }
+
+  return result
+}
+
 export type SeasonLeaders = {
   season:    { id: string; name: string; startDate: Date }
   topScorer: PlayerWithStats | null

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getPlayerProfile } from "@/lib/players"
+import { getPlayerProfile, getPlayerForms, type PlayerForm } from "@/lib/players"
 
 export default async function PlayerProfilePage({
   params,
@@ -8,8 +8,9 @@ export default async function PlayerProfilePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const player = await getPlayerProfile(id)
+  const [player, forms] = await Promise.all([getPlayerProfile(id), getPlayerForms()])
   if (!player) notFound()
+  const form = forms.get(id)
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -22,9 +23,12 @@ export default async function PlayerProfilePage({
 
       {/* Hero */}
       <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <h1 className="text-2xl font-bold text-zinc-900">
-          {player.firstName} {player.lastName}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-900">
+            {player.firstName} {player.lastName}
+          </h1>
+          <FormArrow form={form} />
+        </div>
         {player.nickname && (
           <p className="mt-0.5 text-sm text-zinc-400">„{player.nickname}"</p>
         )}
@@ -154,6 +158,13 @@ export default async function PlayerProfilePage({
       )}
     </div>
   )
+}
+
+function FormArrow({ form }: { form: PlayerForm | undefined }) {
+  if (!form) return null
+  if (form === "up")   return <span className="text-base font-bold leading-none text-orange-500" title="Forma w górę">↑</span>
+  if (form === "down") return <span className="text-base font-bold leading-none text-red-500" title="Forma w dół">↓</span>
+  return <span className="text-base font-bold leading-none text-zinc-400" title="Forma stabilna">→</span>
 }
 
 function StatCell({ label, value }: { label: string; value: number }) {

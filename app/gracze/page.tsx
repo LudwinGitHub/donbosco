@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { getAllSeasons } from "@/lib/standings"
-import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
+import { getPlayersWithStats, getPlayerForms, type PlayerWithStats, type PlayerForm } from "@/lib/players"
 import { getActiveBadges, type PlayerBadge } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
 
@@ -16,9 +16,10 @@ export default async function PlayersPage({
     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
   )
 
-  const [players, badges] = await Promise.all([
+  const [players, badges, forms] = await Promise.all([
     getPlayersWithStats(seasonId),
     getActiveBadges(seasonId),
+    getPlayerForms(),
   ])
   const currentSeason = seasons.find((s) => s.id === seasonId) ?? null
 
@@ -98,6 +99,7 @@ export default async function PlayersPage({
                         <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
                           {p.firstName} {p.lastName}
                         </Link>
+                        <FormArrow form={forms.get(p.id)} />
                         {p.nickname && (
                           <span className="text-xs text-zinc-400">„{p.nickname}"</span>
                         )}
@@ -257,6 +259,13 @@ function SortHeader({
       </Link>
     </th>
   )
+}
+
+function FormArrow({ form }: { form: PlayerForm | undefined }) {
+  if (!form) return null
+  if (form === "up")   return <span className="text-[11px] font-bold leading-none text-orange-500" title="Forma w górę">↑</span>
+  if (form === "down") return <span className="text-[11px] font-bold leading-none text-red-500" title="Forma w dół">↓</span>
+  return <span className="text-[11px] font-bold leading-none text-zinc-400" title="Forma stabilna">→</span>
 }
 
 function goalLabel(n: number) {

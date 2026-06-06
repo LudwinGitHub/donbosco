@@ -177,19 +177,20 @@ function MatchRow({ match: m, confirmedCount, isNext }: { match: MatchListItem; 
           <div className="shrink-0 w-20 text-center">{scoreOrTime}</div>
           <TeamName name={m.awayTeam.name} color={m.awayTeam.color} align="left" />
         </div>
-        {isNext && (
-          <span className="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full">
-            Następny
-          </span>
-        )}
-        {!played && !cancelled && (
-          <div className="shrink-0 text-right">
+        {/* Fixed-width right block keeps the center section aligned across all rows */}
+        <div className="shrink-0 w-28 flex items-center justify-end gap-2">
+          {isNext && (
+            <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full">
+              Następny
+            </span>
+          )}
+          {!played && !cancelled && (
             <span className={`text-xs font-medium tabular-nums ${isFull ? "text-red-500" : "text-zinc-400"}`}>
               {confirmedCount}/{m.playerLimit}
             </span>
-          </div>
-        )}
-        <div className="w-4 shrink-0 text-zinc-300 group-hover:text-zinc-400 text-sm">›</div>
+          )}
+          <span className="text-zinc-300 group-hover:text-zinc-400 text-sm">›</span>
+        </div>
       </div>
 
     </Link>

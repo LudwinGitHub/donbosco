@@ -34,6 +34,11 @@ export default async function MatchesPage({
 
   const matches = await getMatches(season.id)
 
+  const now = new Date()
+  const nextMatchId = [...matches]
+    .filter((m) => m.status === "SCHEDULED" && new Date(m.scheduledAt) > now)
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0]?.id ?? null
+
   const registrationCounts = season.id === activeSeason?.id
     ? await prisma.matchRegistration.groupBy({
         by: ["matchId"],
@@ -105,7 +110,7 @@ export default async function MatchesPage({
             )}
             <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
               {roundMatches.map((m) => (
-                <MatchRow key={m.id} match={m} confirmedCount={countByMatchId[m.id] ?? 0} />
+                <MatchRow key={m.id} match={m} confirmedCount={countByMatchId[m.id] ?? 0} isNext={m.id === nextMatchId} />
               ))}
             </div>
           </section>
@@ -115,7 +120,7 @@ export default async function MatchesPage({
   )
 }
 
-function MatchRow({ match: m, confirmedCount }: { match: MatchListItem; confirmedCount: number }) {
+function MatchRow({ match: m, confirmedCount, isNext }: { match: MatchListItem; confirmedCount: number; isNext: boolean }) {
   const played    = m.status === "PLAYED"
   const cancelled = m.status === "CANCELLED" || m.status === "POSTPONED"
   const isFull    = confirmedCount >= m.playerLimit
@@ -131,19 +136,32 @@ function MatchRow({ match: m, confirmedCount }: { match: MatchListItem; confirme
   )
 
   return (
-    <Link href={`/mecze/${m.id}`} className="block transition-colors hover:bg-zinc-50 group">
-
+    <Link
+      href={`/mecze/${m.id}`}
+      className={`block transition-colors group ${
+        isNext
+          ? "border-l-4 border-l-orange-500 bg-orange-50 hover:bg-orange-100"
+          : "hover:bg-zinc-50"
+      }`}
+    >
       {/* Mobile layout */}
       <div className="flex sm:hidden items-center gap-3 px-4 py-3">
         <div className="shrink-0 w-14 text-center">{scoreOrTime}</div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-zinc-800 truncate">
-            <span className="inline-block h-2 w-2 rounded-full mr-1 align-middle shrink-0" style={{ backgroundColor: m.homeTeam.color }} />
-            {m.homeTeam.name}
-            <span className="text-zinc-300 mx-1.5">vs</span>
-            <span className="inline-block h-2 w-2 rounded-full mr-1 align-middle shrink-0" style={{ backgroundColor: m.awayTeam.color }} />
-            {m.awayTeam.name}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-medium text-zinc-800 truncate">
+              <span className="inline-block h-2 w-2 rounded-full mr-1 align-middle shrink-0" style={{ backgroundColor: m.homeTeam.color }} />
+              {m.homeTeam.name}
+              <span className="text-zinc-300 mx-1.5">vs</span>
+              <span className="inline-block h-2 w-2 rounded-full mr-1 align-middle shrink-0" style={{ backgroundColor: m.awayTeam.color }} />
+              {m.awayTeam.name}
+            </p>
+            {isNext && (
+              <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full shrink-0">
+                Następny
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 text-xs text-zinc-400">
             {formatDate(m.scheduledAt)}
             {!played && !cancelled && ` · ${confirmedCount}/${m.playerLimit}`}
@@ -160,6 +178,11 @@ function MatchRow({ match: m, confirmedCount }: { match: MatchListItem; confirme
           <div className="shrink-0 w-20 text-center">{scoreOrTime}</div>
           <TeamName name={m.awayTeam.name} color={m.awayTeam.color} align="left" />
         </div>
+        {isNext && (
+          <span className="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full">
+            Następny
+          </span>
+        )}
         {!played && !cancelled && (
           <div className="shrink-0 text-right">
             <span className={`text-xs font-medium tabular-nums ${isFull ? "text-red-500" : "text-zinc-400"}`}>
@@ -212,7 +235,7 @@ function SeasonTab({
       href={href}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
         active
-          ? "bg-zinc-900 text-white"
+          ? "bg-orange-100 text-orange-700 border border-orange-200"
           : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
       }`}
     >

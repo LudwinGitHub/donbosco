@@ -50,6 +50,7 @@ body {
 .dark .bg-orange-50  { background-color: rgba(124 45 18 / 0.15) !important; }
 .dark .bg-orange-100 { background-color: rgba(124 45 18 / 0.25) !important; }
 .dark .bg-orange-200 { background-color: rgba(124 45 18 / 0.3) !important; }
+.dark .hover\:bg-orange-100:hover { background-color: rgba(124 45 18 / 0.35) !important; }
 .dark .bg-red-50     { background-color: rgba(69 10 10 / 0.2) !important; }
 .dark .bg-red-100    { background-color: rgba(69 10 10 / 0.3) !important; }
 

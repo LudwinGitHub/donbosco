@@ -69,7 +69,7 @@ export default async function MatchesPage({
         {isOrganizer && season.id === activeSeason?.id && (
           <Link
             href="/panel/mecze/nowy"
-            className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
+            className="rounded-lg bg-orange-100 border border-orange-200 px-4 py-2 text-sm font-medium text-orange-700 transition-colors hover:bg-orange-200"
           >
             + Nowy mecz
           </Link>

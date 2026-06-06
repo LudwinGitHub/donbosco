@@ -298,7 +298,7 @@ export default function ChatFab({
       {/* ── Przycisk FAB ── */}
       <button
         onClick={handleOpen}
-        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-500 text-white shadow-lg hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center"
+        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-100 border border-orange-200 text-orange-700 shadow-lg shadow-orange-100/60 hover:bg-orange-200 active:scale-95 transition-all flex items-center justify-center"
         style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
         aria-label={open ? "Zamknij czat" : "Otwórz czat"}
       >
@@ -316,7 +316,7 @@ export default function ChatFab({
 
         {/* Czerwona kropka — nowe wiadomości */}
         {hasUnread && !open && (
-          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-orange-500" />
+          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-orange-100" />
         )}
       </button>
     </>

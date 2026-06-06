@@ -7,9 +7,9 @@ import { prisma } from "@/lib/prisma"
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sezon?: string }>
+  searchParams: Promise<{ sezon?: string; sort?: string }>
 }) {
-  const { sezon: seasonId } = await searchParams
+  const { sezon: seasonId, sort } = await searchParams
   const [activeSeason, allSeasons, session, latestAnnouncements] = await Promise.all([
     getActiveSeason(),
     getAllSeasons(),
@@ -17,6 +17,7 @@ export default async function HomePage({
     prisma.announcement.findMany({
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
       take: 3,
+      include: { pollVotes: { select: { option: true } } },
     }),
   ])
 
@@ -50,10 +51,17 @@ export default async function HomePage({
     ? allSeasons.find((s) => s.id === seasonId) ?? activeSeason
     : activeSeason
 
-  const rows =
+  const baseRows =
     season && activeSeason && season.id !== activeSeason.id
       ? await getStandings(season.id)
       : activeRows
+
+  const rows = (() => {
+    if (sort === "w")  return [...baseRows].sort((a, b) => b.won - a.won || b.points - a.points || b.goalDiff - a.goalDiff)
+    if (sort === "rb") return [...baseRows].sort((a, b) => b.goalDiff - a.goalDiff || b.points - a.points)
+    if (sort === "br") return [...baseRows].sort((a, b) => b.goalsFor - a.goalsFor || b.points - a.points)
+    return baseRows
+  })()
 
   const sortedSeasons = [...allSeasons].sort(
     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
@@ -72,12 +80,12 @@ export default async function HomePage({
       {activeSeason && (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {/* Last match */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 col-span-2 sm:col-span-1">
+          <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 col-span-2 sm:col-span-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Ostatni mecz{lastMatch?.round != null ? ` · k${lastMatch.round}` : ""}
             </p>
             {lastMatch ? (
-              <Link href={`/mecze/${lastMatch.id}`} className="mt-3 block group">
+              <Link href={`/mecze/${lastMatch.id}`} className="mt-3 flex flex-1 flex-col group">
                 <div className="flex items-center gap-2">
                   <div className="flex flex-1 items-center gap-1.5 min-w-0">
                     <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: lastMatch.homeTeam.color }} />
@@ -96,7 +104,7 @@ export default async function HomePage({
                     ⭐ MVP: <span className="font-medium text-zinc-700">{lastMatch.mvpPlayer.firstName} {lastMatch.mvpPlayer.lastName}</span>
                   </p>
                 )}
-                <p className="mt-1.5 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                <p className="mt-auto pt-2 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
                   {fmtDate(lastMatch.scheduledAt)} →
                 </p>
               </Link>
@@ -106,12 +114,12 @@ export default async function HomePage({
           </div>
 
           {/* Next match */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 col-span-2 sm:col-span-1">
+          <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 col-span-2 sm:col-span-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
               Następny mecz{nextMatch?.round != null ? ` · k${nextMatch.round}` : ""}
             </p>
             {nextMatch ? (
-              <Link href={`/mecze/${nextMatch.id}`} className="mt-3 block group">
+              <Link href={`/mecze/${nextMatch.id}`} className="mt-3 flex flex-1 flex-col group">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex flex-1 items-center gap-1.5 min-w-0">
                     <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: nextMatch.homeTeam.color }} />
@@ -123,7 +131,7 @@ export default async function HomePage({
                     <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: nextMatch.awayTeam.color }} />
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                <p className="mt-auto pt-2 text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">
                   {fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)} →
                 </p>
               </Link>
@@ -133,19 +141,23 @@ export default async function HomePage({
           </div>
 
           {/* Table leader */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Lider tabeli</p>
+          <div className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4">
+            <div className="flex items-start justify-between gap-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Lider tabeli</p>
+              <span className="text-lg leading-none">🏆</span>
+            </div>
             {tableLeader ? (
-              <div className="mt-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: tableLeader.teamColor }} />
-                  <span className="font-semibold text-zinc-900 leading-tight">{tableLeader.teamName}</span>
+              <>
+                <p className="mt-2 truncate font-bold text-zinc-900 leading-tight">{tableLeader.teamName}</p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: tableLeader.teamColor }} />
+                  <span className="text-xs text-zinc-500">{tableLeader.played} meczów</span>
                 </div>
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold text-zinc-900">{tableLeader.points}</span>
-                  <span className="text-xs text-zinc-400">pkt · {tableLeader.played} meczów</span>
+                <div className="mt-auto pt-2 flex items-baseline gap-1.5">
+                  <span className="text-2xl font-black text-zinc-900">{tableLeader.points}</span>
+                  <span className="text-xs text-zinc-400">pkt</span>
                 </div>
-              </div>
+              </>
             ) : (
               <p className="mt-3 text-sm text-zinc-400">Brak danych.</p>
             )}
@@ -153,7 +165,7 @@ export default async function HomePage({
 
           {/* Top scorer */}
           {topScorer && topScorer.goals > 0 ? (
-            <Link href={`/gracze/${topScorer.id}`} className="block rounded-xl border border-zinc-200 border-t-2 border-t-amber-400 bg-white p-4 transition-colors hover:bg-zinc-50">
+            <Link href={`/gracze/${topScorer.id}`} className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4 transition-colors hover:bg-zinc-50">
               <div className="flex items-start justify-between gap-1">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
                 <span className="text-lg leading-none">⚽</span>
@@ -172,8 +184,8 @@ export default async function HomePage({
               ) : (
                 <div className="mt-1 h-4" />
               )}
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-amber-500">{topScorer.goals}</span>
+              <div className="mt-auto pt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-zinc-900">{topScorer.goals}</span>
                 <span className="text-xs text-zinc-400">{goalLabel(topScorer.goals)}</span>
                 {topScorer.assists > 0 && (
                   <span className="text-xs text-zinc-400">· {topScorer.assists} asyst</span>
@@ -181,7 +193,7 @@ export default async function HomePage({
               </div>
             </Link>
           ) : (
-            <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
               <p className="mt-3 text-sm text-zinc-400">Brak danych.</p>
             </div>
@@ -200,28 +212,56 @@ export default async function HomePage({
           </div>
           <div className="space-y-2">
             {latestAnnouncements.map((a) => {
-              const cardCls =
-                a.priority === "URGENT"    ? "border-red-300 bg-red-50" :
-                a.priority === "IMPORTANT" ? "border-orange-200 bg-orange-50" :
-                "border-zinc-200 bg-white"
+              const borderCls =
+                a.priority === "URGENT"    ? "border-l-red-500" :
+                a.priority === "IMPORTANT" ? "border-l-orange-500" :
+                "border-l-orange-300"
               const badgeCls =
                 a.priority === "URGENT"    ? "text-xs font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded-full" :
                 a.priority === "IMPORTANT" ? "text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full" :
                 null
-              const badgeLabel =
-                a.priority === "URGENT" ? "Pilne" :
-                a.priority === "IMPORTANT" ? "Ważne" : null
+              const badgeLabel = a.priority === "URGENT" ? "Pilne" : a.priority === "IMPORTANT" ? "Ważne" : null
+              const pollOpts = [
+                { opt: "A", label: a.pollOptA },
+                { opt: "B", label: a.pollOptB },
+                ...(a.pollOptC ? [{ opt: "C", label: a.pollOptC }] : []),
+                ...(a.pollOptD ? [{ opt: "D", label: a.pollOptD }] : []),
+              ].filter((o) => o.label)
+              const hasPoll = !!a.pollQuestion && pollOpts.length >= 2
+              const totalVotes = a.pollVotes.length
               return (
-                <div key={a.id} className={`rounded-xl border px-4 py-3 ${cardCls}`}>
+                <Link
+                  key={a.id}
+                  href="/ogloszenia"
+                  className={`block rounded-xl border border-zinc-200 border-l-4 bg-white px-4 py-3 transition-colors hover:bg-zinc-50 ${borderCls}`}
+                >
                   <div className="flex items-center gap-2 flex-wrap">
                     {badgeCls && <span className={badgeCls}>{badgeLabel}</span>}
                     {a.isPinned && (
-                      <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Przypięte</span>
+                      <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">Przypięte</span>
                     )}
                     <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
                   </div>
                   <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{a.content}</p>
-                </div>
+                  {hasPoll && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs font-semibold text-zinc-600">📊 {a.pollQuestion}</p>
+                      {pollOpts.map(({ opt, label }) => {
+                        const votes = a.pollVotes.filter((v) => v.option === opt).length
+                        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0
+                        return (
+                          <div key={opt} className="relative flex items-center gap-2 rounded-md overflow-hidden bg-zinc-100 px-2 py-1 text-xs">
+                            <span className="absolute inset-y-0 left-0 bg-orange-100" style={{ width: `${pct}%` }} />
+                            <span className="relative font-bold text-orange-500 shrink-0 w-3">{opt}</span>
+                            <span className="relative flex-1 truncate text-zinc-700">{label}</span>
+                            <span className="relative shrink-0 text-zinc-400 tabular-nums">{pct}%</span>
+                          </div>
+                        )
+                      })}
+                      <p className="text-[11px] text-zinc-400">{totalVotes} {voteLabel(totalVotes)} · Zagłosuj →</p>
+                    </div>
+                  )}
+                </Link>
               )
             })}
           </div>
@@ -230,14 +270,14 @@ export default async function HomePage({
 
       {/* ── Registration reminder ── */}
       {showRegPrompt && nextMatch && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
-          <p className="text-amber-800 font-medium">
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-orange-200 bg-orange-50 border-l-4 border-l-orange-500 px-4 py-3 text-sm">
+          <p className="text-orange-800 font-medium">
             Nie jesteś zapisany na następny mecz:{" "}
             <span className="font-semibold">{fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)}</span>
           </p>
           <Link
             href={`/mecze/${nextMatch.id}`}
-            className="shrink-0 font-semibold text-amber-900 hover:underline"
+            className="shrink-0 font-semibold text-orange-700 hover:underline"
           >
             Zapisz się →
           </Link>
@@ -282,12 +322,12 @@ export default async function HomePage({
                     <th className="px-4 py-3 text-left w-8">#</th>
                     <th className="px-4 py-3 text-left">Drużyna</th>
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Mecze">M</th>
-                    <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Wygrane">W</th>
+                    <StandingsSortHeader label="W" title="Wygrane"        sortKey="w"   currentSort={sort} seasonId={seasonId} />
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Remisy">R</th>
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Porażki">P</th>
-                    <th className="px-4 py-3 text-center w-14 hidden sm:table-cell" title="Bramki">Br</th>
-                    <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Różnica bramek">RB</th>
-                    <th className="px-4 py-3 text-center w-10 font-bold text-zinc-600" title="Punkty">Pkt</th>
+                    <StandingsSortHeader label="Br" title="Bramki"        sortKey="br"  currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
+                    <StandingsSortHeader label="RB" title="Różnica bramek" sortKey="rb" currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
+                    <StandingsSortHeader label="Pkt" title="Punkty"       sortKey="pkt" currentSort={sort} seasonId={seasonId} className="font-bold text-zinc-600" />
                     <th className="px-4 py-3 text-center" title="Forma (ostatnie 5 meczów)">Forma</th>
                   </tr>
                 </thead>
@@ -298,7 +338,9 @@ export default async function HomePage({
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: row.teamColor }} />
-                          <span className="font-medium text-zinc-900">{row.teamName}</span>
+                          <Link href={`/druzyny/${row.teamId}`} className="font-medium text-zinc-900 hover:underline">
+                            {row.teamName}
+                          </Link>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.played}</td>
@@ -355,7 +397,9 @@ function SeasonTab({
     <Link
       href={href}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-        active ? "bg-zinc-900 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+        active
+          ? "bg-orange-100 text-orange-700 border border-orange-200"
+          : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
       }`}
     >
       {label}
@@ -364,6 +408,36 @@ function SeasonTab({
       )}
     </Link>
   )
+}
+
+function StandingsSortHeader({
+  label, title, sortKey, currentSort, seasonId, className = "",
+}: {
+  label: string; title: string; sortKey: string; currentSort?: string; seasonId?: string; className?: string
+}) {
+  const isActive = currentSort === sortKey || (!currentSort && sortKey === "pkt")
+  const params = new URLSearchParams()
+  if (seasonId) params.set("sezon", seasonId)
+  params.set("sort", sortKey)
+  return (
+    <th className={`px-4 py-3 text-center w-10 ${className}`} title={title}>
+      <Link
+        href={`/?${params.toString()}`}
+        className={`inline-flex items-center gap-0.5 transition-colors ${
+          isActive ? "text-orange-600 font-semibold" : "hover:text-zinc-600"
+        }`}
+      >
+        {label}
+        {isActive && <span className="text-[9px]">▼</span>}
+      </Link>
+    </th>
+  )
+}
+
+function voteLabel(n: number) {
+  if (n === 1) return "głos"
+  if (n >= 2 && n <= 4) return "głosy"
+  return "głosów"
 }
 
 function goalLabel(n: number) {

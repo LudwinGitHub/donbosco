@@ -5,6 +5,7 @@ import {
   deleteAnnouncement,
   togglePin,
   toggleReaction,
+  castPollVote,
   type AnnouncementFormState,
 } from "@/app/actions/announcements"
 
@@ -12,6 +13,7 @@ type Priority = "NORMAL" | "IMPORTANT" | "URGENT"
 type ReactionType = "LIKE" | "HEART" | "ANGRY"
 
 type Reaction = { type: ReactionType; userId: string }
+type PollVote = { option: string; userId: string }
 
 type Announcement = {
   id: string
@@ -22,12 +24,18 @@ type Announcement = {
   createdAt: Date
   author: { firstName: string; lastName: string }
   reactions: Reaction[]
+  pollQuestion: string | null
+  pollOptA: string | null
+  pollOptB: string | null
+  pollOptC: string | null
+  pollOptD: string | null
+  pollVotes: PollVote[]
 }
 
 const PRIORITY_CONFIG: Record<Priority, { card: string; badge: string; label: string }> = {
-  NORMAL:    { card: "border-zinc-200 bg-white",       badge: "bg-zinc-100 text-zinc-500",     label: "Normalne" },
-  IMPORTANT: { card: "border-orange-200 bg-orange-50", badge: "bg-orange-100 text-orange-600", label: "Ważne" },
-  URGENT:    { card: "border-red-300 bg-red-50",       badge: "bg-red-100 text-red-600",       label: "Pilne" },
+  NORMAL:    { card: "border-zinc-200 bg-white border-l-4 border-l-orange-300", badge: "bg-orange-50 text-orange-600",  label: "Normalne" },
+  IMPORTANT: { card: "border-zinc-200 bg-white border-l-4 border-l-orange-500", badge: "bg-orange-100 text-orange-700", label: "Ważne" },
+  URGENT:    { card: "border-zinc-200 bg-white border-l-4 border-l-red-500",    badge: "bg-red-100 text-red-600",       label: "Pilne" },
 }
 
 const REACTIONS: { type: ReactionType; emoji: string }[] = [
@@ -36,10 +44,101 @@ const REACTIONS: { type: ReactionType; emoji: string }[] = [
   { type: "ANGRY", emoji: "😡" },
 ]
 
+const POLL_OPTIONS = ["A", "B", "C", "D"] as const
+
 function fmtDate(date: Date) {
   return new Date(date).toLocaleDateString("pl-PL", {
     day: "numeric", month: "short", year: "numeric",
   })
+}
+
+// ── Poll section ──────────────────────────────────────────────────────────────
+
+function PollSection({
+  a,
+  currentUserId,
+}: {
+  a: Announcement
+  currentUserId: string | null
+}) {
+  const opts: Record<string, string | null> = {
+    A: a.pollOptA, B: a.pollOptB, C: a.pollOptC, D: a.pollOptD,
+  }
+  const activeOpts = POLL_OPTIONS.filter((o) => opts[o])
+
+  const myVote = currentUserId
+    ? (a.pollVotes.find((v) => v.userId === currentUserId)?.option ?? null)
+    : null
+
+  type OptimisticState = { myVote: string | null; votes: Record<string, number> }
+
+  const initialVotes = Object.fromEntries(
+    activeOpts.map((o) => [o, a.pollVotes.filter((v) => v.option === o).length])
+  ) as Record<string, number>
+
+  const [optimistic, setOptimistic] = useOptimistic<OptimisticState, string | null>(
+    { myVote, votes: initialVotes },
+    (state, newOpt) => {
+      const votes = { ...state.votes }
+      if (state.myVote) votes[state.myVote] = (votes[state.myVote] ?? 1) - 1
+      if (newOpt)       votes[newOpt] = (votes[newOpt] ?? 0) + 1
+      return { myVote: newOpt, votes }
+    }
+  )
+
+  const [, startVote] = useTransition()
+
+  const totalVotes = activeOpts.reduce((s, o) => s + (optimistic.votes[o] ?? 0), 0)
+
+  const handleVote = (opt: string) => {
+    if (!currentUserId) return
+    const newOpt = optimistic.myVote === opt ? null : opt
+    startVote(async () => {
+      setOptimistic(newOpt)
+      await castPollVote(a.id, opt as "A" | "B" | "C" | "D")
+    })
+  }
+
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 space-y-2">
+      <p className="text-sm font-semibold text-zinc-800">{a.pollQuestion}</p>
+      <div className="space-y-1.5">
+        {activeOpts.map((opt) => {
+          const count = optimistic.votes[opt] ?? 0
+          const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+          const isActive = optimistic.myVote === opt
+          return (
+            <button
+              key={opt}
+              onClick={() => handleVote(opt)}
+              disabled={!currentUserId}
+              title={!currentUserId ? "Zaloguj się, aby głosować" : undefined}
+              className={`relative w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-all overflow-hidden
+                ${isActive
+                  ? "border-orange-400 bg-orange-50 font-semibold text-orange-700"
+                  : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
+                }
+                disabled:cursor-default`}
+            >
+              {/* Progress bar behind */}
+              <span
+                className={`absolute inset-y-0 left-0 transition-all ${isActive ? "bg-orange-100" : "bg-zinc-100"}`}
+                style={{ width: `${pct}%` }}
+              />
+              <span className="relative shrink-0 w-5 h-5 flex items-center justify-center rounded-full border text-[11px] font-bold
+                border-current">{opt}</span>
+              <span className="relative flex-1 truncate">{opts[opt]}</span>
+              <span className="relative shrink-0 text-xs text-zinc-400 tabular-nums">{pct}%</span>
+            </button>
+          )
+        })}
+      </div>
+      <p className="text-[11px] text-zinc-400">
+        {totalVotes} {totalVotes === 1 ? "głos" : totalVotes >= 2 && totalVotes <= 4 ? "głosy" : "głosów"}
+        {myVote && " · Twój głos: " + myVote}
+      </p>
+    </div>
+  )
 }
 
 // ── Per-card component with optimistic reactions ──────────────────────────────
@@ -94,6 +193,8 @@ function AnnouncementCard({
     })
   }
 
+  const hasPoll = !!a.pollQuestion && !!a.pollOptA && !!a.pollOptB
+
   return (
     <div className={`rounded-xl border p-4 space-y-3 ${cfg.card}`}>
       {/* Nagłówek */}
@@ -105,7 +206,7 @@ function AnnouncementCard({
             </span>
           )}
           {a.isPinned && (
-            <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
               Przypięte
             </span>
           )}
@@ -133,6 +234,9 @@ function AnnouncementCard({
 
       {/* Treść */}
       <p className="text-sm text-zinc-700 whitespace-pre-wrap">{a.content}</p>
+
+      {/* Ankieta */}
+      {hasPoll && <PollSection a={a} currentUserId={currentUserId} />}
 
       {/* Stopka: meta + reakcje */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -170,6 +274,31 @@ function AnnouncementCard({
   )
 }
 
+// ── Poll form fields ──────────────────────────────────────────────────────────
+
+function PollFields() {
+  return (
+    <div className="space-y-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Ankieta</p>
+      <input
+        name="pollQuestion"
+        placeholder="Pytanie ankiety…"
+        className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
+      />
+      <div className="grid grid-cols-2 gap-2">
+        {(["A", "B", "C", "D"] as const).map((opt, i) => (
+          <input
+            key={opt}
+            name={`pollOpt${opt}`}
+            placeholder={`Opcja ${opt}${i >= 2 ? " (opcjonalna)" : ""}`}
+            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Main section ──────────────────────────────────────────────────────────────
 
 export default function AnnouncementsSection({
@@ -183,6 +312,7 @@ export default function AnnouncementsSection({
 }) {
   const [pending, startTransition] = useTransition()
   const [formKey, setFormKey] = useState(0)
+  const [showPoll, setShowPoll] = useState(false)
   const [state, action, submitting] = useActionState<AnnouncementFormState, FormData>(
     addAnnouncement,
     undefined
@@ -205,7 +335,7 @@ export default function AnnouncementsSection({
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Nowe ogłoszenie</p>
           <form
             key={formKey}
-            action={(fd) => { action(fd); setFormKey((k) => k + 1) }}
+            action={(fd) => { action(fd); setFormKey((k) => k + 1); setShowPoll(false) }}
             className="space-y-3"
           >
             <input
@@ -223,6 +353,12 @@ export default function AnnouncementsSection({
               required
               className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 resize-none"
             />
+
+            {/* Hidden hasPoll checkbox — driven by state */}
+            <input type="hidden" name="hasPoll" value={showPoll ? "on" : "off"} />
+
+            {showPoll && <PollFields />}
+
             <div className="flex flex-wrap items-center gap-3 justify-between">
               <div className="flex flex-wrap items-center gap-3">
                 <select
@@ -238,6 +374,17 @@ export default function AnnouncementsSection({
                   <input type="checkbox" name="isPinned" className="rounded" />
                   Przypnij
                 </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPoll((v) => !v)}
+                  className={`text-sm px-2.5 py-1 rounded-lg border transition-colors ${
+                    showPoll
+                      ? "border-orange-400 bg-orange-50 text-orange-700 font-semibold"
+                      : "border-zinc-300 text-zinc-500 hover:bg-zinc-50"
+                  }`}
+                >
+                  📊 Ankieta
+                </button>
               </div>
               <button
                 type="submit"

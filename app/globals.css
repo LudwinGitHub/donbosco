@@ -38,6 +38,31 @@ body {
 .dark .border-zinc-100 { border-color: #27272a !important; }
 .dark .border-b { border-bottom-color: #27272a; }
 
+/* Preserve orange/amber top borders — overridden by border-zinc-200 rule above */
+.dark .border-t-orange-500 { border-top-color: rgb(249 115 22) !important; }
+
+/* Preserve orange left borders — overridden by border-zinc-200 shorthand above */
+.dark .border-l-orange-300 { border-left-color: rgb(253 186 116) !important; }
+.dark .border-l-orange-500 { border-left-color: rgb(249 115 22) !important; }
+.dark .border-l-red-500    { border-left-color: rgb(239 68 68) !important; }
+
+/* Orange/red surfaces for announcements & registration reminder */
+.dark .bg-orange-50  { background-color: rgba(124 45 18 / 0.15) !important; }
+.dark .bg-orange-100 { background-color: rgba(124 45 18 / 0.25) !important; }
+.dark .bg-orange-200 { background-color: rgba(124 45 18 / 0.3) !important; }
+.dark .bg-red-50     { background-color: rgba(69 10 10 / 0.2) !important; }
+.dark .bg-red-100    { background-color: rgba(69 10 10 / 0.3) !important; }
+
+/* Orange/red border colors */
+.dark .border-orange-200 { border-color: rgba(154 52 18 / 0.4) !important; }
+.dark .border-orange-400 { border-color: rgb(234 88 12 / 0.7) !important; }
+
+/* Orange/red text colors */
+.dark .text-orange-600 { color: #fb923c !important; }
+.dark .text-orange-700 { color: #f97316 !important; }
+.dark .text-orange-800 { color: #ea580c !important; }
+.dark .text-red-600    { color: #f87171 !important; }
+
 /* Divide lines */
 .dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) { border-color: #27272a !important; }
 .dark .divide-zinc-50 > :not([hidden]) ~ :not([hidden]) { border-color: #27272a !important; }

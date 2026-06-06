@@ -17,7 +17,7 @@ export function NavLinks({ links }: { links: NavItem[] }) {
             href={l.href}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
               active
-                ? "bg-zinc-900 text-white"
+                ? "bg-orange-100 text-orange-700"
                 : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
             }`}
           >
@@ -144,7 +144,7 @@ export function MobileMenu({
                   href={l.href}
                   className={`flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     active
-                      ? "bg-zinc-900 text-white"
+                      ? "bg-orange-100 text-orange-700"
                       : "text-zinc-700 hover:bg-zinc-100"
                   }`}
                 >
@@ -160,7 +160,7 @@ export function MobileMenu({
                   href="/moj-profil"
                   className={`flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                     pathname === "/moj-profil"
-                      ? "bg-zinc-900 text-white"
+                      ? "bg-orange-100 text-orange-700"
                       : "text-zinc-700 hover:bg-zinc-100"
                   }`}
                 >

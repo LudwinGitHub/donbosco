@@ -58,19 +58,19 @@ export default async function PlayersPage({
           <div className="grid grid-cols-3 gap-3">
             <StatCard
               label="Król strzelców" emoji="⚽"
-              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
+              borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="goals"
               format={(p) => `${p.goals} ${goalLabel(p.goals)}`}
             />
             <StatCard
               label="Król asyst" emoji="🎯"
-              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
+              borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="assists"
               format={(p) => `${p.assists} ${assistLabel(p.assists)}`}
             />
             <StatCard
               label="Najwięcej meczów" emoji="📅"
-              borderClass="border-t-amber-400" statColorClass="text-zinc-900"
+              borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="played"
               format={(p) => `${p.played} ${matchLabel(p.played)}`}
             />
@@ -164,7 +164,7 @@ function SeasonTab({ href, label, active }: { href: string; label: string; activ
       href={href}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
         active
-          ? "bg-zinc-900 text-white"
+          ? "bg-orange-100 text-orange-700 border border-orange-200"
           : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
       }`}
     >
@@ -249,7 +249,7 @@ function SortHeader({
       <Link
         href={`/gracze?${params.toString()}`}
         className={`inline-flex items-center gap-0.5 transition-colors ${
-          isActive ? "text-zinc-900" : "hover:text-zinc-600"
+          isActive ? "text-orange-600 font-semibold" : "hover:text-zinc-600"
         }`}
       >
         {label}

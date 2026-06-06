@@ -22,14 +22,27 @@ export async function addAnnouncement(
     ? (rawPriority as "NORMAL" | "IMPORTANT" | "URGENT")
     : "NORMAL"
 
+  const hasPoll     = formData.get("hasPoll") === "on"
+  const pollQuestion = hasPoll ? ((formData.get("pollQuestion") as string) ?? "").trim() : null
+  const pollOptA    = hasPoll ? ((formData.get("pollOptA") as string) ?? "").trim() || null : null
+  const pollOptB    = hasPoll ? ((formData.get("pollOptB") as string) ?? "").trim() || null : null
+  const pollOptC    = hasPoll ? ((formData.get("pollOptC") as string) ?? "").trim() || null : null
+  const pollOptD    = hasPoll ? ((formData.get("pollOptD") as string) ?? "").trim() || null : null
+
   if (!title)   return { error: "Tytuł nie może być pusty." }
   if (!content) return { error: "Treść nie może być pusta." }
   if (title.length > 100)    return { error: "Tytuł może mieć maksymalnie 100 znaków." }
   if (content.length > 1000) return { error: "Treść może mieć maksymalnie 1000 znaków." }
+  if (hasPoll && !pollQuestion) return { error: "Pytanie ankiety nie może być puste." }
+  if (hasPoll && !pollOptA)     return { error: "Opcja A ankiety nie może być pusta." }
+  if (hasPoll && !pollOptB)     return { error: "Opcja B ankiety nie może być pusta." }
 
   try {
     await prisma.announcement.create({
-      data: { title, content, isPinned, priority, authorId: session.userId },
+      data: {
+        title, content, isPinned, priority, authorId: session.userId,
+        pollQuestion, pollOptA, pollOptB, pollOptC, pollOptD,
+      },
     })
   } catch (e) {
     console.error("[addAnnouncement]", e)
@@ -53,6 +66,32 @@ export async function addAnnouncement(
   revalidatePath("/")
   revalidatePath("/ogloszenia")
   return undefined
+}
+
+export async function castPollVote(
+  announcementId: string,
+  option: "A" | "B" | "C" | "D"
+): Promise<void> {
+  const session = await verifySession()
+
+  const existing = await prisma.announcementPollVote.findUnique({
+    where: { announcementId_userId: { announcementId, userId: session.userId } },
+  })
+
+  if (existing) {
+    if (existing.option === option) {
+      await prisma.announcementPollVote.delete({ where: { id: existing.id } })
+    } else {
+      await prisma.announcementPollVote.update({ where: { id: existing.id }, data: { option } })
+    }
+  } else {
+    await prisma.announcementPollVote.create({
+      data: { announcementId, userId: session.userId, option },
+    })
+  }
+
+  revalidatePath("/")
+  revalidatePath("/ogloszenia")
 }
 
 export async function deleteAnnouncement(id: string): Promise<void> {

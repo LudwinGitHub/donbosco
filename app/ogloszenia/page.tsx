@@ -10,6 +10,7 @@ export default async function AnnouncementsPage() {
       include: {
         author: { select: { firstName: true, lastName: true } },
         reactions: { select: { type: true, userId: true } },
+        pollVotes: { select: { option: true, userId: true } },
       },
     }),
   ])

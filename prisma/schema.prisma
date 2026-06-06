@@ -67,6 +67,7 @@ model User {
   mvpVotesGiven          MatchMvpVote[] @relation("mvpVoter")
   announcements          Announcement[]
   announcementReactions  AnnouncementReaction[]
+  announcementPollVotes  AnnouncementPollVote[]
   chatMessages           ChatMessage[]
 
   @@map("users")
@@ -307,18 +308,37 @@ model MatchMvpVote {
 }
 
 model Announcement {
-  id        String               @id @default(cuid())
-  title     String
-  content   String
-  isPinned  Boolean              @default(false)
-  priority  AnnouncementPriority @default(NORMAL)
-  authorId  String
-  author    User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  reactions AnnouncementReaction[]
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id           String               @id @default(cuid())
+  title        String
+  content      String
+  isPinned     Boolean              @default(false)
+  priority     AnnouncementPriority @default(NORMAL)
+  authorId     String
+  author       User                 @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions    AnnouncementReaction[]
+  pollQuestion String?
+  pollOptA     String?
+  pollOptB     String?
+  pollOptC     String?
+  pollOptD     String?
+  pollVotes    AnnouncementPollVote[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
   @@map("announcements")
+}
+
+model AnnouncementPollVote {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  option         String       // "A" | "B" | "C" | "D"
+  createdAt      DateTime     @default(now())
+
+  @@unique([announcementId, userId])
+  @@map("announcement_poll_votes")
 }
 
 model AnnouncementReaction {

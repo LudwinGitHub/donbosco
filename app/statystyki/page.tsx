@@ -5,24 +5,29 @@ import {
   getSeasonOverviews,
   getFullScorerRanking,
   getTeamStats,
+  getPlayerStreaks,
   type MatchHighlight,
   type PlayerMatchRecord,
   type SeasonOverview,
   type ScorerRankingRow,
   type TeamStatsRow,
+  type PlayerStreak,
+  type BestSeasonScorer,
 } from "@/lib/stats"
 import { getActiveSeason } from "@/lib/standings"
 
 export default async function StatystykiPage() {
   const activeSeason = await getActiveSeason()
 
-  const [{ highestScoring, biggestWin }, topScorers, seasons, allTimeScorerRanking, teamStats] = await Promise.all([
-    getMatchHighlights(),
-    getTopSingleMatchScorers(5),
-    getSeasonOverviews(),
-    getFullScorerRanking(),
-    activeSeason ? getTeamStats(activeSeason.id) : Promise.resolve([]),
-  ])
+  const [{ highestScoring, biggestWin }, topScorers, seasons, allTimeScorerRanking, teamStats, streaks] =
+    await Promise.all([
+      getMatchHighlights(),
+      getTopSingleMatchScorers(5),
+      getSeasonOverviews(),
+      getFullScorerRanking(),
+      activeSeason ? getTeamStats(activeSeason.id) : Promise.resolve([]),
+      getPlayerStreaks(),
+    ])
 
   return (
     <div className="space-y-8">
@@ -42,8 +47,8 @@ export default async function StatystykiPage() {
       {/* All-time scorer ranking */}
       {allTimeScorerRanking.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Klasyfikacja strzelców</h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <SectionHeading>Klasyfikacja strzelców</SectionHeading>
+          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -70,9 +75,43 @@ export default async function StatystykiPage() {
         </section>
       )}
 
+      {/* Player streak records */}
+      {(streaks.goalStreak || streaks.matchStreak || streaks.bestSeasonScorer) && (
+        <section className="space-y-3">
+          <SectionHeading>Rekordy zawodników</SectionHeading>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {streaks.goalStreak && (
+              <StreakCard
+                emoji="🔥"
+                title="Najdłuższa seria z golem"
+                player={streaks.goalStreak}
+                value={`${streaks.goalStreak.streak} ${matchLabel(streaks.goalStreak.streak)}`}
+              />
+            )}
+            {streaks.matchStreak && (
+              <StreakCard
+                emoji="💪"
+                title="Najdłuższa seria meczów"
+                player={streaks.matchStreak}
+                value={`${streaks.matchStreak.streak} ${matchLabel(streaks.matchStreak.streak)}`}
+              />
+            )}
+            {streaks.bestSeasonScorer && (
+              <StreakCard
+                emoji="⚡"
+                title="Najlepszy sezon"
+                player={streaks.bestSeasonScorer}
+                value={`${streaks.bestSeasonScorer.goals} ${goalLabel(streaks.bestSeasonScorer.goals)}`}
+                sub={streaks.bestSeasonScorer.seasonName}
+              />
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Match records */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Rekordy meczu</h2>
+        <SectionHeading>Rekordy meczu</SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <MatchRecordCard
             title="Najbardziej bramkowy mecz"
@@ -87,11 +126,11 @@ export default async function StatystykiPage() {
         </div>
       </section>
 
-      {/* Player records */}
+      {/* Player records — single match */}
       {topScorers.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Rekord strzelecki (w jednym meczu)</h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <SectionHeading>Rekord strzelecki (w jednym meczu)</SectionHeading>
+          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -113,8 +152,8 @@ export default async function StatystykiPage() {
 
       {/* Season overview */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Podsumowanie sezonów</h2>
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <SectionHeading>Podsumowanie sezonów</SectionHeading>
+        <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -137,10 +176,8 @@ export default async function StatystykiPage() {
       {/* Team stats (active season) */}
       {activeSeason && teamStats.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            Statystyki drużyn — {activeSeason.name}
-          </h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <SectionHeading>Statystyki drużyn — {activeSeason.name}</SectionHeading>
+          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -164,6 +201,49 @@ export default async function StatystykiPage() {
   )
 }
 
+// ─── Section heading ──────────────────────────────────────────────────────────
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="block h-4 w-1 rounded-full bg-orange-500 shrink-0" />
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{children}</h2>
+    </div>
+  )
+}
+
+// ─── Streak card ─────────────────────────────────────────────────────────────
+
+function StreakCard({
+  emoji, title, player, value, sub,
+}: {
+  emoji: string
+  title: string
+  player: PlayerStreak | BestSeasonScorer
+  value: string
+  sub?: string
+}) {
+  return (
+    <Link
+      href={`/gracze/${player.playerId}`}
+      className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4 transition-colors hover:bg-zinc-50"
+    >
+      <div className="flex items-start justify-between gap-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{title}</p>
+        <span className="text-lg leading-none">{emoji}</span>
+      </div>
+      <p className="mt-2 font-bold text-zinc-900 leading-tight truncate">
+        {player.firstName} {player.lastName}
+      </p>
+      {player.nickname && (
+        <p className="text-xs text-zinc-400 truncate">„{player.nickname}"</p>
+      )}
+      {sub && <p className="text-xs text-zinc-400 truncate">{sub}</p>}
+      <p className="mt-auto pt-2 text-2xl font-black text-zinc-900">{value}</p>
+    </Link>
+  )
+}
+
 // ─── Components ───────────────────────────────────────────────────────────────
 
 function MatchRecordCard({
@@ -179,7 +259,7 @@ function MatchRecordCard({
   const [top, ...rest] = matches
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white overflow-hidden">
       <div className="px-4 pt-4 pb-3 border-b border-zinc-100">
         <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{title}</p>
         <Link href={`/mecze/${top.matchId}`} className="mt-2 block group">
@@ -321,4 +401,16 @@ function TeamStatsRow({ row: t }: { row: TeamStatsRow }) {
       <td className="px-4 py-3 text-center font-medium text-zinc-700">{t.cleanSheets}</td>
     </tr>
   )
+}
+
+function goalLabel(n: number) {
+  if (n === 1) return "gol"
+  if (n >= 2 && n <= 4) return "gole"
+  return "goli"
+}
+
+function matchLabel(n: number) {
+  if (n === 1) return "mecz"
+  if (n >= 2 && n <= 4) return "mecze"
+  return "meczów"
 }

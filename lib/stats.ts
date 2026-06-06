@@ -326,6 +326,108 @@ export async function getTeamStats(seasonId: string): Promise<TeamStatsRow[]> {
     .sort((a, b) => b.avgGoalsScored - a.avgGoalsScored)
 }
 
+// ─── Player streaks ───────────────────────────────────────────────────────────
+
+export type PlayerStreak = {
+  playerId:  string
+  firstName: string
+  lastName:  string
+  nickname:  string | null
+  streak:    number
+}
+
+export type BestSeasonScorer = {
+  playerId:   string
+  firstName:  string
+  lastName:   string
+  nickname:   string | null
+  goals:      number
+  seasonName: string
+}
+
+export async function getPlayerStreaks(): Promise<{
+  goalStreak:       PlayerStreak | null
+  matchStreak:      PlayerStreak | null
+  bestSeasonScorer: BestSeasonScorer | null
+}> {
+  const [matches, lineups, goals, players, seasonGoals] = await Promise.all([
+    prisma.match.findMany({
+      where: { status: "PLAYED" },
+      orderBy: { scheduledAt: "asc" },
+      select: { id: true },
+    }),
+    prisma.matchLineup.findMany({ select: { matchId: true, playerId: true } }),
+    prisma.goal.findMany({ where: { isOwnGoal: false }, select: { matchId: true, scorerId: true } }),
+    prisma.player.findMany({ select: { id: true, firstName: true, lastName: true, nickname: true } }),
+    prisma.$queryRaw<Array<{ playerId: string; goals: bigint; seasonName: string }>>`
+      SELECT g."scorerId" AS "playerId", COUNT(g.id) AS goals, s.name AS "seasonName"
+      FROM goals g
+      JOIN matches m ON g."matchId" = m.id
+      JOIN seasons s ON m."seasonId" = s.id
+      WHERE g."isOwnGoal" = false
+      GROUP BY g."scorerId", s.id, s.name
+      ORDER BY goals DESC
+      LIMIT 1
+    `,
+  ])
+
+  const matchIds = matches.map((m) => m.id)
+  const matchIdSet = new Set(matchIds)
+  const playerMap = new Map(players.map((p) => [p.id, p]))
+
+  const playerMatchSet = new Map<string, Set<string>>()
+  for (const l of lineups) {
+    if (!matchIdSet.has(l.matchId)) continue
+    if (!playerMatchSet.has(l.playerId)) playerMatchSet.set(l.playerId, new Set())
+    playerMatchSet.get(l.playerId)!.add(l.matchId)
+  }
+
+  const playerGoalSet = new Map<string, Set<string>>()
+  for (const g of goals) {
+    if (!matchIdSet.has(g.matchId)) continue
+    if (!playerGoalSet.has(g.scorerId)) playerGoalSet.set(g.scorerId, new Set())
+    playerGoalSet.get(g.scorerId)!.add(g.matchId)
+  }
+
+  let bestGoalStreak:  PlayerStreak | null = null
+  let bestMatchStreak: PlayerStreak | null = null
+
+  for (const [playerId, matchSet] of playerMatchSet.entries()) {
+    const player = playerMap.get(playerId)
+    if (!player) continue
+
+    const goalSet = playerGoalSet.get(playerId) ?? new Set<string>()
+
+    // Goal streak: consecutive participated matches with at least one goal
+    const playedInOrder = matchIds.filter((id) => matchSet.has(id))
+    let currGoal = 0, maxGoal = 0
+    for (const matchId of playedInOrder) {
+      if (goalSet.has(matchId)) { currGoal++; maxGoal = Math.max(maxGoal, currGoal) }
+      else currGoal = 0
+    }
+
+    // Match streak: consecutive league matches (unbroken attendance)
+    let currMatch = 0, maxMatch = 0
+    for (const matchId of matchIds) {
+      if (matchSet.has(matchId)) { currMatch++; maxMatch = Math.max(maxMatch, currMatch) }
+      else currMatch = 0
+    }
+
+    const p = { playerId, firstName: player.firstName, lastName: player.lastName, nickname: player.nickname }
+    if (maxGoal  > 0 && (!bestGoalStreak  || maxGoal  > bestGoalStreak.streak))  bestGoalStreak  = { ...p, streak: maxGoal }
+    if (maxMatch > 1 && (!bestMatchStreak || maxMatch > bestMatchStreak.streak)) bestMatchStreak = { ...p, streak: maxMatch }
+  }
+
+  let bestSeasonScorer: BestSeasonScorer | null = null
+  if (seasonGoals.length > 0) {
+    const row    = seasonGoals[0]
+    const player = playerMap.get(row.playerId)
+    if (player) bestSeasonScorer = { playerId: row.playerId, firstName: player.firstName, lastName: player.lastName, nickname: player.nickname, goals: Number(row.goals), seasonName: row.seasonName }
+  }
+
+  return { goalStreak: bestGoalStreak, matchStreak: bestMatchStreak, bestSeasonScorer }
+}
+
 // ─── Season overviews ─────────────────────────────────────────────────────────
 
 export async function getSeasonOverviews(): Promise<SeasonOverview[]> {

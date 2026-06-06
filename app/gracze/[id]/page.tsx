@@ -144,12 +144,12 @@ export default async function PlayerProfilePage({
 
                   <div className="shrink-0 flex items-center gap-2 text-xs">
                     {m.goals > 0 && (
-                      <span className="rounded-full bg-zinc-900 px-2 py-0.5 font-semibold text-white">
+                      <span className="rounded-full bg-orange-100 border border-orange-200 px-2 py-0.5 font-semibold text-orange-700">
                         {m.goals}G
                       </span>
                     )}
                     {m.assists > 0 && (
-                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 font-semibold text-zinc-700">
+                      <span className="rounded-full border border-zinc-200 px-2 py-0.5 font-semibold text-zinc-600">
                         {m.assists}A
                       </span>
                     )}
@@ -168,9 +168,9 @@ export default async function PlayerProfilePage({
 
 function FormArrow({ form }: { form: PlayerForm | undefined }) {
   if (!form) return null
-  if (form === "up")   return <span className="text-base font-bold leading-none text-orange-500" title="Forma w górę">↑</span>
-  if (form === "down") return <span className="text-base font-bold leading-none text-red-500" title="Forma w dół">↓</span>
-  return <span className="text-base font-bold leading-none text-zinc-400" title="Forma stabilna">→</span>
+  if (form === "up")   return <span className="text-xl font-black leading-none text-orange-500" title="Forma w górę">▲</span>
+  if (form === "down") return <span className="text-xl font-black leading-none text-red-500" title="Forma w dół">▼</span>
+  return <span className="text-xl font-black leading-none text-zinc-400" title="Forma stabilna">—</span>
 }
 
 function StatCell({ label, value }: { label: string; value: number }) {

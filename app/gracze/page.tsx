@@ -85,10 +85,10 @@ export default async function PlayersPage({
                   <th className="px-4 py-3 text-right w-8">#</th>
                   <th className="px-4 py-3 text-left">Gracz</th>
                   {seasonId && <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>}
+                  <th className="px-4 py-3 text-center w-10" title="Forma">F</th>
                   <SortHeader label="M" title="Mecze"  sortKey="played"  currentSort={sort} seasonId={seasonId} />
                   <SortHeader label="G" title="Gole"   sortKey="goals"   currentSort={sort} seasonId={seasonId} />
                   <SortHeader label="A" title="Asysty" sortKey="assists" currentSort={sort} seasonId={seasonId} />
-                  <th className="px-4 py-3 text-center w-10" title="Forma">F</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -123,6 +123,9 @@ export default async function PlayersPage({
                         )}
                       </td>
                     )}
+                    <td className="px-4 py-3 text-center">
+                      <FormArrow form={forms.get(p.id)} />
+                    </td>
                     <td className="px-4 py-3 text-center text-zinc-600">{p.played}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={p.goals > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
@@ -133,9 +136,6 @@ export default async function PlayersPage({
                       <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
                         {p.assists}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <FormArrow form={forms.get(p.id)} />
                     </td>
                   </tr>
                 ))}
@@ -266,9 +266,9 @@ function SortHeader({
 
 function FormArrow({ form }: { form: PlayerForm | undefined }) {
   if (!form) return null
-  if (form === "up")   return <span className="text-[11px] font-bold leading-none text-orange-500" title="Forma w górę">↑</span>
-  if (form === "down") return <span className="text-[11px] font-bold leading-none text-red-500" title="Forma w dół">↓</span>
-  return <span className="text-[11px] font-bold leading-none text-zinc-400" title="Forma stabilna">→</span>
+  if (form === "up")   return <span className="text-sm font-black leading-none text-orange-500" title="Forma w górę">▲</span>
+  if (form === "down") return <span className="text-sm font-black leading-none text-red-500" title="Forma w dół">▼</span>
+  return <span className="text-sm font-black leading-none text-zinc-400" title="Forma stabilna">—</span>
 }
 
 function goalLabel(n: number) {

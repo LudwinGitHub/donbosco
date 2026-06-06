@@ -21,7 +21,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 export const metadata: Metadata = {
   title: "Don Bosco Premier League",
   description: "Amatorska liga piłkarska",
-  icons: { icon: "/logo-cropped.png" },
+  icons: { icon: "/donlogo.png" },
 }
 
 export const viewport: Viewport = {
@@ -85,15 +85,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* Logo */}
               <Link href="/" className="flex items-center gap-2.5 shrink-0">
                 <Image
-                  src="/logo-cropped.png"
+                  src="/donlogo.png"
                   alt="Don Bosco Premier League"
-                  width={40} height={40}
+                  width={56} height={56}
                   quality={100} priority unoptimized
-                  className="w-8 h-8 sm:w-10 sm:h-10"
+                  className="logo-img w-11 h-11 sm:w-14 sm:h-14 object-contain shrink-0"
                 />
                 <span className="font-extrabold tracking-tight leading-tight">
-                  <span className="text-sm sm:text-base">Don Bosco</span>
-                  <span className="hidden sm:block text-[10px] font-semibold tracking-widest uppercase text-zinc-400">
+                  <span className="text-sm sm:text-base text-orange-600">Don Bosco</span>
+                  <span className="hidden sm:block text-[10px] font-bold tracking-widest uppercase text-zinc-400">
                     Premier League
                   </span>
                 </span>

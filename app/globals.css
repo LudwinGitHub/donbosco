@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Logo: multiply makes white bg transparent against light header */
+.logo-img { mix-blend-mode: multiply; }
+/* Dark mode: revert to normal — logo stays visible, transparent PNG needed for perfect result */
+.dark .logo-img { mix-blend-mode: normal; }
+
 /* Class-based dark mode variant */
 @custom-variant dark (&:is(.dark *));
 

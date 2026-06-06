@@ -69,7 +69,7 @@ export default async function MatchesPage({
         {isOrganizer && season.id === activeSeason?.id && (
           <Link
             href="/panel/mecze/nowy"
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+            className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
           >
             + Nowy mecz
           </Link>
@@ -138,12 +138,11 @@ function MatchRow({ match: m, confirmedCount, isNext }: { match: MatchListItem; 
   return (
     <Link
       href={`/mecze/${m.id}`}
-      className={`block transition-colors group ${
-        isNext
-          ? "border-l-4 border-l-orange-500 bg-orange-50 hover:bg-orange-100"
-          : "hover:bg-zinc-50"
+      className={`relative block transition-colors group ${
+        isNext ? "bg-orange-50 hover:bg-orange-100" : "hover:bg-zinc-50"
       }`}
     >
+      {isNext && <span className="absolute inset-y-0 left-0 w-1 bg-orange-500" />}
       {/* Mobile layout */}
       <div className="flex sm:hidden items-center gap-3 px-4 py-3">
         <div className="shrink-0 w-14 text-center">{scoreOrTime}</div>

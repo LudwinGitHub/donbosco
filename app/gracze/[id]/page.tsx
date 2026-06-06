@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getPlayerProfile, getPlayerForms, type PlayerForm } from "@/lib/players"
+import { getActiveBadges } from "@/lib/badges"
+import BadgeChip from "@/app/ui/badge-chip"
 
 export default async function PlayerProfilePage({
   params,
@@ -8,9 +10,10 @@ export default async function PlayerProfilePage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [player, forms] = await Promise.all([getPlayerProfile(id), getPlayerForms()])
+  const [player, forms, badges] = await Promise.all([getPlayerProfile(id), getPlayerForms(), getActiveBadges()])
   if (!player) notFound()
   const form = forms.get(id)
+  const playerBadges = badges.get(id) ?? []
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -23,11 +26,14 @@ export default async function PlayerProfilePage({
 
       {/* Hero */}
       <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-bold text-zinc-900">
             {player.firstName} {player.lastName}
           </h1>
           <FormArrow form={form} />
+          {playerBadges.map((b, i) => (
+            <BadgeChip key={i} type={b.type} />
+          ))}
         </div>
         {player.nickname && (
           <p className="mt-0.5 text-sm text-zinc-400">„{player.nickname}"</p>

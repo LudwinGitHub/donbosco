@@ -88,6 +88,7 @@ export default async function PlayersPage({
                   <SortHeader label="M" title="Mecze"  sortKey="played"  currentSort={sort} seasonId={seasonId} />
                   <SortHeader label="G" title="Gole"   sortKey="goals"   currentSort={sort} seasonId={seasonId} />
                   <SortHeader label="A" title="Asysty" sortKey="assists" currentSort={sort} seasonId={seasonId} />
+                  <th className="px-4 py-3 text-center w-10" title="Forma">F</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -99,7 +100,6 @@ export default async function PlayersPage({
                         <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
                           {p.firstName} {p.lastName}
                         </Link>
-                        <FormArrow form={forms.get(p.id)} />
                         {p.nickname && (
                           <span className="text-xs text-zinc-400">„{p.nickname}"</span>
                         )}
@@ -133,6 +133,9 @@ export default async function PlayersPage({
                       <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
                         {p.assists}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <FormArrow form={forms.get(p.id)} />
                     </td>
                   </tr>
                 ))}

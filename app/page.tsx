@@ -323,7 +323,7 @@ export default async function HomePage({
                     <th className="px-4 py-3 text-left w-8">#</th>
                     <th className="px-4 py-3 text-left">Drużyna</th>
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Mecze">M</th>
-                    <StandingsSortHeader label="W" title="Wygrane"        sortKey="w"   currentSort={sort} seasonId={seasonId} />
+                    <StandingsSortHeader label="W" title="Wygrane"        sortKey="w"   currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Remisy">R</th>
                     <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Porażki">P</th>
                     <StandingsSortHeader label="Br" title="Bramki"        sortKey="br"  currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />

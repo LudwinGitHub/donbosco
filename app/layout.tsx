@@ -81,35 +81,67 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider>
         <header className="navbar-bg sticky top-0 z-50 border-b border-black/8 dark:border-white/8 shadow-md shadow-black/5 dark:shadow-black/30 relative overflow-hidden">
           {/* Orange accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent z-10" />
 
-          <div className="mx-auto max-w-5xl px-4">
+          {/* ── Mobile hero — full bleed ── */}
+          <div className="sm:hidden relative overflow-hidden" style={{ height: "144px" }}>
+            {/* Diagonal jersey-stripe pattern */}
+            <div className="hero-stripes absolute inset-0 pointer-events-none" />
 
-            {/* ── Mobile navbar ── */}
-            <div className="flex sm:hidden items-center justify-between h-16 relative">
-              {/* Logo only (no text on mobile) */}
-              <Link href="/" className="shrink-0">
+            {/* Orange radial glow — top right */}
+            <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
+
+            {/* Vertical right accent line */}
+            <div className="absolute right-0 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent pointer-events-none" />
+
+            {/* Ghost "DB" — large decorative background element */}
+            <div
+              className="absolute -bottom-3 right-4 font-black italic leading-none select-none pointer-events-none text-orange-500/[0.055] dark:text-orange-500/[0.09]"
+              style={{ fontSize: "110px" }}
+              aria-hidden
+            >
+              DB
+            </div>
+
+            {/* Controls — top right */}
+            <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
+              {session && <PushButton />}
+              <ThemeToggle />
+            </div>
+
+            {/* Bottom gradient wash */}
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-orange-500/[0.04] to-transparent pointer-events-none" />
+
+            {/* Logo + text */}
+            <div className="relative z-10 flex items-center h-full px-5">
+              <Link href="/" className="shrink-0 mr-4">
                 <Image
                   src="/donlogo.png"
                   alt="Don Bosco Premier League"
-                  width={48} height={48}
+                  width={64} height={64}
                   quality={100} priority unoptimized
-                  className="logo-img w-11 h-11 object-contain block"
+                  className="logo-img w-16 h-16 object-contain block"
                 />
               </Link>
-
-              {/* Centered title */}
-              <span className="absolute left-1/2 -translate-x-1/2 font-black italic text-orange-500 text-xl tracking-tight pointer-events-none select-none">
-                Don Bosco
-              </span>
-
-              {/* Right: theme toggle */}
-              <div className="flex items-center gap-1">
-                {session && <PushButton />}
-                <ThemeToggle />
+              <div>
+                <p
+                  className="font-black italic text-orange-500 leading-none tracking-tight"
+                  style={{ fontSize: "2.1rem" }}
+                >
+                  Don Bosco
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="block h-px w-6 bg-orange-500/40" />
+                  <p className="text-[9px] font-bold tracking-[0.32em] uppercase text-zinc-400 dark:text-zinc-500">
+                    Premier League
+                  </p>
+                  <span className="block h-px w-6 bg-orange-500/40" />
+                </div>
               </div>
             </div>
+          </div>
 
+          <div className="mx-auto max-w-5xl px-4">
             {/* ── Desktop navbar ── */}
             <div className="hidden sm:flex items-center justify-between h-16">
               <Link href="/" className="flex items-center gap-3 shrink-0">

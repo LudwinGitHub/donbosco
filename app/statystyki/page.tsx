@@ -1,3 +1,4 @@
+import React from "react"
 import Link from "next/link"
 import {
   getMatchHighlights,
@@ -82,7 +83,7 @@ export default async function StatystykiPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {streaks.goalStreak && (
               <StreakCard
-                emoji="🔥"
+                icon={<IconFlame />}
                 title="Najdłuższa seria z golem"
                 player={streaks.goalStreak}
                 value={`${streaks.goalStreak.streak} ${matchLabel(streaks.goalStreak.streak)}`}
@@ -90,7 +91,7 @@ export default async function StatystykiPage() {
             )}
             {streaks.matchStreak && (
               <StreakCard
-                emoji="💪"
+                icon={<IconShield />}
                 title="Najdłuższa seria meczów"
                 player={streaks.matchStreak}
                 value={`${streaks.matchStreak.streak} ${matchLabel(streaks.matchStreak.streak)}`}
@@ -98,7 +99,7 @@ export default async function StatystykiPage() {
             )}
             {streaks.bestSeasonScorer && (
               <StreakCard
-                emoji="⚡"
+                icon={<IconStar />}
                 title="Najlepszy sezon"
                 player={streaks.bestSeasonScorer}
                 value={`${streaks.bestSeasonScorer.goals} ${goalLabel(streaks.bestSeasonScorer.goals)}`}
@@ -215,9 +216,9 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 // ─── Streak card ─────────────────────────────────────────────────────────────
 
 function StreakCard({
-  emoji, title, player, value, sub,
+  icon, title, player, value, sub,
 }: {
-  emoji: string
+  icon: React.ReactNode
   title: string
   player: PlayerStreak | BestSeasonScorer
   value: string
@@ -230,7 +231,7 @@ function StreakCard({
     >
       <div className="flex items-start justify-between gap-1">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{title}</p>
-        <span className="text-lg leading-none">{emoji}</span>
+        <span className="text-orange-500">{icon}</span>
       </div>
       <p className="mt-2 font-bold text-zinc-900 leading-tight truncate">
         {player.firstName} {player.lastName}
@@ -413,4 +414,28 @@ function matchLabel(n: number) {
   if (n === 1) return "mecz"
   if (n >= 2 && n <= 4) return "mecze"
   return "meczów"
+}
+
+function IconFlame() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z" />
+    </svg>
+  )
+}
+
+function IconShield() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )
+}
+
+function IconStar() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  )
 }

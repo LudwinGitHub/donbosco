@@ -102,14 +102,8 @@ body {
 .dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.05) !important; }
 .dark .divide-zinc-50  > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.04) !important; }
 
-/* Table thead bottom border — transparent in dark mode, no visible separator */
-.dark table thead tr { border-bottom-color: transparent !important; }
-
-/* Chat FAB: above bottom nav on mobile, normal position on desktop */
-.chat-fab-pos { bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)); }
-@media (min-width: 640px) {
-  .chat-fab-pos { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
-}
+/* Table thead bottom border — higher specificity (3 classes) beats .dark .border-zinc-100 (2 classes) */
+.dark .bg-zinc-50.border-b { border-color: transparent !important; }
 
 /* Hover backgrounds */
 .dark .hover\:bg-zinc-50:hover  { background-color: rgba(255, 255, 255, 0.04) !important; }

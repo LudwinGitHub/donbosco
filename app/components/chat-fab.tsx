@@ -80,6 +80,12 @@ export default function ChatFab({
     setHasUnread(!lastRead || newestAt > new Date(lastRead))
   }, [messages, open])
 
+  // ── Broadcast unread state to bottom nav ──────────────────────────────────
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("chat-unread", { detail: hasUnread }))
+  }, [hasUnread])
+
   // ── Polling: 5 s when open, 30 s when closed ──────────────────────────────
 
   useEffect(() => {
@@ -149,6 +155,22 @@ export default function ChatFab({
       return !o
     })
   }
+
+  // ── Listen for toggle from bottom nav ─────────────────────────────────────
+
+  useEffect(() => {
+    const handler = () => {
+      setOpen((o) => {
+        if (!o) {
+          localStorage.setItem(LAST_READ_KEY, new Date().toISOString())
+          setHasUnread(false)
+        }
+        return !o
+      })
+    }
+    window.addEventListener("toggle-chat", handler)
+    return () => window.removeEventListener("toggle-chat", handler)
+  }, [])
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -295,10 +317,11 @@ export default function ChatFab({
         </div>
       )}
 
-      {/* ── Przycisk FAB ── */}
+      {/* ── Przycisk FAB — tylko desktop ── */}
       <button
         onClick={handleOpen}
-        className="chat-fab-pos fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-500 text-white shadow-lg shadow-orange-500/40 hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center"
+        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-500 text-white shadow-lg shadow-orange-500/40 hover:bg-orange-600 active:scale-95 transition-all items-center justify-center hidden sm:flex"
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
         aria-label={open ? "Zamknij czat" : "Otwórz czat"}
       >
         {open ? (

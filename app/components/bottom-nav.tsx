@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 type Props = {
   isLoggedIn: boolean
@@ -17,6 +17,18 @@ function active(pathname: string, href: string) {
 export default function BottomNav({ isLoggedIn, isOrganizer, logoutAction }: Props) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
+  const [chatUnread, setChatUnread] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: Event) => setChatUnread((e as CustomEvent<boolean>).detail)
+    window.addEventListener("chat-unread", handler)
+    return () => window.removeEventListener("chat-unread", handler)
+  }, [])
+
+  const openChat = () => {
+    window.dispatchEvent(new CustomEvent("toggle-chat"))
+    setChatUnread(false)
+  }
 
   return (
     <>
@@ -32,6 +44,7 @@ export default function BottomNav({ isLoggedIn, isOrganizer, logoutAction }: Pro
             onClick={(e) => e.stopPropagation()}
           >
             <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400">Nawigacja</p>
+            <MoreLink href="/statystyki"  label="Statystyki"  emoji="📊" isActive={active(pathname, "/statystyki")}  onClose={() => setMoreOpen(false)} />
             <MoreLink href="/glosowanie"  label="Głosowanie"  emoji="🗳️" isActive={active(pathname, "/glosowanie")}  onClose={() => setMoreOpen(false)} />
             <MoreLink href="/ogloszenia"  label="Ogłoszenia"  emoji="📢" isActive={active(pathname, "/ogloszenia")}  onClose={() => setMoreOpen(false)} />
             {isOrganizer && (
@@ -73,10 +86,22 @@ export default function BottomNav({ isLoggedIn, isOrganizer, logoutAction }: Pro
         style={{ bottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
       >
         <nav className="flex items-center justify-around rounded-2xl bg-white/92 dark:bg-[#11141a]/92 backdrop-blur-xl border border-zinc-200/70 dark:border-white/8 shadow-xl shadow-black/10 dark:shadow-black/50 px-1 py-1.5">
-          <NavItem href="/"            label="Tabela"  isActive={active(pathname, "/")}            icon={<IconHome />} />
-          <NavItem href="/mecze"       label="Mecze"   isActive={active(pathname, "/mecze")}       icon={<IconCalendar />} />
-          <NavItem href="/gracze"      label="Gracze"  isActive={active(pathname, "/gracze")}      icon={<IconUsers />} />
-          <NavItem href="/statystyki"  label="Stat."   isActive={active(pathname, "/statystyki")}  icon={<IconChart />} />
+          <NavItem href="/"       label="Tabela" isActive={active(pathname, "/")}      icon={<IconHome />} />
+          <NavItem href="/mecze"  label="Mecze"  isActive={active(pathname, "/mecze")} icon={<IconCalendar />} />
+          <NavItem href="/gracze" label="Gracze" isActive={active(pathname, "/gracze")} icon={<IconUsers />} />
+
+          {/* Chat button */}
+          <button
+            onClick={openChat}
+            className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-w-[52px] text-zinc-400 dark:text-zinc-500"
+          >
+            <IconChat />
+            <span className="text-[10px] font-semibold">Czat</span>
+            {chatUnread && (
+              <span className="absolute top-1 right-2.5 w-2 h-2 rounded-full bg-red-500 border border-white dark:border-[#11141a]" />
+            )}
+          </button>
+
           <button
             onClick={() => setMoreOpen((v) => !v)}
             className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-w-[52px] ${
@@ -166,13 +191,10 @@ function IconUsers() {
   )
 }
 
-function IconChart() {
+function IconChat() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-      <line x1="2" y1="20" x2="22" y2="20" />
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   )
 }

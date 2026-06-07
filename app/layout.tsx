@@ -79,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="pl" className={geist.variable}>
       <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
         <ThemeProvider>
-        <header className="navbar-bg sticky top-0 z-50 border-b border-black/8 dark:border-white/8 shadow-md shadow-black/5 dark:shadow-black/30 relative overflow-hidden">
+        <header className="navbar-bg sticky top-0 z-50 border-b border-black/8 dark:border-white/8 shadow-md shadow-black/5 dark:shadow-black/30 relative">
           {/* Orange accent line */}
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent z-10" />
 

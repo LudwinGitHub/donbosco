@@ -78,22 +78,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="pl" className={geist.variable}>
       <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
         <ThemeProvider>
-        <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur-sm shadow-sm shadow-zinc-100/60 dark:bg-zinc-950/95 dark:border-zinc-800 dark:shadow-zinc-900/60">
+        <header className="navbar-bg sticky top-0 z-50 border-b border-black/8 dark:border-white/8 shadow-md shadow-black/5 dark:shadow-black/30 relative overflow-hidden">
+          {/* Orange accent line bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-90" />
           <div className="mx-auto max-w-5xl px-4">
-            <div className="flex items-center justify-between h-14">
+            <div className="flex items-center justify-between h-16">
 
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2.5 shrink-0">
-                <Image
-                  src="/donlogo.png"
-                  alt="Don Bosco Premier League"
-                  width={56} height={56}
-                  quality={100} priority unoptimized
-                  className="logo-img w-11 h-11 sm:w-14 sm:h-14 object-contain shrink-0"
-                />
+              <Link href="/" className="flex items-center gap-3 shrink-0">
+                <div className="dark:bg-white/92 dark:rounded-xl dark:p-0.5 shrink-0">
+                  <Image
+                    src="/donlogo.png"
+                    alt="Don Bosco Premier League"
+                    width={56} height={56}
+                    quality={100} priority unoptimized
+                    className="logo-img w-12 h-12 sm:w-14 sm:h-14 object-contain block"
+                  />
+                </div>
                 <span className="font-extrabold tracking-tight leading-tight">
-                  <span className="text-sm sm:text-base text-orange-600">Don Bosco</span>
-                  <span className="hidden sm:block text-[10px] font-bold tracking-widest uppercase text-zinc-400">
+                  <span className="text-sm sm:text-base text-orange-600 italic">Don Bosco</span>
+                  <span className="hidden sm:block text-[10px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">
                     Premier League
                   </span>
                 </span>

@@ -144,7 +144,7 @@ export default async function PlayerProfilePage({
 
                   <div className="shrink-0 flex items-center gap-2 text-xs">
                     {m.goals > 0 && (
-                      <span className="rounded-full bg-orange-100 border border-orange-200 px-2 py-0.5 font-semibold text-orange-700">
+                      <span className="rounded-full bg-orange-500 px-2 py-0.5 font-semibold text-white">
                         {m.goals}G
                       </span>
                     )}

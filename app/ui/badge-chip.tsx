@@ -28,7 +28,7 @@ export default function BadgeChip({ type }: { type: BadgeType }) {
       onMouseLeave={() => setOpen(false)}
       onClick={(e) => { e.stopPropagation(); setOpen(o => !o) }}
     >
-      <span className="inline-flex cursor-pointer select-none items-center rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-xs leading-none shadow-sm">
+      <span className="inline-flex cursor-pointer select-none items-center rounded-full border border-orange-500/60 bg-orange-500/10 px-2 py-0.5 text-xs leading-none shadow-sm text-orange-600">
         {cfg.emoji}
       </span>
       {open && (

@@ -298,7 +298,7 @@ export default function ChatFab({
       {/* ── Przycisk FAB ── */}
       <button
         onClick={handleOpen}
-        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-100 border border-orange-200 text-orange-700 shadow-lg shadow-orange-100/60 hover:bg-orange-200 active:scale-95 transition-all flex items-center justify-center"
+        className="fixed right-6 z-[60] w-14 h-14 rounded-full bg-orange-500 text-white shadow-lg shadow-orange-500/40 hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center"
         style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
         aria-label={open ? "Zamknij czat" : "Otwórz czat"}
       >

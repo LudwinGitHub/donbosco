@@ -103,17 +103,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Don Bosco
               </span>
 
-              {/* Right: theme toggle + hamburger */}
+              {/* Right: theme toggle */}
               <div className="flex items-center gap-1">
                 {session && <PushButton />}
                 <ThemeToggle />
-                <MobileMenu
-                  navLinks={navLinks}
-                  panelLinks={panelLinks}
-                  isLoggedIn={!!session}
-                  isOrganizer={session?.role === "ORGANIZER"}
-                  logoutAction={logout}
-                />
               </div>
             </div>
 

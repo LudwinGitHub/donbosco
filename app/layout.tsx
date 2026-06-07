@@ -89,15 +89,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="flex sm:hidden items-center justify-between h-16 relative">
               {/* Logo only (no text on mobile) */}
               <Link href="/" className="shrink-0">
-                <div className="dark:bg-white/95 dark:rounded-xl dark:p-0.5">
-                  <Image
-                    src="/donlogo.png"
-                    alt="Don Bosco Premier League"
-                    width={48} height={48}
-                    quality={100} priority unoptimized
-                    className="logo-img w-11 h-11 object-contain block"
-                  />
-                </div>
+                <Image
+                  src="/donlogo.png"
+                  alt="Don Bosco Premier League"
+                  width={48} height={48}
+                  quality={100} priority unoptimized
+                  className="logo-img w-11 h-11 object-contain block"
+                />
               </Link>
 
               {/* Centered title */}
@@ -122,15 +120,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* ── Desktop navbar ── */}
             <div className="hidden sm:flex items-center justify-between h-16">
               <Link href="/" className="flex items-center gap-3 shrink-0">
-                <div className="dark:bg-white/95 dark:rounded-xl dark:p-0.5 shrink-0">
-                  <Image
-                    src="/donlogo.png"
-                    alt="Don Bosco Premier League"
-                    width={56} height={56}
-                    quality={100} priority unoptimized
-                    className="logo-img w-14 h-14 object-contain block"
-                  />
-                </div>
+                <Image
+                  src="/donlogo.png"
+                  alt="Don Bosco Premier League"
+                  width={56} height={56}
+                  quality={100} priority unoptimized
+                  className="logo-img w-14 h-14 object-contain block"
+                />
                 <span className="font-extrabold tracking-tight leading-tight">
                   <span className="text-base text-orange-500 italic">Don Bosco</span>
                   <span className="block text-[10px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">

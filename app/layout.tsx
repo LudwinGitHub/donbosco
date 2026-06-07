@@ -15,6 +15,7 @@ import { NavLinks, PanelDropdown, MobileMenu } from "./nav-links"
 import ThemeProvider from "./theme-provider"
 import ThemeToggle from "./theme-toggle"
 import ChatFab from "./components/chat-fab"
+import BottomNav from "./components/bottom-nav"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -79,39 +80,69 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
         <ThemeProvider>
         <header className="navbar-bg sticky top-0 z-50 border-b border-black/8 dark:border-white/8 shadow-md shadow-black/5 dark:shadow-black/30 relative overflow-hidden">
-          {/* Orange accent line bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-90" />
-          <div className="mx-auto max-w-5xl px-4">
-            <div className="flex items-center justify-between h-16">
+          {/* Orange accent line */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
 
-              {/* Logo */}
+          <div className="mx-auto max-w-5xl px-4">
+
+            {/* ── Mobile navbar ── */}
+            <div className="flex sm:hidden items-center justify-between h-16 relative">
+              {/* Logo only (no text on mobile) */}
+              <Link href="/" className="shrink-0">
+                <div className="dark:bg-white/95 dark:rounded-xl dark:p-0.5">
+                  <Image
+                    src="/donlogo.png"
+                    alt="Don Bosco Premier League"
+                    width={48} height={48}
+                    quality={100} priority unoptimized
+                    className="logo-img w-11 h-11 object-contain block"
+                  />
+                </div>
+              </Link>
+
+              {/* Centered title */}
+              <span className="absolute left-1/2 -translate-x-1/2 font-black italic text-orange-500 text-xl tracking-tight pointer-events-none select-none">
+                Don Bosco
+              </span>
+
+              {/* Right: theme toggle + hamburger */}
+              <div className="flex items-center gap-1">
+                {session && <PushButton />}
+                <ThemeToggle />
+                <MobileMenu
+                  navLinks={navLinks}
+                  panelLinks={panelLinks}
+                  isLoggedIn={!!session}
+                  isOrganizer={session?.role === "ORGANIZER"}
+                  logoutAction={logout}
+                />
+              </div>
+            </div>
+
+            {/* ── Desktop navbar ── */}
+            <div className="hidden sm:flex items-center justify-between h-16">
               <Link href="/" className="flex items-center gap-3 shrink-0">
-                <div className="dark:bg-white/92 dark:rounded-xl dark:p-0.5 shrink-0">
+                <div className="dark:bg-white/95 dark:rounded-xl dark:p-0.5 shrink-0">
                   <Image
                     src="/donlogo.png"
                     alt="Don Bosco Premier League"
                     width={56} height={56}
                     quality={100} priority unoptimized
-                    className="logo-img w-12 h-12 sm:w-14 sm:h-14 object-contain block"
+                    className="logo-img w-14 h-14 object-contain block"
                   />
                 </div>
                 <span className="font-extrabold tracking-tight leading-tight">
-                  <span className="text-sm sm:text-base text-orange-600 italic">Don Bosco</span>
-                  <span className="hidden sm:block text-[10px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">
+                  <span className="text-base text-orange-500 italic">Don Bosco</span>
+                  <span className="block text-[10px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">
                     Premier League
                   </span>
                 </span>
               </Link>
 
-              {/* Desktop nav */}
               <NavLinks links={navLinks} />
 
-              {/* Right side: panel dropdown + auth + mobile hamburger */}
               <div className="flex items-center gap-1">
-                {session?.role === "ORGANIZER" && (
-                  <PanelDropdown links={panelLinks} />
-                )}
-
+                {session?.role === "ORGANIZER" && <PanelDropdown links={panelLinks} />}
                 {session ? (
                   <>
                     <Link
@@ -140,13 +171,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     </Link>
                     <Link
                       href="/logowanie"
-                      className="hidden md:block rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+                      className="hidden md:block rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 transition-colors dark:bg-orange-500 dark:hover:bg-orange-600"
                     >
                       Zaloguj się
                     </Link>
                   </>
                 )}
-
                 <ThemeToggle />
                 <MobileMenu
                   navLinks={navLinks}
@@ -156,8 +186,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   logoutAction={logout}
                 />
               </div>
-
             </div>
+
           </div>
         </header>
 
@@ -171,12 +201,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
 
-        <main className="mx-auto max-w-5xl px-4 py-4 sm:py-8">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 py-4 pb-28 sm:py-8 sm:pb-8">{children}</main>
         <Toaster richColors position="bottom-left" />
         <Suspense><ToastConsumer /></Suspense>
         <ChatFab
           currentUserId={session?.userId ?? null}
           isOrganizer={session?.role === "ORGANIZER"}
+        />
+        <BottomNav
+          isLoggedIn={!!session}
+          isOrganizer={session?.role === "ORGANIZER"}
+          logoutAction={logout}
         />
         </ThemeProvider>
       </body>

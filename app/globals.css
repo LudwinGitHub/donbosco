@@ -102,6 +102,9 @@ body {
 .dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.05) !important; }
 .dark .divide-zinc-50  > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.04) !important; }
 
+/* Table thead bottom border — match divide opacity so first row blends in */
+.dark table thead tr { border-bottom-color: rgba(255, 255, 255, 0.05) !important; }
+
 /* Hover backgrounds */
 .dark .hover\:bg-zinc-50:hover  { background-color: rgba(255, 255, 255, 0.04) !important; }
 .dark .hover\:bg-zinc-100:hover { background-color: rgba(255, 255, 255, 0.07) !important; }

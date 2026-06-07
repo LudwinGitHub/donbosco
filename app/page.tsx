@@ -1,3 +1,4 @@
+import React from "react"
 import Link from "next/link"
 import { getActiveSeason, getAllSeasons, getStandings, type FormResult } from "@/lib/standings"
 import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
@@ -144,7 +145,7 @@ export default async function HomePage({
           <div className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4">
             <div className="flex items-start justify-between gap-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Lider tabeli</p>
-              <span className="text-lg leading-none">🏆</span>
+              <span className="text-orange-500"><IconTrophy /></span>
             </div>
             {tableLeader ? (
               <>
@@ -168,7 +169,7 @@ export default async function HomePage({
             <Link href={`/gracze/${topScorer.id}`} className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4 transition-colors hover:bg-zinc-50">
               <div className="flex items-start justify-between gap-1">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Król strzelców</p>
-                <span className="text-lg leading-none">⚽</span>
+                <span className="text-orange-500"><IconBall /></span>
               </div>
               <p className="mt-2 truncate font-bold text-zinc-900 leading-tight">
                 {topScorer.firstName} {topScorer.lastName}
@@ -452,4 +453,28 @@ function fmtDate(date: Date) {
 
 function fmtTime(date: Date) {
   return new Date(date).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+}
+
+function IconTrophy() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 21h8M12 17v4M17 3H7v8a5 5 0 0 0 10 0V3z" />
+      <path d="M7 4H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1" />
+      <path d="M17 4h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1" />
+    </svg>
+  )
+}
+
+function IconBall() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="12,6 15.5,9.5 14,14 10,14 8.5,9.5" fill="currentColor" stroke="none" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="15.5" y1="9.5" x2="19" y2="8" />
+      <line x1="14" y1="14" x2="17" y2="17" />
+      <line x1="10" y1="14" x2="7" y2="17" />
+      <line x1="8.5" y1="9.5" x2="5" y2="8" />
+    </svg>
+  )
 }

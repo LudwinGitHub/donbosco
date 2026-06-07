@@ -1,3 +1,4 @@
+import React from "react"
 import Link from "next/link"
 import { getAllSeasons } from "@/lib/standings"
 import { getPlayersWithStats, getPlayerForms, type PlayerWithStats, type PlayerForm } from "@/lib/players"
@@ -58,19 +59,19 @@ export default async function PlayersPage({
           {/* 3 stat cards — all-time or season-specific */}
           <div className="grid grid-cols-3 gap-3">
             <StatCard
-              label="Król strzelców" emoji="⚽"
+              label="Król strzelców" icon={<IconBall />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="goals"
               format={(p) => `${p.goals} ${goalLabel(p.goals)}`}
             />
             <StatCard
-              label="Król asyst" emoji="🎯"
+              label="Król asyst" icon={<IconTarget />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="assists"
               format={(p) => `${p.assists} ${assistLabel(p.assists)}`}
             />
             <StatCard
-              label="Najwięcej meczów" emoji="📅"
+              label="Najwięcej meczów" icon={<IconCalendar />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="played"
               format={(p) => `${p.played} ${matchLabel(p.played)}`}
@@ -194,7 +195,7 @@ const BADGE_LEGEND = [
 
 function StatCard({
   label,
-  emoji,
+  icon,
   borderClass,
   statColorClass,
   players,
@@ -202,7 +203,7 @@ function StatCard({
   format,
 }: {
   label: string
-  emoji: string
+  icon: React.ReactNode
   borderClass: string
   statColorClass: string
   players: PlayerWithStats[]
@@ -219,7 +220,7 @@ function StatCard({
     >
       <div className="flex items-start justify-between gap-1">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
-        <span className="text-lg leading-none">{emoji}</span>
+        <span className="text-orange-500">{icon}</span>
       </div>
       <p className="mt-2 truncate font-bold text-zinc-900 leading-tight">
         {leader.firstName} {leader.lastName}
@@ -285,4 +286,39 @@ function matchLabel(n: number) {
   if (n === 1) return "mecz"
   if (n >= 2 && n <= 4) return "mecze"
   return "meczów"
+}
+
+function IconBall() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="12,6 15.5,9.5 14,14 10,14 8.5,9.5" fill="currentColor" stroke="none" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="15.5" y1="9.5" x2="19" y2="8" />
+      <line x1="14" y1="14" x2="17" y2="17" />
+      <line x1="10" y1="14" x2="7" y2="17" />
+      <line x1="8.5" y1="9.5" x2="5" y2="8" />
+    </svg>
+  )
+}
+
+function IconTarget() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function IconCalendar() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
 }

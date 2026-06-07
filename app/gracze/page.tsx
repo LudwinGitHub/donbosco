@@ -147,9 +147,9 @@ export default async function PlayersPage({
           <div className="rounded-xl border border-zinc-200 bg-white p-4">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Legenda odznak</p>
             <div className="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
-              {BADGE_LEGEND.map(({ emoji, label, description }) => (
+              {BADGE_LEGEND.map(({ type, label, description }) => (
                 <div key={label} className="flex items-start gap-2">
-                  <span className="shrink-0 text-sm leading-5">{emoji}</span>
+                  <span className="shrink-0 mt-0.5"><BadgeChip type={type} /></span>
                   <p className="text-xs text-zinc-500 leading-5">
                     <span className="font-semibold text-zinc-700">{label}</span>
                     {" — "}{description}
@@ -180,17 +180,17 @@ function SeasonTab({ href, label, active }: { href: string; label: string; activ
 }
 
 const BADGE_LEGEND = [
-  { emoji: "⚽", label: "Striker",       description: "Najlepszy strzelec aktywnego sezonu" },
-  { emoji: "🎯", label: "Playmaker",     description: "Najlepszy asystent aktywnego sezonu" },
-  { emoji: "🔥", label: "Hero (gole)",   description: "Najwięcej goli w ostatnim meczu" },
-  { emoji: "💫", label: "Hero (asysty)", description: "Najwięcej asyst w ostatnim meczu" },
-  { emoji: "🎩", label: "Hat-trick",     description: "3+ gole w ostatnim meczu" },
-  { emoji: "🔥", label: "On Fire",       description: "Gol lub asysta w każdym z ostatnich 3 wystąpień" },
-  { emoji: "🎯", label: "Seria asyst",   description: "Asysta w każdym z ostatnich 3 wystąpień" },
-  { emoji: "🦾", label: "Iron Man",      description: "Grał we wszystkich meczach sezonu (min. 5)" },
-  { emoji: "🎖", label: "Weteran",       description: "Najwięcej występów all-time (min. 10)" },
-  { emoji: "⭐", label: "MVP Legend",    description: "Tytuł MVP zdobyty 3 lub więcej razy" },
-  { emoji: "🤝", label: "Deadly Duo",    description: "Najlepsza para strzelec+asystent sezonu (min. 2 wspólne akcje)" },
+  { type: "striker"       as const, label: "Striker",       description: "Najlepszy strzelec aktywnego sezonu" },
+  { type: "playmaker"     as const, label: "Playmaker",     description: "Najlepszy asystent aktywnego sezonu" },
+  { type: "hero-goal"     as const, label: "Hero (gole)",   description: "Najwięcej goli w ostatnim meczu" },
+  { type: "hero-assist"   as const, label: "Hero (asysty)", description: "Najwięcej asyst w ostatnim meczu" },
+  { type: "hat-trick"     as const, label: "Hat-trick",     description: "3+ gole w ostatnim meczu" },
+  { type: "on-fire"       as const, label: "On Fire",       description: "Gol lub asysta w każdym z ostatnich 3 wystąpień" },
+  { type: "assist-streak" as const, label: "Seria asyst",   description: "Asysta w każdym z ostatnich 3 wystąpień" },
+  { type: "iron-man"      as const, label: "Iron Man",      description: "Grał we wszystkich meczach sezonu (min. 5)" },
+  { type: "veteran"       as const, label: "Weteran",       description: "Najwięcej występów all-time (min. 10)" },
+  { type: "mvp-legend"    as const, label: "MVP Legend",    description: "Tytuł MVP zdobyty 3 lub więcej razy" },
+  { type: "deadly-duo"    as const, label: "Deadly Duo",    description: "Najlepsza para strzelec+asystent sezonu (min. 2 wspólne akcje)" },
 ]
 
 function StatCard({

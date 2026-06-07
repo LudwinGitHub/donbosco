@@ -103,8 +103,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               DB
             </div>
 
-            {/* Controls — top right */}
-            <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
+            {/* Controls — top right, z-20 above the h-full logo div */}
+            <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
               {session && <PushButton />}
               <ThemeToggle />
             </div>

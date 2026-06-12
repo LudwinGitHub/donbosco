@@ -139,7 +139,7 @@ export default function TeamPicker({
           <button
             onClick={handleDraw}
             disabled={selected.size < 2}
-            className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Losuj
           </button>

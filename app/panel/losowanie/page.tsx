@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { verifySession } from "@/lib/dal"
-import { getPlayersWithStats } from "@/lib/players"
+import { getPlayersWithStats, getPlayerForms } from "@/lib/players"
 import { prisma } from "@/lib/prisma"
 import TeamPicker from "./team-picker"
 
@@ -8,8 +8,9 @@ export default async function LosowaniePage() {
   const session = await verifySession()
   if (session.role !== "ORGANIZER") redirect("/")
 
-  const [players, matches] = await Promise.all([
+  const [players, forms, matches] = await Promise.all([
     getPlayersWithStats(),
+    getPlayerForms(),
     prisma.match.findMany({
       where:   { status: "SCHEDULED", scheduledAt: { gt: new Date() } },
       include: { homeTeam: true, awayTeam: true },
@@ -26,6 +27,7 @@ export default async function LosowaniePage() {
     played:    p.played,
     goals:     p.goals,
     assists:   p.assists,
+    form:      forms.get(p.id),
   }))
 
   const matchData = matches.map((m) => ({

@@ -6,6 +6,7 @@ export type PlayerForBalance = {
   played: number
   goals: number
   assists: number
+  form?: "up" | "down" | "stable"
 }
 
 export type BalancedTeams = {
@@ -24,10 +25,14 @@ export function generateBalancedTeams(players: PlayerForBalance[]): BalancedTeam
   const n = players.length
   if (n < 2) throw new Error("Za mało graczy.")
 
-  // Add jitter so each call yields different (but balanced) teams
+  const FORM_BONUS: Record<string, number> = { up: 0.25, down: -0.25, stable: 0 }
+
+  // Add form modifier + jitter so each call yields different (but balanced) teams
   const rated = players.map((p) => ({
     player: p,
-    rating: playerRating(p) + (Math.random() - 0.5) * 0.5,
+    rating: playerRating(p)
+      + (FORM_BONUS[p.form ?? "stable"] ?? 0)
+      + (Math.random() - 0.5) * 0.5,
   }))
   rated.sort((a, b) => b.rating - a.rating)
 

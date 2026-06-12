@@ -171,6 +171,7 @@ export default function TeamPicker({
                     )}
                   </div>
                   <div className="shrink-0 flex items-center gap-1.5">
+                    <FormArrow form={p.form} />
                     <RatingDot rating={playerRating(p)} />
                     <span className="text-xs text-zinc-400 tabular-nums">
                       {p.goals}G {p.assists}A
@@ -320,6 +321,12 @@ function TeamList({ label, players }: { label: string; players: PlayerForBalance
       </ul>
     </div>
   )
+}
+
+function FormArrow({ form }: { form?: "up" | "down" | "stable" }) {
+  if (form === "up")   return <span className="text-[10px] font-black leading-none text-orange-500" title="Forma w górę">▲</span>
+  if (form === "down") return <span className="text-[10px] font-black leading-none text-red-400" title="Forma w dół">▼</span>
+  return null
 }
 
 function RatingDot({ rating }: { rating: number }) {

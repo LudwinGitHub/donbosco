@@ -3,16 +3,18 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 
 type VoteBannerProps = {
-  scheduledAtISO:  string
-  windowOpenAtISO: string
-  matchName:       string
-  totalVotes:      number
-  maxVotes:        number
+  scheduledAtISO:   string
+  windowOpenAtISO:  string
+  windowCloseAtISO: string
+  matchName:        string
+  totalVotes:       number
+  maxVotes:         number
 }
 
 export default function VoteBanner({
   scheduledAtISO,
   windowOpenAtISO,
+  windowCloseAtISO,
   matchName,
   totalVotes,
   maxVotes,
@@ -24,15 +26,15 @@ export default function VoteBanner({
     const tick = () => {
       const now      = Date.now()
       const windowMs = new Date(windowOpenAtISO).getTime()
-      const matchMs  = new Date(scheduledAtISO).getTime()
-      const active   = now >= windowMs && now < matchMs && totalVotes < maxVotes
+      const closeMs  = new Date(windowCloseAtISO).getTime()
+      const active   = now >= windowMs && now < closeMs && totalVotes < maxVotes
       setVisible(active)
-      if (active) setCountdown(fmt(matchMs - now))
+      if (active) setCountdown(fmt(closeMs - now))
     }
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [scheduledAtISO, windowOpenAtISO, totalVotes, maxVotes])
+  }, [windowOpenAtISO, windowCloseAtISO, totalVotes, maxVotes])
 
   if (!visible) return null
 

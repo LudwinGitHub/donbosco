@@ -47,15 +47,17 @@ export default function TeamPicker({
 
   useEffect(() => {
     setSaved(false)
-    if (selected.size >= 2) {
-      const active = players.filter((p) => selected.has(p.id))
-      setDrawA(generateBalancedTeams(active))
-      setDrawB(generateBalancedTeams(active))
-    } else {
-      setDrawA(null)
-      setDrawB(null)
-    }
-  }, [selected, players])
+    setDrawA(null)
+    setDrawB(null)
+  }, [selected])
+
+  const handleDraw = () => {
+    if (selected.size < 2) return
+    const active = players.filter((p) => selected.has(p.id))
+    setDrawA(generateBalancedTeams(active))
+    setDrawB(generateBalancedTeams(active))
+    setSaved(false)
+  }
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -133,6 +135,14 @@ export default function TeamPicker({
               <span className="ml-1 font-medium text-amber-600">Limit osiągnięty</span>
             )}
           </div>
+
+          <button
+            onClick={handleDraw}
+            disabled={selected.size < 2}
+            className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Losuj
+          </button>
 
           <div className="max-h-[540px] overflow-y-auto rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
             {filtered.map((p) => {
@@ -274,7 +284,7 @@ function DrawColumn({
 
       {!draw ? (
         <div className="flex items-center justify-center rounded-xl border border-dashed border-zinc-200 py-16 text-sm text-zinc-400">
-          Zaznacz co najmniej 2 graczy
+          Wybierz graczy i naciśnij Losuj
         </div>
       ) : (
         <div className="space-y-2">

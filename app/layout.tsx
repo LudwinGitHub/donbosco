@@ -31,7 +31,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
-const VOTE_WINDOW_MS = 3 * 60 * 60 * 1000
+const VOTE_WINDOW_OPEN_MS  = 3.5 * 60 * 60 * 1000
+const VOTE_WINDOW_CLOSE_MS = 0.5 * 60 * 60 * 1000
 
 const navLinks = [
   { href: "/",             label: "Tabela" },
@@ -49,8 +50,9 @@ const panelLinks = [
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const now       = new Date()
-  const windowEnd = new Date(now.getTime() + VOTE_WINDOW_MS)
+  const now            = new Date()
+  const windowOpenEnd  = new Date(now.getTime() + VOTE_WINDOW_OPEN_MS)
+  const windowCloseEnd = new Date(now.getTime() + VOTE_WINDOW_CLOSE_MS)
 
   const [session, activeDraw] = await Promise.all([
     getOptionalSession(),
@@ -58,7 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       where: {
         match: {
           status:      "SCHEDULED",
-          scheduledAt: { gt: now, lte: windowEnd },
+          scheduledAt: { gt: windowCloseEnd, lte: windowOpenEnd },
         },
       },
       select: {
@@ -215,7 +217,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {activeDraw && activeDraw._count.votes < 14 && (
           <VoteBanner
             scheduledAtISO={activeDraw.match.scheduledAt.toISOString()}
-            windowOpenAtISO={new Date(activeDraw.match.scheduledAt.getTime() - VOTE_WINDOW_MS).toISOString()}
+            windowOpenAtISO={new Date(activeDraw.match.scheduledAt.getTime() - VOTE_WINDOW_OPEN_MS).toISOString()}
+            windowCloseAtISO={new Date(activeDraw.match.scheduledAt.getTime() - VOTE_WINDOW_CLOSE_MS).toISOString()}
             matchName={`${activeDraw.match.homeTeam.name} vs ${activeDraw.match.awayTeam.name}`}
             totalVotes={activeDraw._count.votes}
             maxVotes={14}

@@ -4,7 +4,8 @@ import { getOptionalSession } from "@/lib/dal"
 import VotePanel from "./vote-panel"
 import MvpVoteSection from "@/app/mecze/[id]/mvp-vote"
 
-const DRAW_VOTE_WINDOW_MS = 3 * 60 * 60 * 1000
+const DRAW_VOTE_WINDOW_OPEN_MS  = 3.5 * 60 * 60 * 1000
+const DRAW_VOTE_WINDOW_CLOSE_MS = 0.5 * 60 * 60 * 1000
 const MVP_WINDOW_MS       = 3 * 24 * 60 * 60 * 1000
 
 export default async function GlosowaniePage() {
@@ -97,8 +98,9 @@ export default async function GlosowaniePage() {
     const resolve = (ids: string[]) =>
       ids.map((i) => pm.get(i)).filter((p): p is NonNullable<typeof p> => !!p)
 
-    const scheduledAt  = draw.match.scheduledAt
-    const windowOpenAt = new Date(scheduledAt.getTime() - DRAW_VOTE_WINDOW_MS)
+    const scheduledAt   = draw.match.scheduledAt
+    const windowOpenAt  = new Date(scheduledAt.getTime() - DRAW_VOTE_WINDOW_OPEN_MS)
+    const windowCloseAt = new Date(scheduledAt.getTime() - DRAW_VOTE_WINDOW_CLOSE_MS)
     const votesA       = draw.votes.filter((v) => v.choice === "A").length
     const votesB       = draw.votes.filter((v) => v.choice === "B").length
     const userVote     = session
@@ -117,6 +119,7 @@ export default async function GlosowaniePage() {
           matchId={draw.matchId}
           scheduledAtISO={scheduledAt.toISOString()}
           windowOpenAtISO={windowOpenAt.toISOString()}
+          windowCloseAtISO={windowCloseAt.toISOString()}
           optionA={{ team1: resolve(draw.optionATeam1), team2: resolve(draw.optionATeam2), rating1: draw.optionARating1, rating2: draw.optionARating2 }}
           optionB={{ team1: resolve(draw.optionBTeam1), team2: resolve(draw.optionBTeam2), rating1: draw.optionBRating1, rating2: draw.optionBRating2 }}
           votesA={votesA}

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { verifySession, getOptionalSession } from "@/lib/dal"
 import type { BalancedTeams } from "@/lib/team-balancer"
 
-const VOTE_WINDOW_MS = 3 * 60 * 60 * 1000
+const VOTE_WINDOW_OPEN_MS  = 3.5 * 60 * 60 * 1000  // opens 3.5h before match (17:00 for 20:30)
+const VOTE_WINDOW_CLOSE_MS = 0.5 * 60 * 60 * 1000  // closes 30min before match (20:00 for 20:30)
 
 export async function saveMatchDraw(
   matchId: string,
@@ -61,12 +62,13 @@ export async function castDrawVote(
     })
     if (!draw) return { success: false, error: "Brak losowania dla tego meczu" }
 
-    const now         = new Date()
-    const scheduledAt = draw.match.scheduledAt
-    const windowOpen  = new Date(scheduledAt.getTime() - VOTE_WINDOW_MS)
+    const now          = new Date()
+    const scheduledAt  = draw.match.scheduledAt
+    const windowOpen   = new Date(scheduledAt.getTime() - VOTE_WINDOW_OPEN_MS)
+    const windowClose  = new Date(scheduledAt.getTime() - VOTE_WINDOW_CLOSE_MS)
 
     if (now < windowOpen)   return { success: false, error: "Głosowanie jeszcze nie otwarte" }
-    if (now >= scheduledAt) return { success: false, error: "Mecz już się rozpoczął" }
+    if (now >= windowClose) return { success: false, error: "Głosowanie zakończone" }
 
     const existing = await prisma.drawVote.findUnique({
       where: { matchId_userId: { matchId, userId: session.userId } },

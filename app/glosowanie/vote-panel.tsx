@@ -6,9 +6,10 @@ type PlayerInfo = { id: string; firstName: string; lastName: string; nickname: s
 type DrawOption = { team1: PlayerInfo[]; team2: PlayerInfo[]; rating1: number; rating2: number }
 
 type VotePanelProps = {
-  matchId:         string
-  scheduledAtISO:  string
-  windowOpenAtISO: string
+  matchId:          string
+  scheduledAtISO:   string
+  windowOpenAtISO:  string
+  windowCloseAtISO: string
   optionA:         DrawOption
   optionB:         DrawOption
   votesA:          number
@@ -25,7 +26,7 @@ type VotingState = "upcoming" | "active" | "closed"
 
 export default function VotePanel(props: VotePanelProps) {
   const {
-    matchId, scheduledAtISO, windowOpenAtISO,
+    matchId, scheduledAtISO, windowOpenAtISO, windowCloseAtISO,
     optionA, optionB, votesA, votesB, totalVotes,
     userVote, isLoggedIn, maxVotes,
     homeTeamName, awayTeamName,
@@ -37,11 +38,11 @@ export default function VotePanel(props: VotePanelProps) {
 
   useEffect(() => {
     const tick = () => {
-      const now      = Date.now()
-      const windowMs = new Date(windowOpenAtISO).getTime()
-      const matchMs  = new Date(scheduledAtISO).getTime()
+      const now        = Date.now()
+      const windowMs   = new Date(windowOpenAtISO).getTime()
+      const closeMs    = new Date(windowCloseAtISO).getTime()
 
-      if (totalVotes >= maxVotes || now >= matchMs) {
+      if (totalVotes >= maxVotes || now >= closeMs) {
         setVotingState("closed")
         setTimeDisplay("Głosowanie zakończone")
         return
@@ -51,13 +52,13 @@ export default function VotePanel(props: VotePanelProps) {
         setTimeDisplay("Otworzy się za " + fmtCountdown(windowMs - now))
       } else {
         setVotingState("active")
-        setTimeDisplay("Mecz za " + fmtCountdown(matchMs - now))
+        setTimeDisplay("Zamknięcie za " + fmtCountdown(closeMs - now))
       }
     }
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
-  }, [windowOpenAtISO, scheduledAtISO, totalVotes, maxVotes])
+  }, [windowOpenAtISO, windowCloseAtISO, totalVotes, maxVotes])
 
   const vote = (choice: "A" | "B" | null) => {
     if (!isLoggedIn || isPending || votingState !== "active") return

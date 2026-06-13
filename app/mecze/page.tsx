@@ -3,6 +3,7 @@ import { getActiveSeason, getAllSeasons } from "@/lib/standings"
 import { getMatches, type MatchListItem } from "@/lib/matches"
 import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
+import EmptyState, { IconCalendar } from "@/app/ui/empty-state"
 
 const STATUS_LABEL: Record<string, string> = {
   SCHEDULED: "Zaplanowany",
@@ -107,9 +108,13 @@ export default async function MatchesPage({
           ))}
       </div>
 
-      <>
+      <div className="stagger">
         {byRound.length === 0 && (
-          <p className="text-zinc-400">Brak zaplanowanych meczów.</p>
+          <EmptyState
+            icon={<IconCalendar />}
+            title="Brak meczów w tym sezonie"
+            description="Organizator doda mecze przed startem rozgrywek."
+          />
         )}
 
         {byRound.map(({ round, matches: roundMatches }) => (
@@ -126,7 +131,7 @@ export default async function MatchesPage({
             </div>
           </section>
         ))}
-      </>
+      </div>
     </div>
   )
 }

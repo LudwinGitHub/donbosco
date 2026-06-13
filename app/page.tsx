@@ -4,6 +4,7 @@ import { getActiveSeason, getAllSeasons, getStandings, type FormResult } from "@
 import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
 import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
+import CountUp from "@/app/ui/count-up"
 
 export default async function HomePage({
   searchParams,
@@ -79,7 +80,7 @@ export default async function HomePage({
 
       {/* ── Dashboard ── */}
       {activeSeason && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 stagger">
           {/* Last match */}
           <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 col-span-2 sm:col-span-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -155,7 +156,7 @@ export default async function HomePage({
                   <span className="text-xs text-zinc-500">{tableLeader.played} meczów</span>
                 </div>
                 <div className="mt-auto pt-2 flex items-baseline gap-1.5">
-                  <span className="text-2xl font-black text-zinc-900">{tableLeader.points}</span>
+                  <CountUp value={tableLeader.points} className="text-2xl font-black text-zinc-900" />
                   <span className="text-xs text-zinc-400">pkt</span>
                 </div>
               </>
@@ -186,10 +187,10 @@ export default async function HomePage({
                 <div className="mt-1 h-4" />
               )}
               <div className="mt-auto pt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-zinc-900">{topScorer.goals}</span>
+                <CountUp value={topScorer.goals} className="text-2xl font-black text-zinc-900" />
                 <span className="text-xs text-zinc-400">{goalLabel(topScorer.goals)}</span>
                 {topScorer.assists > 0 && (
-                  <span className="text-xs text-zinc-400">· {topScorer.assists} asyst</span>
+                  <span className="text-xs text-zinc-400">· <CountUp value={topScorer.assists} /> asyst</span>
                 )}
               </div>
             </Link>
@@ -211,7 +212,7 @@ export default async function HomePage({
               Zobacz wszystkie →
             </Link>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 stagger">
             {latestAnnouncements.map((a) => {
               const borderCls =
                 a.priority === "URGENT"    ? "border-l-red-500" :
@@ -332,7 +333,7 @@ export default async function HomePage({
                     <th className="px-4 py-3 text-center" title="Forma (ostatnie 5 meczów)">Forma</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-zinc-100 stagger">
                   {rows.map((row, i) => (
                     <tr key={row.teamId} className="transition-colors hover:bg-zinc-50">
                       <td className="px-4 py-3 text-zinc-400 font-medium">{i + 1}</td>
@@ -384,9 +385,20 @@ export default async function HomePage({
 }
 
 function FormDot({ result }: { result: FormResult }) {
-  const styles: Record<FormResult, string> = { W: "bg-green-500", D: "bg-zinc-300", L: "bg-red-400" }
-  const titles: Record<FormResult, string> = { W: "Wygrana", D: "Remis", L: "Porażka" }
-  return <span title={titles[result]} className={`h-2.5 w-2.5 rounded-full ${styles[result]}`} />
+  const cfg: Record<FormResult, { bg: string; text: string; label: string }> = {
+    W: { bg: "bg-green-500", text: "text-white",    label: "Wygrana" },
+    D: { bg: "bg-zinc-300",  text: "text-zinc-600", label: "Remis"   },
+    L: { bg: "bg-red-400",   text: "text-white",    label: "Porażka" },
+  }
+  const { bg, text, label } = cfg[result]
+  return (
+    <span
+      title={label}
+      className={`inline-flex h-5 w-5 items-center justify-center rounded text-[9px] font-bold ${bg} ${text}`}
+    >
+      {result}
+    </span>
+  )
 }
 
 function SeasonTab({

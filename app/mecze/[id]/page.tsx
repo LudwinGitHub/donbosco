@@ -147,38 +147,51 @@ export default async function MatchDetailPage({
       </div>
 
       {/* Scoreboard */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <div className="flex items-center justify-between gap-4">
-          <TeamBlock name={match.homeTeam.name} color={match.homeTeam.color} align="left" />
+      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden anim-fade-up">
+        {/* Team color bar */}
+        <div className="flex h-1.5">
+          <div className="flex-1" style={{ backgroundColor: match.homeTeam.color }} />
+          <div className="flex-1" style={{ backgroundColor: match.awayTeam.color }} />
+        </div>
 
-          <div className="shrink-0 text-center">
-            {played ? (
-              <span className="text-4xl font-bold tabular-nums text-zinc-900">
-                {match.homeScore} : {match.awayScore}
-              </span>
-            ) : (
-              <div>
+        <div className="px-4 py-6 sm:px-8">
+          <div className="flex items-center gap-3 sm:gap-6">
+            {/* Home team */}
+            <TeamBlock name={match.homeTeam.name} color={match.homeTeam.color} align="left" />
+
+            {/* Score / VS */}
+            <div className="shrink-0 flex flex-col items-center gap-1">
+              {played ? (
+                <span className="text-4xl sm:text-5xl font-black tabular-nums text-zinc-900 tracking-tight">
+                  {match.homeScore}<span className="text-zinc-300 mx-1">:</span>{match.awayScore}
+                </span>
+              ) : (
                 <span className="text-2xl font-light text-zinc-300">vs</span>
-                <p className="mt-1 text-xs text-zinc-400">{formatDateTime(match.scheduledAt)}</p>
+              )}
+              <div className="flex flex-col items-center gap-0.5">
+                {played && match.playedAt && (
+                  <p className="text-xs text-zinc-400">{formatDateTime(match.playedAt)}</p>
+                )}
+                {!played && (
+                  <p className="text-xs text-zinc-400">{formatDateTime(match.scheduledAt)}</p>
+                )}
+                {match.venue && (
+                  <p className="text-xs text-zinc-400">{match.venue}</p>
+                )}
+                {match.mvpPlayer && (
+                  <p className="mt-1 text-xs text-zinc-400">
+                    ⭐{" "}
+                    <Link href={`/gracze/${match.mvpPlayer.id}`} className="font-semibold text-zinc-700 hover:underline">
+                      {match.mvpPlayer.firstName} {match.mvpPlayer.lastName}
+                    </Link>
+                  </p>
+                )}
               </div>
-            )}
-            {played && match.playedAt && (
-              <p className="mt-1 text-xs text-zinc-400">{formatDateTime(match.playedAt)}</p>
-            )}
-            {match.venue && (
-              <p className="mt-0.5 text-xs text-zinc-400">{match.venue}</p>
-            )}
-            {match.mvpPlayer && (
-              <p className="mt-2 text-xs text-zinc-400">
-                ⭐{" "}
-                <Link href={`/gracze/${match.mvpPlayer.id}`} className="font-semibold text-zinc-700 hover:underline">
-                  {match.mvpPlayer.firstName} {match.mvpPlayer.lastName}
-                </Link>
-              </p>
-            )}
-          </div>
+            </div>
 
-          <TeamBlock name={match.awayTeam.name} color={match.awayTeam.color} align="right" />
+            {/* Away team */}
+            <TeamBlock name={match.awayTeam.name} color={match.awayTeam.color} align="right" />
+          </div>
         </div>
       </div>
 
@@ -301,22 +314,25 @@ export default async function MatchDetailPage({
   )
 }
 
-function TeamBlock({
-  name,
-  color,
-  align,
-}: {
-  name: string
-  color: string
-  align: "left" | "right"
-}) {
+function teamTextColor(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.45 ? "#18181b" : "#ffffff"
+}
+
+function TeamBlock({ name, color, align }: { name: string; color: string; align: "left" | "right" }) {
+  const textColor = teamTextColor(color)
+  const isRight = align === "right"
   return (
-    <div className={`flex flex-1 flex-col items-${align === "left" ? "start" : "end"} gap-2`}>
+    <div className={`flex flex-1 flex-col items-center gap-2 ${isRight ? "sm:items-end" : "sm:items-start"}`}>
       <span
-        className="h-10 w-10 rounded-full border-2 border-zinc-100"
-        style={{ backgroundColor: color }}
-      />
-      <span className="font-semibold text-zinc-900 text-sm leading-tight">{name}</span>
+        className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full text-base sm:text-lg font-black uppercase shadow-sm"
+        style={{ backgroundColor: color, color: textColor }}
+      >
+        {name[0]}
+      </span>
+      <span className="font-bold text-zinc-900 text-sm sm:text-base leading-tight text-center">{name}</span>
     </div>
   )
 }

@@ -125,6 +125,36 @@ body {
   );
 }
 
+/* ── Entry animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.anim-fade-up { animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade-in { animation: fade-in 0.3s ease both; }
+
+/* Staggered list children */
+.stagger > * { animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.stagger > *:nth-child(1)    { animation-delay:   0ms; }
+.stagger > *:nth-child(2)    { animation-delay:  55ms; }
+.stagger > *:nth-child(3)    { animation-delay: 110ms; }
+.stagger > *:nth-child(4)    { animation-delay: 165ms; }
+.stagger > *:nth-child(5)    { animation-delay: 220ms; }
+.stagger > *:nth-child(6)    { animation-delay: 275ms; }
+.stagger > *:nth-child(7)    { animation-delay: 330ms; }
+.stagger > *:nth-child(8)    { animation-delay: 385ms; }
+.stagger > *:nth-child(9)    { animation-delay: 440ms; }
+.stagger > *:nth-child(n+10) { animation-delay: 480ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up, .anim-fade-in, .stagger > * { animation: none !important; }
+}
+
 /* Hover backgrounds */
 .dark .hover\:bg-zinc-50:hover  { background-color: rgba(255, 255, 255, 0.04) !important; }
 .dark .hover\:bg-zinc-100:hover { background-color: rgba(255, 255, 255, 0.07) !important; }

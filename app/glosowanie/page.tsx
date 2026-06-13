@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getOptionalSession } from "@/lib/dal"
 import VotePanel from "./vote-panel"
 import MvpVoteSection from "@/app/mecze/[id]/mvp-vote"
+import EmptyState, { IconTrophy, IconVote } from "@/app/ui/empty-state"
 
 const DRAW_VOTE_WINDOW_OPEN_MS  = 3.5 * 60 * 60 * 1000
 const DRAW_VOTE_WINDOW_CLOSE_MS = 0.5 * 60 * 60 * 1000
@@ -173,11 +174,15 @@ export default async function GlosowaniePage() {
           </div>
 
           {mvpMatch.mvpPlayer && !mvpVotingOpen ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <span className="text-3xl">⭐</span>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">MVP meczu</p>
-                <p className="mt-0.5 text-lg font-bold text-zinc-900">
+            <div className="relative overflow-hidden rounded-xl border border-amber-300 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4"
+              style={{ background: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 40%, #fde68a 100%)" }}
+            >
+              {/* Subtle glow */}
+              <div className="pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full blur-3xl opacity-40" style={{ backgroundColor: "#f59e0b" }} />
+              <span className="relative text-4xl">⭐</span>
+              <div className="relative">
+                <p className="text-xs font-bold uppercase tracking-widest text-amber-600">MVP meczu</p>
+                <p className="mt-0.5 text-xl font-black text-zinc-900">
                   {mvpMatch.mvpPlayer.firstName} {mvpMatch.mvpPlayer.lastName}
                 </p>
               </div>
@@ -197,8 +202,12 @@ export default async function GlosowaniePage() {
       ) : (
         <section>
           <h2 className="text-lg font-bold">MVP meczu</h2>
-          <div className="mt-3 rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center text-sm text-zinc-400">
-            Brak rozegranych meczów.
+          <div className="mt-3">
+            <EmptyState
+              icon={<IconTrophy />}
+              title="Brak rozegranych meczów"
+              description="MVP pojawi się po pierwszym rozegranym meczu."
+            />
           </div>
         </section>
       )}
@@ -207,8 +216,12 @@ export default async function GlosowaniePage() {
       {!drawSection && (
         <section>
           <h2 className="text-lg font-bold">Głosowanie na skład</h2>
-          <div className="mt-3 rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center text-sm text-zinc-400">
-            Brak aktywnego losowania. Organizator opublikuje składy przed meczem.
+          <div className="mt-3">
+            <EmptyState
+              icon={<IconVote />}
+              title="Brak aktywnego losowania"
+              description="Organizator opublikuje składy przed meczem."
+            />
           </div>
         </section>
       )}

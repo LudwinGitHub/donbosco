@@ -4,6 +4,8 @@ import { getAllSeasons } from "@/lib/standings"
 import { getPlayersWithStats, getPlayerForms, type PlayerWithStats, type PlayerForm } from "@/lib/players"
 import { getActiveBadges, type PlayerBadge } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
+import PlayerAvatar from "@/app/ui/player-avatar"
+import EmptyState, { IconUsers } from "@/app/ui/empty-state"
 
 export default async function PlayersPage({
   searchParams,
@@ -53,11 +55,15 @@ export default async function PlayersPage({
       </div>
 
       {players.length === 0 ? (
-        <p className="text-zinc-400">Brak danych dla tego sezonu.</p>
+        <EmptyState
+          icon={<IconUsers />}
+          title="Brak danych dla tego sezonu"
+          description="Gracze pojawią się po rozegraniu pierwszych meczów."
+        />
       ) : (
         <>
           {/* 3 stat cards — all-time or season-specific */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 stagger">
             <StatCard
               label="Król strzelców" icon={<IconBall />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
@@ -92,21 +98,29 @@ export default async function PlayersPage({
                   <SortHeader label="A" title="Asysty" sortKey="assists" currentSort={sort} seasonId={seasonId} />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-zinc-100 stagger">
                 {displayPlayers.map((p, i) => (
                   <tr key={p.id} className="transition-colors hover:bg-zinc-50">
                     <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
-                          {p.firstName} {p.lastName}
-                        </Link>
-                        {p.nickname && (
-                          <span className="text-xs text-zinc-400">„{p.nickname}"</span>
-                        )}
-                        {(badges.get(p.id) ?? []).map((b, i) => (
-                          <BadgeChip key={i} type={b.type} />
-                        ))}
+                      <div className="flex items-center gap-2.5">
+                        <PlayerAvatar
+                          firstName={p.firstName}
+                          lastName={p.lastName}
+                          color={p.team?.color}
+                          size="sm"
+                        />
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                          <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
+                            {p.firstName} {p.lastName}
+                          </Link>
+                          {p.nickname && (
+                            <span className="text-xs text-zinc-400">„{p.nickname}"</span>
+                          )}
+                          {(badges.get(p.id) ?? []).map((b, i) => (
+                            <BadgeChip key={i} type={b.type} />
+                          ))}
+                        </div>
                       </div>
                     </td>
                     {seasonId && (

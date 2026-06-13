@@ -217,14 +217,14 @@ function AnnouncementCard({
             <button
               onClick={() => onTogglePin(a.id, a.isPinned)}
               disabled={disabled}
-              className="text-xs text-zinc-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+              className="min-h-[44px] px-2 text-xs text-zinc-400 hover:text-amber-600 transition-colors disabled:opacity-50"
             >
               {a.isPinned ? "Odepnij" : "Przypnij"}
             </button>
             <button
               onClick={() => onDelete(a.id)}
               disabled={disabled}
-              className="text-xs text-zinc-400 hover:text-red-500 transition-colors disabled:opacity-50"
+              className="min-h-[44px] px-2 text-xs text-zinc-400 hover:text-red-500 transition-colors disabled:opacity-50"
             >
               Usuń
             </button>
@@ -254,7 +254,7 @@ function AnnouncementCard({
                 onClick={() => handleReaction(type)}
                 disabled={!currentUserId}
                 title={!currentUserId ? "Zaloguj się, aby reagować" : undefined}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all
+                className={`flex items-center gap-1 px-2 py-2 rounded-lg text-xs font-medium transition-all
                   ${isActive
                     ? "bg-zinc-900 text-white"
                     : count > 0

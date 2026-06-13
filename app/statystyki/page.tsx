@@ -185,7 +185,7 @@ export default async function StatystykiPage() {
                   <th className="px-4 py-3 text-left">Drużyna</th>
                   <th className="px-4 py-3 text-center w-28 hidden sm:table-cell">Śr. goli zdobytych</th>
                   <th className="px-4 py-3 text-center w-28 hidden sm:table-cell">Śr. straconych</th>
-                  <th className="px-4 py-3 text-center w-28">Śr. goli</th>
+                  <th className="px-4 py-3 text-center w-28 sm:hidden">Śr. goli (zd/str)</th>
                   <th className="px-4 py-3 text-center w-24">Czyste konta</th>
                 </tr>
               </thead>

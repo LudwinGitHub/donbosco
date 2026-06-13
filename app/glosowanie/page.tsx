@@ -173,7 +173,7 @@ export default async function GlosowaniePage() {
           </div>
 
           {mvpMatch.mvpPlayer && !mvpVotingOpen ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex items-center gap-4">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <span className="text-3xl">⭐</span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">MVP meczu</p>

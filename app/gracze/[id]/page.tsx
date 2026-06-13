@@ -38,7 +38,7 @@ export default async function PlayerProfilePage({
         {player.nickname && (
           <p className="mt-0.5 text-sm text-zinc-400">„{player.nickname}"</p>
         )}
-        <div className={`mt-5 grid gap-4 border-t border-zinc-100 pt-5 ${player.totalMvp > 0 ? "grid-cols-4" : "grid-cols-3"}`}>
+        <div className={`mt-5 grid gap-4 border-t border-zinc-100 pt-5 ${player.totalMvp > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
           <StatCell label="Mecze"  value={player.totalPlayed} />
           <StatCell label="Gole"   value={player.totalGoals} />
           <StatCell label="Asysty" value={player.totalAssists} />
@@ -127,7 +127,7 @@ export default async function PlayerProfilePage({
                   </div>
 
                   {result && (
-                    <span className={`shrink-0 w-6 text-center text-xs font-bold ${
+                    <span className={`hidden sm:inline shrink-0 w-6 text-center text-xs font-bold ${
                       result === "W" ? "text-green-600"
                       : result === "L" ? "text-red-500"
                       : "text-zinc-400"
@@ -137,8 +137,18 @@ export default async function PlayerProfilePage({
                   )}
 
                   {m.homeScore != null && (
-                    <span className="shrink-0 w-12 text-center text-sm font-semibold tabular-nums text-zinc-700">
+                    <span className="hidden sm:inline shrink-0 w-12 text-center text-sm font-semibold tabular-nums text-zinc-700">
                       {m.homeScore}:{m.awayScore}
+                    </span>
+                  )}
+
+                  {result && (
+                    <span className={`sm:hidden shrink-0 text-xs font-bold tabular-nums ${
+                      result === "W" ? "text-green-600"
+                      : result === "L" ? "text-red-500"
+                      : "text-zinc-400"
+                    }`}>
+                      {m.homeScore != null ? `${m.homeScore}:${m.awayScore}` : result}
                     </span>
                   )}
 

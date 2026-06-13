@@ -57,7 +57,7 @@ export default async function PlayersPage({
       ) : (
         <>
           {/* 3 stat cards — all-time or season-specific */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <StatCard
               label="Król strzelców" icon={<IconBall />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"

@@ -6,6 +6,8 @@ import ChangePasswordSection from "./change-password-form"
 import { createVerificationToken } from "@/app/actions/auth"
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
+import PlayerAvatar from "@/app/ui/player-avatar"
+import AvatarPicker from "./avatar-picker"
 
 export default async function MyProfilePage({
   searchParams,
@@ -274,23 +276,34 @@ export default async function MyProfilePage({
         {!tab && (
           <>
             <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Profil gracza</p>
-                <p className="mt-1 text-xl font-bold text-zinc-900">
-                  {p.firstName} {p.lastName}
-                  {p.nickname && (
-                    <span className="ml-2 text-base font-normal text-zinc-400">„{p.nickname}"</span>
-                  )}
-                </p>
-                {(() => {
-                  const myBadges = badges.get(p.id) ?? []
-                  return myBadges.length > 0 ? (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {myBadges.map((b, i) => <BadgeChip key={i} type={b.type} />)}
-                    </div>
-                  ) : null
-                })()}
+              <div className="flex items-start gap-4">
+                <PlayerAvatar
+                  firstName={p.firstName}
+                  lastName={p.lastName}
+                  avatarId={p.avatarId}
+                  size="lg"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Profil gracza</p>
+                  <p className="mt-1 text-xl font-bold text-zinc-900">
+                    {p.firstName} {p.lastName}
+                    {p.nickname && (
+                      <span className="ml-2 text-base font-normal text-zinc-400">„{p.nickname}"</span>
+                    )}
+                  </p>
+                  {(() => {
+                    const myBadges = badges.get(p.id) ?? []
+                    return myBadges.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {myBadges.map((b, i) => <BadgeChip key={i} type={b.type} />)}
+                      </div>
+                    ) : null
+                  })()}
+                </div>
               </div>
+
+              <hr className="border-zinc-100" />
+              <AvatarPicker current={p.avatarId} />
 
               <div className="grid grid-cols-4 gap-4 border-t border-zinc-100 pt-4">
                 <StatCell label="Mecze"  value={p.matchLineups.length} />

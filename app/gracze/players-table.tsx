@@ -45,7 +45,7 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
               <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2.5">
-                  <PlayerAvatar firstName={p.firstName} lastName={p.lastName} color={p.team?.color} size="sm" />
+                  <PlayerAvatar firstName={p.firstName} lastName={p.lastName} color={p.team?.color} avatarId={p.avatarId} size="sm" />
                   <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                     <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
                       {p.firstName} {p.lastName}

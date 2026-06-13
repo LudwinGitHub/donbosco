@@ -66,6 +66,7 @@ export type PlayerWithStats = {
   lastName: string
   nickname: string | null
   photoUrl: string | null
+  avatarId: number | null
   team: { id: string; name: string; color: string } | null
   played: number
   goals: number
@@ -104,6 +105,7 @@ export async function getPlayersWithStats(seasonId?: string): Promise<PlayerWith
       lastName:  p.lastName,
       nickname:  p.nickname,
       photoUrl:  p.photoUrl,
+      avatarId:  p.avatarId,
       team:      p.teamPlayers[0]?.team ?? null,
       played:    p.matchLineups.length,
       goals:     p.goalsScored.length,

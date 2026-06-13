@@ -16,6 +16,7 @@ import ThemeProvider from "./theme-provider"
 import ThemeToggle from "./theme-toggle"
 import ChatFab from "./components/chat-fab"
 import BottomNav from "./components/bottom-nav"
+import { Analytics } from "@vercel/analytics/next"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -237,6 +238,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           isOrganizer={session?.role === "ORGANIZER"}
           logoutAction={logout}
         />
+        <Analytics />
         </ThemeProvider>
       </body>
     </html>

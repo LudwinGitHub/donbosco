@@ -373,8 +373,8 @@ function parseWorksheet(ws: ExcelJS.Worksheet): ParsedMatch[] {
       // Sprawdź czy kolumna B (nameCell) jest pusta → koniec meczowych graczy
       if (!nameText) continue
 
-      // Filtruj linie nagłówkowe ("Gracz", "Gole", "Asysty", "$")
-      if (/^gracz$/i.test(nameText) || /^gole$/i.test(nameText)) continue
+      // Drugi nagłówek "Gracz" = koniec sekcji graczy (zaczyna się sekcja podsumowania/rankingu)
+      if (/^gracz$/i.test(nameText) || /^gole$/i.test(nameText)) break
 
       // Parsuj nazwę
       const name = parseName(nameText)

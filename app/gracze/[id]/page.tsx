@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { getPlayerProfile, getPlayerForms, type PlayerForm } from "@/lib/players"
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
+import SeasonChart from "@/app/moj-profil/season-chart"
 
 export default async function PlayerProfilePage({
   params,
@@ -93,6 +94,18 @@ export default async function PlayerProfilePage({
                 ))}
               </tbody>
             </table>
+            {player.seasons.length >= 2 && (
+              <div className="border-t border-zinc-100 p-4">
+                <SeasonChart
+                  data={[...player.seasons].reverse().map(({ season, goals, assists, played }) => ({
+                    seasonName: season.name,
+                    goals,
+                    assists,
+                    played,
+                  }))}
+                />
+              </div>
+            )}
           </div>
         </section>
       )}

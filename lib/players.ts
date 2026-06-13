@@ -9,6 +9,42 @@ export type SeasonChartEntry = {
   played: number
 }
 
+export async function getFavoritePartner(playerId: string): Promise<{
+  id: string
+  firstName: string
+  lastName: string
+  count: number
+} | null> {
+  const [scored, assisted] = await Promise.all([
+    prisma.goal.findMany({
+      where: { scorerId: playerId, isOwnGoal: false, assisterId: { not: null } },
+      select: { assisterId: true },
+    }),
+    prisma.goal.findMany({
+      where: { assisterId: playerId },
+      select: { scorerId: true },
+    }),
+  ])
+
+  const counts = new Map<string, number>()
+  for (const g of scored)   if (g.assisterId) counts.set(g.assisterId, (counts.get(g.assisterId) ?? 0) + 1)
+  for (const g of assisted)                   counts.set(g.scorerId,   (counts.get(g.scorerId)   ?? 0) + 1)
+
+  if (counts.size === 0) return null
+
+  let bestId = "", bestCount = 0
+  for (const [pid, count] of counts) {
+    if (count > bestCount) { bestCount = count; bestId = pid }
+  }
+  if (bestCount < 2) return null
+
+  const partner = await prisma.player.findUnique({
+    where: { id: bestId },
+    select: { id: true, firstName: true, lastName: true },
+  })
+  return partner ? { ...partner, count: bestCount } : null
+}
+
 export async function getSeasonStatsForPlayer(playerId: string): Promise<SeasonChartEntry[]> {
   const [lineups, goals, assists] = await Promise.all([
     prisma.matchLineup.findMany({

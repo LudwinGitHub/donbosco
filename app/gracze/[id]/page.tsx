@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getPlayerProfile, getPlayerForms, type PlayerForm } from "@/lib/players"
+import { getPlayerProfile, getPlayerForms, getFavoritePartner, type PlayerForm } from "@/lib/players"
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
 import SeasonChart from "@/app/moj-profil/season-chart"
@@ -15,6 +15,13 @@ export default async function PlayerProfilePage({
   if (!player) notFound()
   const form = forms.get(id)
   const playerBadges = badges.get(id) ?? []
+
+  const favoritePartner = await getFavoritePartner(id)
+
+  const bestMatch = player.matches.length > 0
+    ? [...player.matches].sort((a, b) => b.goals - a.goals || b.assists - a.assists)[0]
+    : null
+  const hasBestMatch = bestMatch && (bestMatch.goals > 0 || bestMatch.assists > 0)
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -46,6 +53,56 @@ export default async function PlayerProfilePage({
           {player.totalMvp > 0 && <StatCell label="MVP" value={player.totalMvp} />}
         </div>
       </div>
+
+      {/* Highlights: best match + favorite partner */}
+      {(hasBestMatch || favoritePartner) && (
+        <div className="grid grid-cols-2 gap-3">
+          {hasBestMatch && bestMatch && (
+            <Link
+              href={`/mecze/${bestMatch.matchId}`}
+              className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4 transition-colors hover:bg-zinc-50"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Najlepszy mecz</p>
+              <div className="mt-2 flex items-center gap-1.5 min-w-0">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: bestMatch.opponent.color }} />
+                <span className="truncate text-sm font-semibold text-zinc-900">{bestMatch.opponent.name}</span>
+              </div>
+              <p className="mt-0.5 text-xs text-zinc-400">
+                {new Date(bestMatch.date).toLocaleDateString("pl-PL", { day: "numeric", month: "short", year: "numeric" })}
+              </p>
+              <div className="mt-auto pt-3 flex items-baseline gap-2">
+                {bestMatch.goals > 0 && (
+                  <span className="text-2xl font-black text-zinc-900">
+                    {bestMatch.goals}
+                    <span className="ml-1 text-sm font-semibold text-orange-500">{goalLabel(bestMatch.goals)}</span>
+                  </span>
+                )}
+                {bestMatch.assists > 0 && (
+                  <span className="text-sm text-zinc-400">{bestMatch.assists}A</span>
+                )}
+              </div>
+            </Link>
+          )}
+
+          {favoritePartner && (
+            <Link
+              href={`/gracze/${favoritePartner.id}`}
+              className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-4 transition-colors hover:bg-zinc-50"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Ulubiony partner</p>
+              <p className="mt-2 truncate text-sm font-semibold text-zinc-900 leading-tight">
+                {favoritePartner.firstName} {favoritePartner.lastName}
+              </p>
+              <div className="mt-auto pt-3">
+                <span className="text-2xl font-black text-zinc-900">
+                  {favoritePartner.count}
+                  <span className="ml-1 text-sm font-semibold text-zinc-400">{actionLabel(favoritePartner.count)}</span>
+                </span>
+              </div>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Per-season breakdown */}
       {player.seasons.length > 0 && (
@@ -194,4 +251,16 @@ function StatCell({ label, value }: { label: string; value: number }) {
       <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
     </div>
   )
+}
+
+function goalLabel(n: number) {
+  if (n === 1) return "gol"
+  if (n >= 2 && n <= 4) return "gole"
+  return "goli"
+}
+
+function actionLabel(n: number) {
+  if (n === 1) return "akcja"
+  if (n >= 2 && n <= 4) return "akcje"
+  return "akcji"
 }

@@ -34,16 +34,27 @@ export default async function MatchesPage({
 
   const matches = await getMatches(season.id)
 
-  const now = new Date()
-  const nextMatchId = [...matches]
-    .filter((m) => m.status === "SCHEDULED" && new Date(m.scheduledAt) > now)
-    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0]?.id ?? null
+  const isActiveSeason = season.id === activeSeason?.id
 
-  const registrationCounts = season.id === activeSeason?.id
+  const now = new Date()
+  const nextMatch = [...matches]
+    .filter((m) => m.status === "SCHEDULED" && new Date(m.scheduledAt) > now)
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0] ?? null
+  const nextMatchId = nextMatch?.id ?? null
+
+  // Dla aktywnego sezonu pokazujemy tylko rozegrane/odwołane + następny zaplanowany
+  const displayMatches = isActiveSeason
+    ? [
+        ...matches.filter((m) => m.status === "PLAYED" || m.status === "CANCELLED" || m.status === "POSTPONED"),
+        ...(nextMatch ? [nextMatch] : []),
+      ]
+    : matches
+
+  const registrationCounts = isActiveSeason
     ? await prisma.matchRegistration.groupBy({
         by: ["matchId"],
         where: {
-          matchId: { in: matches.map((m) => m.id) },
+          matchId: { in: displayMatches.map((m) => m.id) },
           status: "CONFIRMED",
         },
         _count: { matchId: true },
@@ -53,7 +64,7 @@ export default async function MatchesPage({
     registrationCounts.map((r) => [r.matchId, r._count.matchId])
   )
 
-  const byRound = groupByRound(matches)
+  const byRound = groupByRound(displayMatches)
 
   const sortedSeasons = [...allSeasons].sort(
     (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()

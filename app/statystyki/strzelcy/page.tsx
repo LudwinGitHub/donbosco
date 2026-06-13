@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { getFullScorerRanking, type ScorerRankingRow } from "@/lib/stats"
+import { getFullScorerRanking } from "@/lib/stats"
 import { getActiveSeason, getAllSeasons } from "@/lib/standings"
+import ScorerTable from "./scorer-table"
 
 export default async function StrzelcyPage({
   searchParams,
@@ -59,63 +60,10 @@ export default async function StrzelcyPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                <th className="px-4 py-3 text-right w-8">#</th>
-                <th className="px-4 py-3 text-left">Gracz</th>
-                <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>
-                <th className="px-4 py-3 text-center w-14" title="Gole">G</th>
-                <th className="px-4 py-3 text-center w-14" title="Asysty">A</th>
-                <th className="px-4 py-3 text-center w-14 hidden sm:table-cell" title="Mecze">M</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {rows.map((r, i) => (
-                <ScorerRow key={r.playerId} row={r} rank={i + 1} />
-              ))}
-            </tbody>
-          </table>
+          <ScorerTable rows={rows} />
         </div>
       )}
     </div>
   )
 }
 
-// ─── Components ───────────────────────────────────────────────────────────────
-
-function ScorerRow({ row: r, rank }: { row: ScorerRankingRow; rank: number }) {
-  const isTop3 = rank <= 3
-
-  return (
-    <tr
-      className={`hover:bg-zinc-50 transition-colors ${isTop3 ? "border-l-2" : ""}`}
-      style={isTop3 ? { borderLeftColor: rank === 1 ? "#ca8a04" : rank === 2 ? "#71717a" : "#b45309" } : undefined}
-    >
-      <td className="px-4 py-3 text-right text-xs text-zinc-300">{rank}</td>
-      <td className="px-4 py-3">
-        <Link href={`/gracze/${r.playerId}`} className="font-medium text-zinc-900 hover:underline">
-          {r.firstName} {r.lastName}
-        </Link>
-        {r.nickname && (
-          <p className="text-xs text-zinc-400">{r.nickname}</p>
-        )}
-      </td>
-      <td className="px-4 py-3 hidden sm:table-cell">
-        {r.teamName ? (
-          <div className="flex items-center gap-1.5">
-            {r.teamColor && (
-              <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: r.teamColor }} />
-            )}
-            <span className="text-zinc-600">{r.teamName}</span>
-          </div>
-        ) : (
-          <span className="text-zinc-300">—</span>
-        )}
-      </td>
-      <td className="px-4 py-3 text-center font-bold text-zinc-900">{r.goals}</td>
-      <td className="px-4 py-3 text-center text-zinc-600">{r.assists}</td>
-      <td className="px-4 py-3 text-center text-zinc-400 hidden sm:table-cell">{r.matches}</td>
-    </tr>
-  )
-}

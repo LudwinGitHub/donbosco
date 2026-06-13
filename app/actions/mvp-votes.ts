@@ -31,6 +31,7 @@ export async function castMvpVote(matchId: string, nomineeId: string) {
   })
 
   revalidatePath(`/mecze/${matchId}`)
+  revalidatePath("/glosowanie")
 }
 
 export async function removeMvpVote(matchId: string) {
@@ -39,4 +40,5 @@ export async function removeMvpVote(matchId: string) {
     where: { matchId, voterId: session.userId },
   })
   revalidatePath(`/mecze/${matchId}`)
+  revalidatePath("/glosowanie")
 }

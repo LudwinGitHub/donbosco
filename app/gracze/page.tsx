@@ -3,9 +3,9 @@ import Link from "next/link"
 import { getAllSeasons } from "@/lib/standings"
 import { getPlayersWithStats, getPlayerForms, type PlayerWithStats, type PlayerForm } from "@/lib/players"
 import { getActiveBadges, type PlayerBadge } from "@/lib/badges"
-import BadgeChip from "@/app/ui/badge-chip"
-import PlayerAvatar from "@/app/ui/player-avatar"
 import EmptyState, { IconUsers } from "@/app/ui/empty-state"
+import BadgeChip from "@/app/ui/badge-chip"
+import PlayersTable from "./players-table"
 
 export default async function PlayersPage({
   searchParams,
@@ -26,11 +26,11 @@ export default async function PlayersPage({
   ])
   const currentSeason = seasons.find((s) => s.id === seasonId) ?? null
 
-  const displayPlayers = (() => {
-    if (sort === "goals")   return [...players].sort((a, b) => b.goals   - a.goals   || b.assists - a.assists || a.lastName.localeCompare(b.lastName))
-    if (sort === "assists") return [...players].sort((a, b) => b.assists - a.assists || b.goals   - a.goals   || a.lastName.localeCompare(b.lastName))
-    return players
-  })()
+  // Convert Maps to plain objects for client component serialization
+  const badgesObj = Object.fromEntries(badges) as Record<string, Array<{ type: import("@/lib/badges").BadgeType }>>
+  const formsObj  = Object.fromEntries(forms)  as Record<string, import("@/lib/players").PlayerForm>
+
+  const initialSort = (sort === "goals" || sort === "assists") ? sort : "played"
 
   return (
     <div className="space-y-5">
@@ -84,79 +84,14 @@ export default async function PlayersPage({
             />
           </div>
 
-          {/* Players table */}
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                  <th className="px-4 py-3 text-right w-8">#</th>
-                  <th className="px-4 py-3 text-left">Gracz</th>
-                  {seasonId && <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>}
-                  <th className="px-4 py-3 text-center w-10" title="Forma">F</th>
-                  <SortHeader label="M" title="Mecze"  sortKey="played"  currentSort={sort} seasonId={seasonId} />
-                  <SortHeader label="G" title="Gole"   sortKey="goals"   currentSort={sort} seasonId={seasonId} />
-                  <SortHeader label="A" title="Asysty" sortKey="assists" currentSort={sort} seasonId={seasonId} />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 stagger">
-                {displayPlayers.map((p, i) => (
-                  <tr key={p.id} className="transition-colors hover:bg-zinc-50">
-                    <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <PlayerAvatar
-                          firstName={p.firstName}
-                          lastName={p.lastName}
-                          color={p.team?.color}
-                          size="sm"
-                        />
-                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                          <Link href={`/gracze/${p.id}`} className="font-medium text-zinc-900 hover:underline">
-                            {p.firstName} {p.lastName}
-                          </Link>
-                          {p.nickname && (
-                            <span className="text-xs text-zinc-400">„{p.nickname}"</span>
-                          )}
-                          {(badges.get(p.id) ?? []).map((b, i) => (
-                            <BadgeChip key={i} type={b.type} />
-                          ))}
-                        </div>
-                      </div>
-                    </td>
-                    {seasonId && (
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        {p.team ? (
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="h-2.5 w-2.5 rounded-full shrink-0"
-                              style={{ backgroundColor: p.team.color }}
-                            />
-                            <span className="text-zinc-600">{p.team.name}</span>
-                          </div>
-                        ) : (
-                          <span className="text-zinc-300">—</span>
-                        )}
-                      </td>
-                    )}
-                    <td className="px-4 py-3 text-center">
-                      <FormArrow form={forms.get(p.id)} />
-                    </td>
-                    <td className="px-4 py-3 text-center text-zinc-600">{p.played}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={p.goals > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
-                        {p.goals}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
-                        {p.assists}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Players table — client component handles sort */}
+          <PlayersTable
+            players={players}
+            badges={badgesObj}
+            forms={formsObj}
+            seasonId={seasonId}
+            initialSort={initialSort}
+          />
           {/* Badge legend */}
           <div className="rounded-xl border border-zinc-200 bg-white p-4">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Legenda odznak</p>
@@ -255,36 +190,6 @@ function StatCard({
   )
 }
 
-function SortHeader({
-  label, title, sortKey, currentSort, seasonId,
-}: {
-  label: string; title: string; sortKey: string; currentSort?: string; seasonId?: string
-}) {
-  const isActive = currentSort === sortKey || (!currentSort && sortKey === "played")
-  const params = new URLSearchParams()
-  if (seasonId) params.set("sezon", seasonId)
-  params.set("sort", sortKey)
-  return (
-    <th className="px-4 py-3 text-center w-14" title={title}>
-      <Link
-        href={`/gracze?${params.toString()}`}
-        className={`inline-flex items-center gap-0.5 transition-colors ${
-          isActive ? "text-orange-600 font-semibold" : "hover:text-zinc-600"
-        }`}
-      >
-        {label}
-        {isActive && <span className="text-[9px]">▼</span>}
-      </Link>
-    </th>
-  )
-}
-
-function FormArrow({ form }: { form: PlayerForm | undefined }) {
-  if (!form) return null
-  if (form === "up")   return <span className="text-sm font-black leading-none text-orange-500" title="Forma w górę">▲</span>
-  if (form === "down") return <span className="text-sm font-black leading-none text-red-500" title="Forma w dół">▼</span>
-  return <span className="text-sm font-black leading-none text-zinc-400" title="Forma stabilna">—</span>
-}
 
 function goalLabel(n: number) {
   if (n === 1) return "gol"

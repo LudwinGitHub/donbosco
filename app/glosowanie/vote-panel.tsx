@@ -1,5 +1,6 @@
 "use client"
-import { useState, useEffect, useTransition } from "react"
+import { useState, useEffect, useTransition, useOptimistic } from "react"
+import { useRouter } from "next/navigation"
 import { castDrawVote } from "@/app/actions/draws"
 
 type PlayerInfo = { id: string; firstName: string; lastName: string; nickname: string | null }
@@ -26,22 +27,37 @@ type VotingState = "upcoming" | "active" | "closed"
 
 export default function VotePanel(props: VotePanelProps) {
   const {
-    matchId, scheduledAtISO, windowOpenAtISO, windowCloseAtISO,
-    optionA, optionB, votesA, votesB, totalVotes,
-    userVote, isLoggedIn, maxVotes,
+    matchId, windowOpenAtISO, windowCloseAtISO,
+    optionA, optionB,
+    userVote, votesA, votesB, totalVotes,
+    isLoggedIn, maxVotes,
     homeTeamName, awayTeamName,
   } = props
 
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [timeDisplay, setTimeDisplay] = useState("")
   const [votingState, setVotingState] = useState<VotingState>("upcoming")
-  const [isPending,   startTransition] = useTransition()
 
+  // ── Optimistic state — instant UI feedback before server confirms ──────────
+  const [opt, updateOpt] = useOptimistic(
+    { userVote, votesA, votesB, totalVotes },
+    (state, newVote: "A" | "B" | null) => {
+      let a = state.votesA, b = state.votesB, t = state.totalVotes
+      if (state.userVote === "A") { a = Math.max(0, a - 1); t = Math.max(0, t - 1) }
+      if (state.userVote === "B") { b = Math.max(0, b - 1); t = Math.max(0, t - 1) }
+      if (newVote === "A") { a++; t++ }
+      if (newVote === "B") { b++; t++ }
+      return { userVote: newVote, votesA: a, votesB: b, totalVotes: t }
+    }
+  )
+
+  // ── Clock ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const tick = () => {
-      const now        = Date.now()
-      const windowMs   = new Date(windowOpenAtISO).getTime()
-      const closeMs    = new Date(windowCloseAtISO).getTime()
-
+      const now     = Date.now()
+      const windowMs = new Date(windowOpenAtISO).getTime()
+      const closeMs  = new Date(windowCloseAtISO).getTime()
       if (totalVotes >= maxVotes || now >= closeMs) {
         setVotingState("closed")
         setTimeDisplay("Głosowanie zakończone")
@@ -60,14 +76,23 @@ export default function VotePanel(props: VotePanelProps) {
     return () => clearInterval(id)
   }, [windowOpenAtISO, windowCloseAtISO, totalVotes, maxVotes])
 
+  // ── Live polling — refresh server data every 12s when voting is active ─────
+  useEffect(() => {
+    if (votingState !== "active") return
+    const id = setInterval(() => router.refresh(), 12_000)
+    return () => clearInterval(id)
+  }, [votingState, router])
+
+  // ── Vote handler ───────────────────────────────────────────────────────────
   const vote = (choice: "A" | "B" | null) => {
     if (!isLoggedIn || isPending || votingState !== "active") return
     startTransition(async () => {
+      updateOpt(choice)
       await castDrawVote(matchId, choice)
     })
   }
 
-  const pctA = totalVotes === 0 ? 50 : Math.round((votesA / totalVotes) * 100)
+  const pctA = opt.totalVotes === 0 ? 50 : Math.round((opt.votesA / opt.totalVotes) * 100)
 
   return (
     <div className="space-y-4">
@@ -91,16 +116,16 @@ export default function VotePanel(props: VotePanelProps) {
       </div>
 
       {/* Vote tally */}
-      {totalVotes > 0 && (
+      {opt.totalVotes > 0 && (
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-zinc-400">
-            <span>Opcja A — {votesA} {voteLabel(votesA)}</span>
-            <span className="font-medium text-zinc-500">{totalVotes}/{maxVotes}</span>
-            <span>Opcja B — {votesB} {voteLabel(votesB)}</span>
+            <span>Opcja A — {opt.votesA} {voteLabel(opt.votesA)}</span>
+            <span className="font-medium text-zinc-500">{opt.totalVotes}/{maxVotes}</span>
+            <span>Opcja B — {opt.votesB} {voteLabel(opt.votesB)}</span>
           </div>
           <div className="flex h-2 overflow-hidden rounded-full bg-amber-100">
             <div
-              className="h-full rounded-full bg-blue-400 transition-all duration-700"
+              className="h-full rounded-full bg-blue-400 transition-all duration-500"
               style={{ width: `${pctA}%` }}
             />
           </div>
@@ -110,32 +135,20 @@ export default function VotePanel(props: VotePanelProps) {
       {/* Option cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <OptionCard
-          label="Opcja A"
-          accentColor="#3b82f6"
-          option={optionA}
-          votes={votesA}
-          totalVotes={totalVotes}
-          isChosen={userVote === "A"}
-          votingState={votingState}
-          isLoggedIn={isLoggedIn}
-          isPending={isPending}
-          onVote={() => vote(userVote === "A" ? null : "A")}
-          homeTeamName={homeTeamName}
-          awayTeamName={awayTeamName}
+          label="Opcja A" accentColor="#3b82f6"
+          option={optionA} votes={opt.votesA} totalVotes={opt.totalVotes}
+          isChosen={opt.userVote === "A"}
+          votingState={votingState} isLoggedIn={isLoggedIn} isPending={isPending}
+          onVote={() => vote(opt.userVote === "A" ? null : "A")}
+          homeTeamName={homeTeamName} awayTeamName={awayTeamName}
         />
         <OptionCard
-          label="Opcja B"
-          accentColor="#f59e0b"
-          option={optionB}
-          votes={votesB}
-          totalVotes={totalVotes}
-          isChosen={userVote === "B"}
-          votingState={votingState}
-          isLoggedIn={isLoggedIn}
-          isPending={isPending}
-          onVote={() => vote(userVote === "B" ? null : "B")}
-          homeTeamName={homeTeamName}
-          awayTeamName={awayTeamName}
+          label="Opcja B" accentColor="#f59e0b"
+          option={optionB} votes={opt.votesB} totalVotes={opt.totalVotes}
+          isChosen={opt.userVote === "B"}
+          votingState={votingState} isLoggedIn={isLoggedIn} isPending={isPending}
+          onVote={() => vote(opt.userVote === "B" ? null : "B")}
+          homeTeamName={homeTeamName} awayTeamName={awayTeamName}
         />
       </div>
 
@@ -158,30 +171,29 @@ function OptionCard({
   isChosen, votingState, isLoggedIn, isPending, onVote,
   homeTeamName, awayTeamName,
 }: {
-  label:         string
-  accentColor:   string
-  option:        DrawOption
-  votes:         number
-  totalVotes:    number
-  isChosen:      boolean
-  votingState:   VotingState
-  isLoggedIn:    boolean
-  isPending:     boolean
-  onVote:        () => void
-  homeTeamName:  string
-  awayTeamName:  string
+  label:        string
+  accentColor:  string
+  option:       DrawOption
+  votes:        number
+  totalVotes:   number
+  isChosen:     boolean
+  votingState:  VotingState
+  isLoggedIn:   boolean
+  isPending:    boolean
+  onVote:       () => void
+  homeTeamName: string
+  awayTeamName: string
 }) {
   const pct      = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
   const otherVotes = totalVotes - votes
-  const isWinner = votingState === "closed" && totalVotes > 0 && votes > otherVotes
+  const isWinner   = votingState === "closed" && totalVotes > 0 && votes > otherVotes
 
   return (
-    <div className={`overflow-hidden rounded-xl border transition-colors ${
+    <div className={`overflow-hidden rounded-xl border transition-all duration-300 ${
       isWinner ? "border-green-300 bg-green-50" :
       isChosen ? "border-zinc-400 bg-zinc-50"   :
                  "border-zinc-200 bg-white"
     }`}>
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
         <span className="flex items-center gap-2 text-sm font-semibold text-zinc-800">
           <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: accentColor }} />
@@ -196,25 +208,28 @@ function OptionCard({
         )}
       </div>
 
-      {/* Player lists */}
       <div className="p-4 space-y-3">
         <TeamMini label={homeTeamName} players={option.team1} />
         <TeamMini label={awayTeamName} players={option.team2} />
       </div>
 
-      {/* Vote button — only when active and logged in */}
       {votingState === "active" && isLoggedIn && (
         <div className="px-4 pb-4">
           <button
             onClick={onVote}
             disabled={isPending}
-            className={`w-full rounded-lg py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+            className={`w-full rounded-lg py-2 text-sm font-medium transition-all duration-150 disabled:opacity-60 ${
               isChosen
                 ? "bg-zinc-800 text-white hover:bg-zinc-600"
                 : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"
             }`}
           >
-            {isChosen ? "Wycofaj głos" : `Głosuję za ${label}`}
+            {isPending ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Zapisuję…
+              </span>
+            ) : isChosen ? "Wycofaj głos" : `Głosuję za ${label}`}
           </button>
         </div>
       )}

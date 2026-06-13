@@ -148,9 +148,9 @@ export default function BadgeChip({ type }: { type: BadgeType }) {
 
       {/* Tooltip */}
       {open && (
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-zinc-700/60 bg-zinc-900 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-lg dark:border-white/10 dark:bg-zinc-800 max-[400px]:left-0 max-[400px]:translate-x-0">
+        <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-zinc-700/60 bg-zinc-900 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-lg dark:border-white/10 dark:bg-zinc-800 max-sm:left-0 max-sm:translate-x-0">
           {label}
-          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-800 max-[400px]:left-3 max-[400px]:translate-x-0" />
+          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-800 max-sm:left-3 max-sm:translate-x-0" />
         </span>
       )}
     </span>

@@ -34,7 +34,7 @@ export default function AvatarPicker({ current }: { current: number | null }) {
           </button>
         )}
       </div>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
         {AVATARS.map((av) => {
           const active = selected === av.id
           return (
@@ -43,7 +43,7 @@ export default function AvatarPicker({ current }: { current: number | null }) {
               onClick={() => pick(av.id)}
               disabled={pending}
               title={av.name}
-              className={`group flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all ${
+              className={`group flex flex-col items-center gap-1.5 rounded-xl p-1.5 sm:p-2 transition-all ${
                 active
                   ? "bg-orange-50 ring-2 ring-orange-500"
                   : "hover:bg-zinc-50 ring-1 ring-transparent hover:ring-zinc-200"

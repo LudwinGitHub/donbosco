@@ -110,62 +110,53 @@ export default async function PlayerProfilePage({
                 : myScore > oppScore ? "W"
                 : myScore < oppScore ? "L"
                 : "D"
+              const resultCls = result === "W" ? "text-green-600" : result === "L" ? "text-red-500" : "text-zinc-400"
+              const date = new Date(m.date).toLocaleDateString("pl-PL", { day: "numeric", month: "short", year: "numeric" })
 
               return (
                 <Link
                   key={m.matchId}
                   href={`/mecze/${m.matchId}`}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-zinc-50 transition-colors"
+                  className="block px-4 py-3 hover:bg-zinc-50 transition-colors"
                 >
-                  <div className="w-24 shrink-0 text-xs text-zinc-400">
-                    {new Date(m.date).toLocaleDateString("pl-PL", { day: "numeric", month: "short", year: "numeric" })}
-                  </div>
-
-                  <div className="flex flex-1 items-center gap-2 min-w-0">
-                    <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: m.opponent.color }} />
-                    <span className="truncate text-sm text-zinc-700">{m.opponent.name}</span>
-                  </div>
-
-                  {result && (
-                    <span className={`hidden sm:inline shrink-0 w-6 text-center text-xs font-bold ${
-                      result === "W" ? "text-green-600"
-                      : result === "L" ? "text-red-500"
-                      : "text-zinc-400"
-                    }`}>
-                      {result}
-                    </span>
-                  )}
-
-                  {m.homeScore != null && (
-                    <span className="hidden sm:inline shrink-0 w-12 text-center text-sm font-semibold tabular-nums text-zinc-700">
-                      {m.homeScore}:{m.awayScore}
-                    </span>
-                  )}
-
-                  {result && (
-                    <span className={`sm:hidden shrink-0 text-xs font-bold tabular-nums ${
-                      result === "W" ? "text-green-600"
-                      : result === "L" ? "text-red-500"
-                      : "text-zinc-400"
-                    }`}>
-                      {m.homeScore != null ? `${m.homeScore}:${m.awayScore}` : result}
-                    </span>
-                  )}
-
-                  <div className="shrink-0 flex items-center gap-2 text-xs">
-                    {m.goals > 0 && (
-                      <span className="rounded-full bg-orange-500 px-2 py-0.5 font-semibold text-white">
-                        {m.goals}G
+                  {/* Desktop: single-line layout */}
+                  <div className="hidden sm:flex sm:items-center sm:gap-4">
+                    <div className="w-24 shrink-0 text-xs text-zinc-400">{date}</div>
+                    <div className="flex flex-1 items-center gap-2 min-w-0">
+                      <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: m.opponent.color }} />
+                      <span className="truncate text-sm text-zinc-700">{m.opponent.name}</span>
+                    </div>
+                    {result && <span className={`shrink-0 w-6 text-center text-xs font-bold ${resultCls}`}>{result}</span>}
+                    {m.homeScore != null && (
+                      <span className="shrink-0 w-12 text-center text-sm font-semibold tabular-nums text-zinc-700">
+                        {m.homeScore}:{m.awayScore}
                       </span>
                     )}
-                    {m.assists > 0 && (
-                      <span className="rounded-full border border-zinc-200 px-2 py-0.5 font-semibold text-zinc-600">
-                        {m.assists}A
-                      </span>
-                    )}
+                    <div className="shrink-0 flex items-center gap-1.5 text-xs">
+                      {m.goals > 0 && <span className="rounded-full bg-orange-500 px-2 py-0.5 font-semibold text-white">{m.goals}G</span>}
+                      {m.assists > 0 && <span className="rounded-full border border-zinc-200 px-2 py-0.5 font-semibold text-zinc-600">{m.assists}A</span>}
+                    </div>
+                    <span className="text-zinc-300 text-sm">›</span>
                   </div>
 
-                  <span className="text-zinc-300 text-sm">›</span>
+                  {/* Mobile: 2-line layout */}
+                  <div className="sm:hidden">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: m.opponent.color }} />
+                      <span className="flex-1 truncate text-sm font-medium text-zinc-700">{m.opponent.name}</span>
+                      {result && (
+                        <span className={`shrink-0 text-xs font-bold tabular-nums ${resultCls}`}>
+                          {m.homeScore != null ? `${m.homeScore}:${m.awayScore}` : result}
+                        </span>
+                      )}
+                      <span className="text-zinc-300 text-sm">›</span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 pl-4">
+                      <span className="text-[11px] text-zinc-400">{date}</span>
+                      {m.goals > 0 && <span className="rounded-full bg-orange-500 px-1.5 py-px text-[11px] font-semibold text-white">{m.goals}G</span>}
+                      {m.assists > 0 && <span className="rounded-full border border-zinc-200 px-1.5 py-px text-[11px] font-semibold text-zinc-600">{m.assists}A</span>}
+                    </div>
+                  </div>
                 </Link>
               )
             })}

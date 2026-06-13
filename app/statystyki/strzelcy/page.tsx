@@ -59,7 +59,7 @@ export default async function StrzelcyPage({
           Brak danych
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
           <ScorerTable rows={rows} />
         </div>
       )}

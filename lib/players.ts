@@ -2,6 +2,59 @@ import { prisma } from "./prisma"
 
 export type PlayerForm = "up" | "down" | "stable"
 
+export type SeasonChartEntry = {
+  seasonName: string
+  goals: number
+  assists: number
+  played: number
+}
+
+export async function getSeasonStatsForPlayer(playerId: string): Promise<SeasonChartEntry[]> {
+  const [lineups, goals, assists] = await Promise.all([
+    prisma.matchLineup.findMany({
+      where: { playerId, match: { status: "PLAYED" } },
+      select: {
+        matchId: true,
+        match: { select: { seasonId: true, season: { select: { name: true, startDate: true } } } },
+      },
+    }),
+    prisma.goal.findMany({
+      where: { scorerId: playerId, isOwnGoal: false },
+      select: { matchId: true },
+    }),
+    prisma.goal.findMany({
+      where: { assisterId: playerId },
+      select: { matchId: true },
+    }),
+  ])
+
+  const goalsByMatch = new Map<string, number>()
+  for (const g of goals) goalsByMatch.set(g.matchId, (goalsByMatch.get(g.matchId) ?? 0) + 1)
+  const assistsByMatch = new Map<string, number>()
+  for (const a of assists) assistsByMatch.set(a.matchId, (assistsByMatch.get(a.matchId) ?? 0) + 1)
+
+  type Acc = { seasonName: string; startDate: Date; goals: number; assists: number; played: number; seen: Set<string> }
+  const map = new Map<string, Acc>()
+
+  for (const l of lineups) {
+    const sid = l.match.seasonId
+    if (!map.has(sid)) {
+      map.set(sid, { seasonName: l.match.season.name, startDate: l.match.season.startDate, goals: 0, assists: 0, played: 0, seen: new Set() })
+    }
+    const s = map.get(sid)!
+    if (!s.seen.has(l.matchId)) {
+      s.seen.add(l.matchId)
+      s.played++
+      s.goals   += goalsByMatch.get(l.matchId)   ?? 0
+      s.assists += assistsByMatch.get(l.matchId) ?? 0
+    }
+  }
+
+  return [...map.values()]
+    .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    .map(({ seasonName, goals, assists, played }) => ({ seasonName, goals, assists, played }))
+}
+
 export async function getPlayerForms(): Promise<Map<string, PlayerForm>> {
   const last3 = await prisma.match.findMany({
     where: { status: "PLAYED" },

@@ -8,6 +8,8 @@ import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
 import PlayerAvatar from "@/app/ui/player-avatar"
 import AvatarPicker from "./avatar-picker"
+import SeasonChart from "./season-chart"
+import { getSeasonStatsForPlayer } from "@/lib/players"
 
 export default async function MyProfilePage({
   searchParams,
@@ -219,6 +221,7 @@ export default async function MyProfilePage({
     }
 
     let matchHistory: MatchHistoryEntry[] = []
+    const seasonStats = !tab ? await getSeasonStatsForPlayer(p.id) : []
 
     if (tab === "historia") {
       const rawLineups = await prisma.matchLineup.findMany({
@@ -312,6 +315,13 @@ export default async function MyProfilePage({
                 <StatCell label="MVP"    value={mvpCount} />
               </div>
             </div>
+
+            {seasonStats.length >= 2 && (
+              <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Postęp sezonowy</p>
+                <SeasonChart data={seasonStats} />
+              </div>
+            )}
 
             {registrationsSection}
 

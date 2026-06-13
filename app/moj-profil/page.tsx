@@ -9,7 +9,7 @@ import BadgeChip from "@/app/ui/badge-chip"
 import PlayerAvatar from "@/app/ui/player-avatar"
 import AvatarPicker from "./avatar-picker"
 import SeasonChart from "./season-chart"
-import { getSeasonStatsForPlayer } from "@/lib/players"
+import { getSeasonStatsForPlayer, getBestMatch, getFavoritePartner } from "@/lib/players"
 
 export default async function MyProfilePage({
   searchParams,
@@ -221,7 +221,13 @@ export default async function MyProfilePage({
     }
 
     let matchHistory: MatchHistoryEntry[] = []
-    const seasonStats = !tab ? await getSeasonStatsForPlayer(p.id) : []
+    const [seasonStats, bestMatch, favoritePartner] = !tab
+      ? await Promise.all([
+          getSeasonStatsForPlayer(p.id),
+          getBestMatch(p.id),
+          getFavoritePartner(p.id),
+        ])
+      : [[], null, null]
 
     if (tab === "historia") {
       const rawLineups = await prisma.matchLineup.findMany({
@@ -315,6 +321,52 @@ export default async function MyProfilePage({
                 <StatCell label="MVP"    value={mvpCount} />
               </div>
             </div>
+
+            {(bestMatch || favoritePartner) && (
+              <div className="grid grid-cols-2 gap-3">
+                {bestMatch && (
+                  <Link
+                    href={`/mecze/${bestMatch.matchId}`}
+                    className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-4 transition-colors hover:bg-zinc-50"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Najlepszy mecz</p>
+                    <div className="mt-2 flex items-center gap-1.5 min-w-0">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: bestMatch.opponent.color }} />
+                      <span className="truncate text-sm font-semibold text-zinc-900">{bestMatch.opponent.name}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-zinc-400">
+                      {new Date(bestMatch.date).toLocaleDateString("pl-PL", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                    <div className="mt-auto pt-3 flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-zinc-900">
+                        {bestMatch.goals}
+                        <span className="ml-1 text-sm font-semibold text-orange-500">{goalLabel(bestMatch.goals)}</span>
+                      </span>
+                      {bestMatch.assists > 0 && (
+                        <span className="text-sm text-zinc-400">{bestMatch.assists}A</span>
+                      )}
+                    </div>
+                  </Link>
+                )}
+                {favoritePartner && (
+                  <Link
+                    href={`/gracze/${favoritePartner.id}`}
+                    className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-4 transition-colors hover:bg-zinc-50"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Ulubiony partner</p>
+                    <p className="mt-2 truncate text-sm font-semibold text-zinc-900 leading-tight">
+                      {favoritePartner.firstName} {favoritePartner.lastName}
+                    </p>
+                    <div className="mt-auto pt-3">
+                      <span className="text-2xl font-black text-zinc-900">
+                        {favoritePartner.count}
+                        <span className="ml-1 text-sm font-semibold text-zinc-400">{actionLabel(favoritePartner.count)}</span>
+                      </span>
+                    </div>
+                  </Link>
+                )}
+              </div>
+            )}
 
             {seasonStats.length >= 2 && (
               <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
@@ -513,6 +565,18 @@ function StatCell({ label, value }: { label: string; value: number }) {
       <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
     </div>
   )
+}
+
+function goalLabel(n: number) {
+  if (n === 1) return "gol"
+  if (n >= 2 && n <= 4) return "gole"
+  return "goli"
+}
+
+function actionLabel(n: number) {
+  if (n === 1) return "akcja"
+  if (n >= 2 && n <= 4) return "akcje"
+  return "akcji"
 }
 
 function PaymentBadge({ status }: { status: string }) {

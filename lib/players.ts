@@ -9,6 +9,58 @@ export type SeasonChartEntry = {
   played: number
 }
 
+export async function getBestMatch(playerId: string): Promise<{
+  matchId:   string
+  date:      Date
+  opponent:  { id: string; name: string; color: string }
+  homeScore: number | null
+  awayScore: number | null
+  goals:     number
+  assists:   number
+} | null> {
+  const goals = await prisma.goal.findMany({
+    where: { scorerId: playerId, isOwnGoal: false },
+    select: { matchId: true },
+  })
+  if (goals.length === 0) return null
+
+  const countByMatch = new Map<string, number>()
+  for (const g of goals) countByMatch.set(g.matchId, (countByMatch.get(g.matchId) ?? 0) + 1)
+
+  const [bestMatchId, bestGoals] = [...countByMatch.entries()].sort((a, b) => b[1] - a[1])[0]
+
+  const [match, lineup, assists] = await Promise.all([
+    prisma.match.findUnique({
+      where: { id: bestMatchId },
+      select: {
+        scheduledAt: true,
+        homeScore:   true,
+        awayScore:   true,
+        homeTeam: { select: { id: true, name: true, color: true } },
+        awayTeam: { select: { id: true, name: true, color: true } },
+      },
+    }),
+    prisma.matchLineup.findFirst({
+      where: { matchId: bestMatchId, playerId },
+      select: { teamId: true },
+    }),
+    prisma.goal.count({ where: { assisterId: playerId, matchId: bestMatchId } }),
+  ])
+
+  if (!match) return null
+  const opponent = match.homeTeam.id === lineup?.teamId ? match.awayTeam : match.homeTeam
+
+  return {
+    matchId:   bestMatchId,
+    date:      match.scheduledAt,
+    opponent,
+    homeScore: match.homeScore,
+    awayScore: match.awayScore,
+    goals:     bestGoals,
+    assists,
+  }
+}
+
 export async function getFavoritePartner(playerId: string): Promise<{
   id: string
   firstName: string

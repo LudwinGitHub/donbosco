@@ -120,7 +120,8 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
 
         {/* Glow blobs — both edges */}
         <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-orange-500/10 blur-3xl" />
-        <div className="absolute -top-8 -left-8  w-40 h-40 rounded-full bg-orange-500/[0.06] blur-3xl" />
+        <div className="absolute -top-4 right-16   w-56 h-56 rounded-full bg-orange-500/[0.10] blur-3xl" />
+        <div className="absolute -top-8 -left-8    w-40 h-40 rounded-full bg-orange-500/[0.06] blur-3xl" />
 
         {/* Edge accent lines */}
         <div className="absolute left-0  top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
@@ -140,60 +141,61 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
           <line x1="0" y1="42" x2="248" y2="44" strokeWidth="1.3" />
           <line x1="0" y1="50" x2="210" y2="51" strokeWidth="1" />
           <line x1="0" y1="58" x2="150" y2="59" strokeWidth="0.8" />
-          {/* zigzag flame silhouette at left edge */}
-          <path d="M 0 64 L 6 46 L 12 56 L 18 32 L 24 48 L 30 18 L 36 38 L 42 24 L 48 40 L 54 30 L 60 46 L 66 36 L 72 48" strokeWidth="1.6" />
-          <path d="M 0 64 L 10 54 L 18 60 L 26 44 L 34 56 L 42 36 L 50 50 L 60 42 L 70 52" strokeWidth="1.1" />
         </svg>
 
-        {/* ── RIGHT: layered fire crown + radiating lines + football ── */}
+        {/* ── RIGHT: ball radiance ── */}
         <svg
           aria-hidden="true"
           viewBox="0 0 390 96"
-          className="absolute right-0 bottom-[-24px] h-[96px] w-[390px] text-orange-500/[0.11] dark:text-orange-500/[0.18]"
-          fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+          className="absolute right-0 bottom-[-24px] h-[96px] w-[390px]"
+          fill="none" strokeLinecap="round"
         >
-          {/* ── LAYER 1 — outer flame crown (tallest zigzag) ── */}
-          <path
-            d="M 0 96 L 14 68 L 26 80 L 40 50 L 54 70 L 68 32 L 82 56 L 96 14 L 110 50 L 122 10 L 136 44 L 148 14 L 162 46 L 174 20 L 188 52 L 200 28 L 212 54 L 224 40 L 236 58 L 248 50"
-            strokeWidth="2.2"
-          />
-          {/* ── LAYER 2 — mid flame zigzag ── */}
-          <path
-            d="M 0 96 L 10 76 L 18 84 L 30 60 L 42 74 L 56 42 L 70 62 L 84 28 L 98 56 L 112 22 L 126 50 L 140 30 L 154 54 L 166 38 L 180 58 L 194 44 L 208 60 L 224 50 L 238 60 L 248 54"
-            strokeWidth="1.6"
-          />
-          {/* ── LAYER 3 — inner base zigzag ── */}
-          <path
-            d="M 0 96 L 18 84 L 36 90 L 58 74 L 78 86 L 100 66 L 122 78 L 144 68 L 166 78 L 188 70 L 210 76 L 234 70 L 248 66"
-            strokeWidth="1.1"
-          />
-          {/* ── SPIKE LINES (individual flame tongues) ── */}
-          <line x1="68"  y1="80" x2="52"  y2="22" strokeWidth="1.6" />
-          <line x1="96"  y1="82" x2="88"  y2="12" strokeWidth="1.8" />
-          <line x1="122" y1="80" x2="120" y2="8"  strokeWidth="2" />
-          <line x1="148" y1="80" x2="152" y2="12" strokeWidth="2" />
-          <line x1="174" y1="80" x2="186" y2="16" strokeWidth="1.8" />
-          <line x1="200" y1="82" x2="212" y2="24" strokeWidth="1.6" />
-          <line x1="44"  y1="78" x2="30"  y2="36" strokeWidth="1.4" />
-          <line x1="224" y1="78" x2="236" y2="36" strokeWidth="1.4" />
-          {/* ── RADIATING LINES FROM FOOTBALL ── */}
-          <line x1="280" y1="38" x2="232" y2="20" strokeWidth="1.2" />
-          <line x1="272" y1="28" x2="218" y2="10" strokeWidth="1" />
-          <line x1="260" y1="22" x2="202" y2="6"  strokeWidth="1" />
-          <line x1="258" y1="52" x2="200" y2="52" strokeWidth="1.2" />
-          <line x1="272" y1="66" x2="228" y2="80" strokeWidth="1" />
-          <line x1="282" y1="72" x2="252" y2="86" strokeWidth="1" />
-          <line x1="264" y1="40" x2="214" y2="26" strokeWidth="1" />
-          <line x1="264" y1="64" x2="218" y2="76" strokeWidth="1" />
-          {/* ── FOOTBALL: cx=314 cy=52 r=32 ── */}
-          <circle cx="314" cy="52" r="32" strokeWidth="2.5" />
-          {/* pentagon inner r=16, top vertex up */}
-          <polygon points="314,36 329,47 324,65 304,65 299,47" strokeWidth="1.6" />
-          <line x1="314" y1="36" x2="314" y2="20" strokeWidth="1.5" />
-          <line x1="329" y1="47" x2="344" y2="42" strokeWidth="1.5" />
-          <line x1="324" y1="65" x2="334" y2="78" strokeWidth="1.5" />
-          <line x1="304" y1="65" x2="294" y2="78" strokeWidth="1.5" />
-          <line x1="299" y1="47" x2="284" y2="42" strokeWidth="1.5" />
+          <defs>
+            <radialGradient id="nbg1" cx="314" cy="52" r="340" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor="#ff5a00" stopOpacity="0.30" />
+              <stop offset="18%"  stopColor="#ff5a00" stopOpacity="0.14" />
+              <stop offset="48%"  stopColor="#ff5a00" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#ff5a00" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* Glow fill */}
+          <rect x="0" y="0" width="390" height="96" fill="url(#nbg1)" />
+          {/* Radiating rays — from football (314,52), strongest left (180°), fading right */}
+          <line x1="314" y1="52" x2="-86" y2="52"   stroke="#ff5a00" strokeOpacity="0.22" strokeWidth="1.4" />
+          <line x1="314" y1="52" x2="-73" y2="155"  stroke="#ff5a00" strokeOpacity="0.18" strokeWidth="1.1" />
+          <line x1="314" y1="52" x2="-73" y2="-51"  stroke="#ff5a00" strokeOpacity="0.18" strokeWidth="1.1" />
+          <line x1="314" y1="52" x2="-32" y2="252"  stroke="#ff5a00" strokeOpacity="0.14" strokeWidth="0.9" />
+          <line x1="314" y1="52" x2="-32" y2="-148" stroke="#ff5a00" strokeOpacity="0.14" strokeWidth="0.9" />
+          <line x1="314" y1="52" x2="31"  y2="335"  stroke="#ff5a00" strokeOpacity="0.11" strokeWidth="0.8" />
+          <line x1="314" y1="52" x2="31"  y2="-231" stroke="#ff5a00" strokeOpacity="0.11" strokeWidth="0.8" />
+          <line x1="314" y1="52" x2="114" y2="398"  stroke="#ff5a00" strokeOpacity="0.08" strokeWidth="0.7" />
+          <line x1="314" y1="52" x2="114" y2="-294" stroke="#ff5a00" strokeOpacity="0.08" strokeWidth="0.7" />
+          <line x1="314" y1="52" x2="211" y2="438"  stroke="#ff5a00" strokeOpacity="0.06" strokeWidth="0.6" />
+          <line x1="314" y1="52" x2="211" y2="-334" stroke="#ff5a00" strokeOpacity="0.06" strokeWidth="0.6" />
+          <line x1="314" y1="52" x2="314" y2="452"  stroke="#ff5a00" strokeOpacity="0.05" strokeWidth="0.5" />
+          <line x1="314" y1="52" x2="314" y2="-348" stroke="#ff5a00" strokeOpacity="0.05" strokeWidth="0.5" />
+          <line x1="314" y1="52" x2="417" y2="438"  stroke="#ff5a00" strokeOpacity="0.04" strokeWidth="0.4" />
+          <line x1="314" y1="52" x2="417" y2="-334" stroke="#ff5a00" strokeOpacity="0.04" strokeWidth="0.4" />
+          <line x1="314" y1="52" x2="514" y2="398"  stroke="#ff5a00" strokeOpacity="0.03" strokeWidth="0.4" />
+          <line x1="314" y1="52" x2="514" y2="-294" stroke="#ff5a00" strokeOpacity="0.03" strokeWidth="0.4" />
+          <line x1="314" y1="52" x2="597" y2="335"  stroke="#ff5a00" strokeOpacity="0.03" strokeWidth="0.3" />
+          <line x1="314" y1="52" x2="597" y2="-231" stroke="#ff5a00" strokeOpacity="0.03" strokeWidth="0.3" />
+          <line x1="314" y1="52" x2="660" y2="252"  stroke="#ff5a00" strokeOpacity="0.02" strokeWidth="0.3" />
+          <line x1="314" y1="52" x2="660" y2="-148" stroke="#ff5a00" strokeOpacity="0.02" strokeWidth="0.3" />
+          <line x1="314" y1="52" x2="714" y2="52"   stroke="#ff5a00" strokeOpacity="0.02" strokeWidth="0.3" />
+          {/* Halo rings */}
+          <circle cx="314" cy="52" r="50"  stroke="#ff5a00" strokeOpacity="0.16" strokeWidth="0.6" />
+          <circle cx="314" cy="52" r="78"  stroke="#ff5a00" strokeOpacity="0.11" strokeWidth="0.4" />
+          <circle cx="314" cy="52" r="115" stroke="#ff5a00" strokeOpacity="0.07" strokeWidth="0.3" />
+          <circle cx="314" cy="52" r="162" stroke="#ff5a00" strokeOpacity="0.04" strokeWidth="0.3" />
+          {/* ── FOOTBALL ── */}
+          <circle  cx="314" cy="52" r="32"                    stroke="#ff5a00" strokeOpacity="0.60" strokeWidth="2.5" />
+          <polygon points="314,36 329,47 323,65 305,65 299,47" stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.6" />
+          <line x1="314" y1="36" x2="314" y2="20"            stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.5" />
+          <line x1="329" y1="47" x2="344" y2="42"            stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.5" />
+          <line x1="323" y1="65" x2="333" y2="78"            stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.5" />
+          <line x1="305" y1="65" x2="295" y2="78"            stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.5" />
+          <line x1="299" y1="47" x2="284" y2="42"            stroke="#ff5a00" strokeOpacity="0.45" strokeWidth="1.5" />
         </svg>
 
         {/* "DB" watermark */}

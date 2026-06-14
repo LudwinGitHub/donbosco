@@ -193,16 +193,13 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
           {/* Left — nav links */}
           <SlidingNavLinks links={navLinks} />
 
-          {/* Center — logo */}
-          <Link href="/" className="flex flex-col items-center gap-0.5 group px-4">
+          {/* Center — oversized logo floating above navbar */}
+          <Link href="/" className="flex items-center justify-center group relative z-20" style={{ margin: "-24px 0" }}>
             <Image
               src="/donlogo.png" alt="Don Bosco Premier League"
-              width={48} height={48} quality={100} priority unoptimized
-              className="logo-img w-12 h-12 object-contain block transition-transform duration-200 group-hover:scale-105"
+              width={112} height={112} quality={100} priority unoptimized
+              className="logo-img w-28 h-28 object-contain block transition-transform duration-200 group-hover:scale-105 drop-shadow-md"
             />
-            <span className="text-[8px] font-bold tracking-[0.28em] uppercase text-zinc-400 dark:text-zinc-500 leading-none">
-              Premier League
-            </span>
           </Link>
 
           {/* Right — controls */}

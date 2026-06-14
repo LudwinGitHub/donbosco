@@ -75,6 +75,33 @@ export async function declinePresence(matchId: string) {
   revalidatePath(`/mecze/${matchId}`)
 }
 
+export async function populateMatchFromGroupSlots(matchId: string): Promise<{ message?: string }> {
+  const session = await verifySession()
+  if (session.role !== "ORGANIZER") return { message: "Brak uprawnień." }
+
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+    select: { status: true, playerLimit: true },
+  })
+  if (!match || match.status !== "SCHEDULED") return { message: "Mecz nie jest zaplanowany." }
+
+  const groupSlots = await prisma.matchGroupSlot.findMany({ orderBy: { position: "asc" } })
+  if (groupSlots.length === 0) return { message: "Lista bazowa jest pusta. Dodaj graczy w /panel/sklad." }
+
+  await prisma.matchRegistration.createMany({
+    data: groupSlots.map((slot) => ({
+      matchId,
+      userId: slot.userId,
+      status: slot.position <= match.playerLimit ? "PENDING" : "WAITLIST",
+      slot: slot.position,
+    })),
+    skipDuplicates: true,
+  })
+
+  revalidatePath(`/mecze/${matchId}`)
+  return {}
+}
+
 // Kept for organizer manual use
 export async function signUp(matchId: string) {
   const session = await verifySession()

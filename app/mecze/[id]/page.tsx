@@ -5,6 +5,7 @@ import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { processMatchDeadlines, getMatchDeadlines } from "@/lib/deadlines"
 import RegistrationSection from "./registration-section"
+import PopulateButton from "./populate-button"
 import DeleteMatchButton from "./delete-match-button"
 import Countdown from "./countdown"
 import CommentsSection from "./comments-section"
@@ -310,6 +311,12 @@ export default async function MatchDetailPage({
       )}
 
       {/* Registration */}
+      {isOrganizer && match.status === "SCHEDULED" && registrations.length === 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+          <p className="text-sm text-orange-800">Lista zapisów jest pusta — wczytaj graczy z listy bazowej.</p>
+          <PopulateButton matchId={id} />
+        </div>
+      )}
       <RegistrationSection
         matchId={id}
         playerLimit={match.playerLimit}

@@ -13,10 +13,7 @@ export default async function GroupPage() {
       orderBy: { position: "asc" },
     }),
     prisma.user.findMany({
-      where: {
-        groupSlot: null,
-        player: { isNot: null },
-      },
+      where: { groupSlot: null },
       select: { id: true, firstName: true, lastName: true, player: { select: { nickname: true } } },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),

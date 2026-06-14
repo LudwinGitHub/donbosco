@@ -54,6 +54,7 @@ export default function BottomNav({ isLoggedIn, isOrganizer, logoutAction }: Pro
                 <MoreLink href="/panel/losowanie" label="Losowanie"      emoji="🎲" isActive={active(pathname, "/panel/losowanie")} onClose={() => setMoreOpen(false)} />
                 <MoreLink href="/panel/sezony"    label="Sezony"         emoji="🏆" isActive={active(pathname, "/panel/sezony")}    onClose={() => setMoreOpen(false)} />
                 <MoreLink href="/panel/gracze"    label="Gracze (panel)" emoji="👥" isActive={active(pathname, "/panel/gracze")}    onClose={() => setMoreOpen(false)} />
+                <MoreLink href="/panel/sklad"     label="Skład"          emoji="📋" isActive={active(pathname, "/panel/sklad")}     onClose={() => setMoreOpen(false)} />
               </>
             )}
             <div className="h-px bg-zinc-100 dark:bg-white/6 mx-2 my-1" />

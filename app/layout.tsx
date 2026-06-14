@@ -77,8 +77,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ])
 
   return (
-    <html lang="pl" className={geist.variable}>
-      <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
+    <html lang="pl" className={geist.variable} suppressHydrationWarning>
+      <body className="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased" suppressHydrationWarning>
         <ThemeProvider>
         <NavHeader
           isLoggedIn={!!session}

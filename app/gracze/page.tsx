@@ -6,6 +6,7 @@ import { getActiveBadges, type PlayerBadge } from "@/lib/badges"
 import EmptyState, { IconUsers } from "@/app/ui/empty-state"
 import BadgeChip from "@/app/ui/badge-chip"
 import PlayersTable from "./players-table"
+import CountUp from "@/app/ui/count-up"
 
 export default async function PlayersPage({
   searchParams,
@@ -68,19 +69,19 @@ export default async function PlayersPage({
               label="Król strzelców" icon={<IconBall />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="goals"
-              format={(p) => `${p.goals} ${goalLabel(p.goals)}`}
+              valueLabel={goalLabel}
             />
             <StatCard
               label="Król asyst" icon={<IconTarget />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="assists"
-              format={(p) => `${p.assists} ${assistLabel(p.assists)}`}
+              valueLabel={assistLabel}
             />
             <StatCard
               label="Najwięcej meczów" icon={<IconCalendar />}
               borderClass="border-t-orange-500" statColorClass="text-zinc-900"
               players={players} sortKey="played"
-              format={(p) => `${p.played} ${matchLabel(p.played)}`}
+              valueLabel={matchLabel}
             />
           </div>
 
@@ -149,7 +150,7 @@ function StatCard({
   statColorClass,
   players,
   sortKey,
-  format,
+  valueLabel,
 }: {
   label: string
   icon: React.ReactNode
@@ -157,10 +158,11 @@ function StatCard({
   statColorClass: string
   players: PlayerWithStats[]
   sortKey: "goals" | "assists" | "played"
-  format: (p: PlayerWithStats) => string
+  valueLabel: (n: number) => string
 }) {
   const leader = [...players].sort((a, b) => b[sortKey] - a[sortKey])[0]
   if (!leader || leader[sortKey] === 0) return null
+  const statValue = leader[sortKey]
 
   return (
     <Link
@@ -185,7 +187,9 @@ function StatCard({
       ) : (
         <div className="mt-1 h-4" />
       )}
-      <p className={`mt-2 text-2xl font-black ${statColorClass}`}>{format(leader)}</p>
+      <p className={`mt-2 text-2xl font-black ${statColorClass}`}>
+        <CountUp value={statValue} /> {valueLabel(statValue)}
+      </p>
     </Link>
   )
 }

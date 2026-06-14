@@ -20,7 +20,7 @@ export default async function HomePage({
     prisma.announcement.findMany({
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
       take: 3,
-      select: { id: true, title: true, priority: true, isPinned: true },
+      select: { id: true, title: true, content: true, priority: true, isPinned: true },
     }),
   ])
 
@@ -238,6 +238,9 @@ export default async function HomePage({
                     )}
                     <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
                   </div>
+                  <p className="mt-1 text-sm text-zinc-500 line-clamp-1">
+                    {a.content.slice(0, 80)}{a.content.length > 80 ? " (...)" : ""}
+                  </p>
                 </Link>
               )
             })}

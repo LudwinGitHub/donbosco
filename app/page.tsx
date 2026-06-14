@@ -42,12 +42,13 @@ export default async function HomePage({
       ])
     : ([null, null, [], []] as const)
 
-  const showRegPrompt = nextMatch && session?.userId
-    ? !(await prisma.matchRegistration.findFirst({
+  const myNextReg = nextMatch && session?.userId
+    ? await prisma.matchRegistration.findFirst({
         where: { matchId: nextMatch.id, userId: session.userId },
-        select: { id: true },
-      }))
-    : false
+        select: { id: true, status: true },
+      })
+    : null
+  const showRegPrompt = nextMatch && session?.userId && (!myNextReg || myNextReg.status === "PENDING")
 
   const season = seasonId
     ? allSeasons.find((s) => s.id === seasonId) ?? activeSeason
@@ -274,14 +275,16 @@ export default async function HomePage({
       {showRegPrompt && nextMatch && (
         <div className="flex items-center justify-between gap-4 rounded-xl border border-orange-200 bg-orange-50 border-l-4 border-l-orange-500 px-4 py-3 text-sm">
           <p className="text-orange-800 font-medium">
-            Nie jesteś zapisany na następny mecz:{" "}
-            <span className="font-semibold">{fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)}</span>
+            {myNextReg?.status === "PENDING"
+              ? <>Potwierdź obecność na mecz: <span className="font-semibold">{fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)}</span></>
+              : <>Nie jesteś zapisany na następny mecz: <span className="font-semibold">{fmtDate(nextMatch.scheduledAt)}, {fmtTime(nextMatch.scheduledAt)}</span></>
+            }
           </p>
           <Link
             href={`/mecze/${nextMatch.id}`}
             className="shrink-0 font-semibold text-orange-700 hover:underline"
           >
-            Zapisz się →
+            {myNextReg?.status === "PENDING" ? "Potwierdź się →" : "Sprawdź mecz →"}
           </Link>
         </div>
       )}

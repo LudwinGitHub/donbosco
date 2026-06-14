@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { getStandings, type FormResult } from "@/lib/standings"
+import { getStandings } from "@/lib/standings"
+import AnimatedFormDots from "@/app/ui/animated-form-dots"
 import { getPlayersWithStats } from "@/lib/players"
 
 export default async function TeamPage({
@@ -67,9 +68,7 @@ export default async function TeamPage({
       {standingRow && standingRow.form.length > 0 && (
         <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3">
           <span className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Forma</span>
-          <div className="flex gap-1.5">
-            {standingRow.form.map((r, i) => <FormDot key={i} result={r} />)}
-          </div>
+          <AnimatedFormDots form={standingRow.form} size="sm" />
         </div>
       )}
 
@@ -189,11 +188,6 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
   )
 }
 
-function FormDot({ result }: { result: FormResult }) {
-  const styles: Record<FormResult, string> = { W: "bg-green-500", D: "bg-zinc-300", L: "bg-red-400" }
-  const titles: Record<FormResult, string> = { W: "Wygrana", D: "Remis", L: "Porażka" }
-  return <span title={titles[result]} className={`h-2.5 w-2.5 rounded-full ${styles[result]}`} />
-}
 
 function fmtDate(date: Date) {
   return new Date(date).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })

@@ -1,10 +1,11 @@
 import React from "react"
 import Link from "next/link"
-import { getActiveSeason, getAllSeasons, getStandings, type FormResult } from "@/lib/standings"
+import { getActiveSeason, getAllSeasons, getStandings } from "@/lib/standings"
 import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
 import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import CountUp from "@/app/ui/count-up"
+import AnimatedFormDots from "@/app/ui/animated-form-dots"
 
 export default async function HomePage({
   searchParams,
@@ -360,9 +361,7 @@ export default async function HomePage({
                       </td>
                       <td className="px-4 py-3 text-center font-bold text-zinc-900">{row.points}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          {row.form.map((r, i) => <FormDot key={i} result={r} />)}
-                        </div>
+                        <AnimatedFormDots form={row.form} />
                       </td>
                     </tr>
                   ))}
@@ -387,22 +386,6 @@ export default async function HomePage({
   )
 }
 
-function FormDot({ result }: { result: FormResult }) {
-  const cfg: Record<FormResult, { bg: string; text: string; label: string }> = {
-    W: { bg: "bg-green-500", text: "text-white",    label: "Wygrana" },
-    D: { bg: "bg-zinc-300",  text: "text-zinc-600", label: "Remis"   },
-    L: { bg: "bg-red-400",   text: "text-white",    label: "Porażka" },
-  }
-  const { bg, text, label } = cfg[result]
-  return (
-    <span
-      title={label}
-      className={`inline-flex h-5 w-5 items-center justify-center rounded text-[9px] font-bold ${bg} ${text}`}
-    >
-      {result}
-    </span>
-  )
-}
 
 function SeasonTab({
   href, label, active, isActive,

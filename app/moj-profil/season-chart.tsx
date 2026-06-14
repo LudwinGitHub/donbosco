@@ -1,4 +1,6 @@
 "use client"
+import { useEffect, useRef, useState } from "react"
+import { useInView } from "@/app/ui/use-in-view"
 import type { SeasonChartEntry } from "@/lib/players"
 
 // ViewBox coordinate system
@@ -33,6 +35,25 @@ function shortLabel(name: string) {
 }
 
 export default function SeasonChart({ data }: { data: SeasonChartEntry[] }) {
+  const [containerRef, isInView] = useInView()
+  const [progress, setProgress] = useState(0)
+  const rafRef = useRef<number>(0)
+  const startRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!isInView) return
+    startRef.current = null
+    function tick(ts: number) {
+      if (!startRef.current) startRef.current = ts
+      const t = Math.min((ts - startRef.current) / 900, 1)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setProgress(eased)
+      if (t < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [isInView])
+
   if (data.length < 2) return null
 
   const rawMax = Math.max(...data.flatMap((d) => [d.goals, d.assists]), 1)
@@ -44,11 +65,14 @@ export default function SeasonChart({ data }: { data: SeasonChartEntry[] }) {
   const barGap = Math.max(2, groupW * 0.05)
   const barW   = (groupW - 2 * padG - barGap) / 2
 
-  const bH = (v: number) => (v / maxVal) * CH
+  const bH = (v: number) => (v / maxVal) * CH * progress
   const bY = (v: number) => PAD_T + CH - bH(v)
 
   return (
-    <div className="space-y-2">
+    <div
+      ref={containerRef as React.RefObject<HTMLDivElement>}
+      className="space-y-2"
+    >
       <svg viewBox={`0 0 ${VW} ${VH}`} className="w-full h-auto">
         {/* Gridlines + Y labels */}
         {grid.map((v) => {
@@ -66,28 +90,36 @@ export default function SeasonChart({ data }: { data: SeasonChartEntry[] }) {
 
         {/* Season groups */}
         {data.map((d, i) => {
-          const gx  = PAD_L + i * groupW + padG
-          const ax  = gx + barW + barGap
-          const cx  = PAD_L + i * groupW + groupW / 2
-          const gh  = Math.max(d.goals   > 0 ? 2 : 0, bH(d.goals))
-          const ah  = Math.max(d.assists > 0 ? 2 : 0, bH(d.assists))
-          const gy  = PAD_T + CH - gh
-          const ay  = PAD_T + CH - ah
+          const gx = PAD_L + i * groupW + padG
+          const ax = gx + barW + barGap
+          const cx = PAD_L + i * groupW + groupW / 2
+          const gh = Math.max(d.goals   > 0 ? 2 * progress : 0, bH(d.goals))
+          const ah = Math.max(d.assists > 0 ? 2 * progress : 0, bH(d.assists))
+          const gy = PAD_T + CH - gh
+          const ay = PAD_T + CH - ah
 
           return (
             <g key={d.seasonName}>
               {/* Goals bar */}
               <rect x={gx} y={gy} width={barW} height={gh} rx="2" fill="#f97316" />
-              {d.goals > 0 && (
-                <text x={gx + barW / 2} y={gy - 3} textAnchor="middle" fontSize="9" fontWeight="600" fill="#f97316">
+              {d.goals > 0 && progress > 0.85 && (
+                <text
+                  x={gx + barW / 2} y={gy - 3}
+                  textAnchor="middle" fontSize="9" fontWeight="600" fill="#f97316"
+                  style={{ opacity: Math.max(0, (progress - 0.85) / 0.15) }}
+                >
                   {d.goals}
                 </text>
               )}
 
               {/* Assists bar */}
               <rect x={ax} y={ay} width={barW} height={ah} rx="2" fill="#a1a1aa" />
-              {d.assists > 0 && (
-                <text x={ax + barW / 2} y={ay - 3} textAnchor="middle" fontSize="9" fontWeight="600" fill="#71717a">
+              {d.assists > 0 && progress > 0.85 && (
+                <text
+                  x={ax + barW / 2} y={ay - 3}
+                  textAnchor="middle" fontSize="9" fontWeight="600" fill="#71717a"
+                  style={{ opacity: Math.max(0, (progress - 0.85) / 0.15) }}
+                >
                   {d.assists}
                 </text>
               )}

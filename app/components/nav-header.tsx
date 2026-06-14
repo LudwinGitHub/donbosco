@@ -126,14 +126,13 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
         <div className="absolute left-0  top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
         <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
 
-        {/* ── LEFT: fan of speed lines + flame cluster ── */}
+        {/* ── LEFT: speed fan + small flame cluster ── */}
         <svg
           aria-hidden="true"
           viewBox="0 0 260 64"
           className="absolute left-0 top-0 h-full w-[260px] text-orange-500/[0.09] dark:text-orange-500/[0.14]"
           fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
         >
-          {/* Fan of speed lines from left edge */}
           <line x1="0" y1="10" x2="200" y2="20" strokeWidth="1" />
           <line x1="0" y1="18" x2="240" y2="25" strokeWidth="1.2" />
           <line x1="0" y1="26" x2="255" y2="30" strokeWidth="1.5" />
@@ -141,45 +140,64 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
           <line x1="0" y1="42" x2="240" y2="44" strokeWidth="1.2" />
           <line x1="0" y1="50" x2="190" y2="52" strokeWidth="1" />
           <line x1="0" y1="58" x2="120" y2="60" strokeWidth="0.8" />
-          {/* Flame cluster at far left */}
-          <path d="M 6 64 C 2 52 0 42 4 30 C 6 22 13 26 11 14 C 15 26 22 20 19 32 C 22 22 30 24 27 36 C 30 26 36 30 33 42 C 38 30 44 34 40 48 C 36 62 28 66 6 64" strokeWidth="1.2" />
-          <path d="M 18 64 C 16 54 20 46 16 36" strokeWidth="1" />
-          <path d="M 30 62 C 28 50 34 42 30 34" strokeWidth="1" />
+          {/* flame cluster — left edge */}
+          <path d="M 7 64 C 3 52 0 42 5 28 C 8 20 16 25 14 12" strokeWidth="1.8" />
+          <path d="M 20 64 C 17 52 22 42 18 30 C 15 22 8 24 11 12" strokeWidth="1.6" />
+          <path d="M 32 62 C 28 50 22 40 28 30 C 32 22 40 26 37 16" strokeWidth="1.4" />
+          <path d="M 44 60 C 48 48 52 40 46 32" strokeWidth="1.2" />
+          <path d="M 54 58 C 50 48 46 40 52 34" strokeWidth="1" />
         </svg>
 
-        {/* ── RIGHT: flame storm + football ── */}
+        {/* ── RIGHT: wall of fire + classic football ── */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 320 90"
-          className="absolute right-0 bottom-[-22px] h-[90px] w-[320px] text-orange-500/[0.11] dark:text-orange-500/[0.18]"
+          viewBox="0 0 380 92"
+          className="absolute right-0 bottom-[-22px] h-[92px] w-[380px] text-orange-500/[0.10] dark:text-orange-500/[0.17]"
           fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
         >
-          {/* Speed lines entering from left */}
-          <line x1="0"  y1="32" x2="55"  y2="35" strokeWidth="1" />
-          <line x1="0"  y1="40" x2="65"  y2="44" strokeWidth="1.2" />
-          <line x1="0"  y1="48" x2="50"  y2="53" strokeWidth="1" />
-          {/* Tall main flames (left of ball) */}
-          <path d="M 90  88 C 85 70 74 58 81 40 C 85 27 96 32 93 14" strokeWidth="1.8" />
-          <path d="M 107 88 C 104 72 109 60 104 44 C 100 32 91 35 93 16" strokeWidth="1.8" />
-          {/* Medium secondary flames */}
-          <path d="M 75  84 C 70 68 62 56 70 44 C 73 36 81 40 79 28" strokeWidth="1.4" />
-          <path d="M 122 84 C 127 68 132 58 126 46" strokeWidth="1.4" />
-          <path d="M 136 80 C 140 66 145 56 139 46" strokeWidth="1.4" />
-          {/* Small wispy flames */}
-          <path d="M 62  78 C 58 66 54 56 60 46" strokeWidth="1" />
-          <path d="M 150 76 C 154 64 158 56 153 48" strokeWidth="1" />
-          <path d="M 160 72 C 164 62 167 54 162 46" strokeWidth="1" />
-          {/* Football: cx=228 cy=56 r=32 */}
-          {/* Outer circle */}
-          <circle cx="228" cy="56" r="32" strokeWidth="2.5" />
-          {/* Curved panel lines — 3 arcs suggesting ball surface */}
-          <path d="M 210 30 C 220 38 226 50 222 64" strokeWidth="1.4" />
-          <path d="M 228 24 C 236 34 240 48 234 64" strokeWidth="1.4" />
-          <path d="M 244 28 C 250 38 252 52 246 66" strokeWidth="1.4" />
-          {/* Horizontal band */}
-          <path d="M 197 50 C 210 46 226 46 246 50 C 252 52 255 56 250 60" strokeWidth="1.2" />
-          {/* Top seam dot */}
-          <circle cx="228" cy="26" r="2.5" fill="currentColor" strokeWidth="0" />
+          {/* Speed lines entering */}
+          <line x1="0" y1="38" x2="28" y2="41" strokeWidth="1" />
+          <line x1="0" y1="48" x2="22" y2="52" strokeWidth="1.2" />
+          <line x1="0" y1="28" x2="20" y2="30" strokeWidth="0.8" />
+
+          {/* ── TALL flames (6) ── */}
+          <path d="M 80  90 C 75 72 65 60 72 42 C 77 28 88 34 85 12"  strokeWidth="2.2" />
+          <path d="M 100 90 C 97 74 102 62 97 46 C 93 32 84 36 87 14"  strokeWidth="2.2" />
+          <path d="M 120 90 C 114 72 104 58 112 40 C 117 26 128 32 125 10" strokeWidth="2.4" />
+          <path d="M 142 90 C 139 74 144 62 139 46 C 135 32 126 36 129 12" strokeWidth="2.4" />
+          <path d="M 162 90 C 158 72 148 58 156 40 C 161 26 172 32 169 10" strokeWidth="2.2" />
+          <path d="M 182 90 C 179 74 184 62 179 46 C 175 32 166 36 169 14" strokeWidth="2.2" />
+
+          {/* ── MEDIUM flames (8) ── */}
+          <path d="M 62  88 C 57 72 48 62 55 48 C 59 38 68 42 65 28" strokeWidth="1.7" />
+          <path d="M 200 88 C 196 72 188 62 195 48 C 200 38 210 42 207 28" strokeWidth="1.7" />
+          <path d="M 45  86 C 40 70 32 60 39 48 C 43 38 52 42 49 30" strokeWidth="1.5" />
+          <path d="M 218 86 C 222 70 228 60 221 48 C 217 38 208 42 211 30" strokeWidth="1.5" />
+          <path d="M 110 90 C 115 74 120 62 114 50" strokeWidth="1.7" />
+          <path d="M 152 90 C 148 74 144 62 150 50" strokeWidth="1.7" />
+          <path d="M 232 84 C 236 70 240 60 234 50" strokeWidth="1.5" />
+          <path d="M 36  84 C 32 70 28 60 34 50" strokeWidth="1.5" />
+
+          {/* ── SHORT / wispy flames (8) ── */}
+          <path d="M 24  82 C 20 70 15 60 21 50" strokeWidth="1.2" />
+          <path d="M 242 80 C 246 68 250 60 244 52" strokeWidth="1.2" />
+          <path d="M 16  78 C 12 68  8 58 14 50" strokeWidth="1" />
+          <path d="M 252 78 C 256 66 260 58 254 50" strokeWidth="1" />
+          <path d="M  8  76 C  4 66  0 56  6 50" strokeWidth="0.8" />
+          <path d="M 260 76 C 264 64 268 56 262 50" strokeWidth="0.8" />
+          <path d="M 258 82 C 262 70 267 62 261 54" strokeWidth="1" />
+          <path d="M 22  80 C 18 70 14 62 20 54" strokeWidth="1" />
+
+          {/* ── Football: cx=305 cy=54 r=30 (classic pentagon style) ── */}
+          <circle cx="305" cy="54" r="30" strokeWidth="2.5" />
+          {/* pentagon: inner r=15, top vertex up */}
+          <polygon points="305,39 319,49 314,66 296,66 291,49" strokeWidth="1.6" />
+          {/* 5 lines from pentagon vertices to circle perimeter */}
+          <line x1="305" y1="39" x2="305" y2="24" strokeWidth="1.5" />
+          <line x1="319" y1="49" x2="333" y2="45" strokeWidth="1.5" />
+          <line x1="314" y1="66" x2="323" y2="78" strokeWidth="1.5" />
+          <line x1="296" y1="66" x2="287" y2="78" strokeWidth="1.5" />
+          <line x1="291" y1="49" x2="277" y2="45" strokeWidth="1.5" />
         </svg>
 
         {/* "DB" watermark */}

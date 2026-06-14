@@ -20,7 +20,7 @@ export default async function HomePage({
     prisma.announcement.findMany({
       orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
       take: 3,
-      include: { pollVotes: { select: { option: true } } },
+      select: { id: true, title: true, priority: true, isPinned: true },
     }),
   ])
 
@@ -225,14 +225,6 @@ export default async function HomePage({
                 a.priority === "IMPORTANT" ? "text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full" :
                 null
               const badgeLabel = a.priority === "URGENT" ? "Pilne" : a.priority === "IMPORTANT" ? "Ważne" : null
-              const pollOpts = [
-                { opt: "A", label: a.pollOptA },
-                { opt: "B", label: a.pollOptB },
-                ...(a.pollOptC ? [{ opt: "C", label: a.pollOptC }] : []),
-                ...(a.pollOptD ? [{ opt: "D", label: a.pollOptD }] : []),
-              ].filter((o) => o.label)
-              const hasPoll = !!a.pollQuestion && pollOpts.length >= 2
-              const totalVotes = a.pollVotes.length
               return (
                 <Link
                   key={a.id}
@@ -246,25 +238,6 @@ export default async function HomePage({
                     )}
                     <p className="text-sm font-semibold text-zinc-900">{a.title}</p>
                   </div>
-                  <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{a.content}</p>
-                  {hasPoll && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs font-semibold text-zinc-600">📊 {a.pollQuestion}</p>
-                      {pollOpts.map(({ opt, label }) => {
-                        const votes = a.pollVotes.filter((v) => v.option === opt).length
-                        const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0
-                        return (
-                          <div key={opt} className="relative flex items-center gap-2 rounded-md overflow-hidden bg-zinc-100 px-2 py-1 text-xs">
-                            <span className="absolute inset-y-0 left-0 bg-orange-100" style={{ width: `${pct}%` }} />
-                            <span className="relative font-bold text-orange-500 shrink-0 w-3">{opt}</span>
-                            <span className="relative flex-1 truncate text-zinc-700">{label}</span>
-                            <span className="relative shrink-0 text-zinc-400 tabular-nums">{pct}%</span>
-                          </div>
-                        )
-                      })}
-                      <p className="text-[11px] text-zinc-400">{totalVotes} {voteLabel(totalVotes)} · Zagłosuj →</p>
-                    </div>
-                  )}
                 </Link>
               )
             })}
@@ -382,11 +355,6 @@ function StandingsSortHeader({
   )
 }
 
-function voteLabel(n: number) {
-  if (n === 1) return "głos"
-  if (n >= 2 && n <= 4) return "głosy"
-  return "głosów"
-}
 
 function goalLabel(n: number) {
   if (n === 1) return "gol"

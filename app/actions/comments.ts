@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
+import { sendPushToUser } from "@/lib/push"
 
 export type CommentFormState = { error?: string } | undefined
 
@@ -15,9 +16,26 @@ export async function addComment(
   if (!text) return { error: "Treść komentarza nie może być pusta." }
   if (text.length > 500) return { error: "Komentarz może mieć maksymalnie 500 znaków." }
 
-  await prisma.matchComment.create({
-    data: { matchId, userId: session.userId, text },
-  })
+  const [, user, registrations] = await Promise.all([
+    prisma.matchComment.create({ data: { matchId, userId: session.userId, text } }),
+    prisma.user.findUnique({ where: { id: session.userId }, select: { firstName: true } }),
+    prisma.matchRegistration.findMany({
+      where:  { matchId, userId: { not: session.userId } },
+      select: { userId: true },
+    }),
+  ])
+
+  const body = text.length > 80 ? text.slice(0, 77) + "…" : text
+  await Promise.allSettled(
+    registrations.map((r) =>
+      sendPushToUser(r.userId, {
+        title: `💬 ${user?.firstName ?? "Ktoś"} skomentował mecz`,
+        body,
+        url: `/mecze/${matchId}`,
+      })
+    )
+  )
+
   revalidatePath(`/mecze/${matchId}`)
   return undefined
 }

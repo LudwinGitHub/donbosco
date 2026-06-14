@@ -1,6 +1,7 @@
 "use server"
 import { prisma } from "@/lib/prisma"
 import { verifySession, getOptionalSession } from "@/lib/dal"
+import { sendPushToAllExcept } from "@/lib/push"
 
 export type ChatFormState = { error?: string } | undefined
 
@@ -29,9 +30,22 @@ export async function sendChatMessage(
   if (!text) return { error: "Wiadomość nie może być pusta." }
   if (text.length > 500) return { error: "Wiadomość może mieć maksymalnie 500 znaków." }
 
-  await prisma.chatMessage.create({
-    data: { text, userId: session.userId },
-  })
+  const cooldown = new Date(Date.now() - 30 * 60 * 1000)
+  const [recentCount, user] = await Promise.all([
+    prisma.chatMessage.count({ where: { createdAt: { gte: cooldown } } }),
+    prisma.user.findUnique({ where: { id: session.userId }, select: { firstName: true } }),
+  ])
+
+  await prisma.chatMessage.create({ data: { text, userId: session.userId } })
+
+  if (recentCount === 0) {
+    await sendPushToAllExcept(session.userId, {
+      title: `💬 ${user?.firstName ?? "Ktoś"} napisał na czacie`,
+      body:  text.length > 80 ? text.slice(0, 77) + "…" : text,
+      url:   "/",
+    })
+  }
+
   return undefined
 }
 

@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession, getOptionalSession } from "@/lib/dal"
+import { sendPushToAll } from "@/lib/push"
 import type { BalancedTeams } from "@/lib/team-balancer"
 
 const VOTE_WINDOW_OPEN_MS  = 3.5 * 60 * 60 * 1000  // opens 3.5h before match (17:00 for 20:30)
@@ -27,6 +28,7 @@ export async function saveMatchDraw(
       optionBRating2: optionB.ratingB,
     }
 
+    let isNewDraw = false
     await prisma.$transaction(async (tx) => {
       const existing = await tx.matchDraw.findUnique({ where: { matchId } })
       if (existing) {
@@ -34,8 +36,25 @@ export async function saveMatchDraw(
         await tx.matchDraw.update({ where: { matchId }, data })
       } else {
         await tx.matchDraw.create({ data: { matchId, ...data } })
+        isNewDraw = true
       }
     })
+
+    if (isNewDraw) {
+      const match = await prisma.match.findUnique({
+        where:   { id: matchId },
+        include: { homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } },
+      })
+      if (match) {
+        const openAt  = new Date(match.scheduledAt.getTime() - VOTE_WINDOW_OPEN_MS)
+        const timeStr = openAt.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+        await sendPushToAll({
+          title: "Zagłosuj na skład! 🗳️",
+          body:  `${match.homeTeam.name} vs ${match.awayTeam.name} — głosowanie od ${timeStr}`,
+          url:   "/glosowanie",
+        })
+      }
+    }
 
     revalidatePath(`/mecze/${matchId}`)
     revalidatePath("/glosowanie")

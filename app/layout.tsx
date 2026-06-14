@@ -3,6 +3,7 @@ import { Geist } from "next/font/google"
 import Link from "next/link"
 import Image from "next/image"
 import { Suspense } from "react"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { getOptionalSession } from "@/lib/dal"
 import { logout } from "@/app/actions/auth"
@@ -238,6 +239,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           logoutAction={logout}
         />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

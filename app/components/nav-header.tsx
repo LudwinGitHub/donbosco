@@ -187,14 +187,18 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
 
       {/* ── Desktop navbar ── */}
       <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
-        {/* 3-column grid: links | logo | controls */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16">
+        {/* flex row: links left, controls right; logo absolutely centered */}
+        <div className="relative flex items-center justify-between h-16">
 
           {/* Left — nav links */}
           <SlidingNavLinks links={navLinks} />
 
-          {/* Center — oversized logo floating above navbar */}
-          <Link href="/" className="flex items-center justify-center group relative z-20" style={{ margin: "-24px 0" }}>
+          {/* Center — oversized logo absolutely centered */}
+          <Link
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center group z-20"
+            style={{ top: "-24px", bottom: "-24px" }}
+          >
             <Image
               src="/donlogo.png" alt="Don Bosco Premier League"
               width={112} height={112} quality={100} priority unoptimized
@@ -203,7 +207,7 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
           </Link>
 
           {/* Right — controls */}
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center gap-1">
             {isOrganizer && <PanelDropdown links={panelLinks} />}
             {isLoggedIn ? (
               <>

@@ -130,7 +130,7 @@ const BADGE_CONFIG: Record<BadgeType, { Icon: React.FC; label: string }> = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BadgeChip({ type }: { type: BadgeType }) {
+export default function BadgeChip({ type, index = 0 }: { type: BadgeType; index?: number }) {
   const { Icon, label } = BADGE_CONFIG[type]
   const [open, setOpen] = useState(false)
 
@@ -140,6 +140,7 @@ export default function BadgeChip({ type }: { type: BadgeType }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onClick={(e) => { e.stopPropagation(); setOpen(o => !o) }}
+      style={{ animation: `badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both`, animationDelay: `${index * 60}ms` }}
     >
       {/* Chip */}
       <span className="inline-flex cursor-pointer select-none items-center rounded-full border border-orange-500/50 bg-orange-500/10 p-1 shadow-sm text-orange-600 dark:border-orange-500/40 dark:bg-orange-500/[0.12] dark:text-orange-400">

@@ -41,7 +41,7 @@ export default async function PlayerProfilePage({
           </h1>
           <FormArrow form={form} />
           {playerBadges.map((b, i) => (
-            <BadgeChip key={i} type={b.type} />
+            <BadgeChip key={i} type={b.type} index={i} />
           ))}
         </div>
         {player.nickname && (

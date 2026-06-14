@@ -5,6 +5,7 @@ import type { PlayerWithStats, PlayerForm } from "@/lib/players"
 import type { BadgeType } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
 import PlayerAvatar from "@/app/ui/player-avatar"
+import CountUp from "@/app/ui/count-up"
 
 type SortKey = "played" | "goals" | "assists"
 
@@ -52,7 +53,7 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
                     </Link>
                     {p.nickname && <span className="text-xs text-zinc-400">„{p.nickname}"</span>}
                     {(badges[p.id] ?? []).map((b, j) => (
-                      <BadgeChip key={j} type={b.type} />
+                      <BadgeChip key={j} type={b.type} index={j} />
                     ))}
                   </div>
                 </div>
@@ -70,12 +71,18 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
               <td className="px-4 py-3 text-center">
                 <FormArrow form={forms[p.id]} />
               </td>
-              <td className="px-4 py-3 text-center text-zinc-600">{p.played}</td>
-              <td className="px-4 py-3 text-center">
-                <span className={p.goals > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>{p.goals}</span>
+              <td className="px-4 py-3 text-center text-zinc-600">
+                <CountUp value={p.played} duration={600} />
               </td>
               <td className="px-4 py-3 text-center">
-                <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>{p.assists}</span>
+                <span className={p.goals > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
+                  <CountUp value={p.goals} duration={600} />
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center">
+                <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
+                  <CountUp value={p.assists} duration={600} />
+                </span>
               </td>
             </tr>
           ))}

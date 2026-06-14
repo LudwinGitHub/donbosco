@@ -1,11 +1,11 @@
 import React from "react"
 import Link from "next/link"
-import { getActiveSeason, getAllSeasons, getStandings } from "@/lib/standings"
-import { getPlayersWithStats, type PlayerWithStats } from "@/lib/players"
+import { getActiveSeason, getAllSeasons, getStandings, type StandingRow } from "@/lib/standings"
+import { getPlayersWithStats } from "@/lib/players"
 import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import CountUp from "@/app/ui/count-up"
-import AnimatedFormDots from "@/app/ui/animated-form-dots"
+import StandingsTable from "@/app/components/standings-table"
 
 export default async function HomePage({
   searchParams,
@@ -64,7 +64,7 @@ export default async function HomePage({
     if (sort === "w")  return [...baseRows].sort((a, b) => b.won - a.won || b.points - a.points || b.goalDiff - a.goalDiff)
     if (sort === "rb") return [...baseRows].sort((a, b) => b.goalDiff - a.goalDiff || b.points - a.points)
     if (sort === "br") return [...baseRows].sort((a, b) => b.goalsFor - a.goalsFor || b.points - a.points)
-    return baseRows
+    return baseRows as StandingRow[]
   })()
 
   const sortedSeasons = [...allSeasons].sort(
@@ -322,58 +322,7 @@ export default async function HomePage({
             </div>
 
             <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-                    <th className="px-4 py-3 text-left w-8">#</th>
-                    <th className="px-4 py-3 text-left">Drużyna</th>
-                    <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Mecze">M</th>
-                    <StandingsSortHeader label="W" title="Wygrane"        sortKey="w"   currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
-                    <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Remisy">R</th>
-                    <th className="px-4 py-3 text-center w-10 hidden sm:table-cell" title="Porażki">P</th>
-                    <StandingsSortHeader label="Br" title="Bramki"        sortKey="br"  currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
-                    <StandingsSortHeader label="RB" title="Różnica bramek" sortKey="rb" currentSort={sort} seasonId={seasonId} className="hidden sm:table-cell" />
-                    <StandingsSortHeader label="Pkt" title="Punkty"       sortKey="pkt" currentSort={sort} seasonId={seasonId} className="font-bold text-zinc-600" />
-                    <th className="px-4 py-3 text-center" title="Forma (ostatnie 5 meczów)">Forma</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 stagger">
-                  {rows.map((row, i) => (
-                    <tr key={row.teamId} className="transition-colors hover:bg-zinc-50">
-                      <td className="px-4 py-3 text-zinc-400 font-medium">{i + 1}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: row.teamColor }} />
-                          <Link href={`/druzyny/${row.teamId}`} className="font-medium text-zinc-900 hover:underline">
-                            {row.teamName}
-                          </Link>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.played}</td>
-                      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.won}</td>
-                      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.drawn}</td>
-                      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.lost}</td>
-                      <td className="px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">{row.goalsFor}:{row.goalsAgainst}</td>
-                      <td className="px-4 py-3 text-center hidden sm:table-cell">
-                        <span className={row.goalDiff > 0 ? "text-green-600" : row.goalDiff < 0 ? "text-red-500" : "text-zinc-400"}>
-                          {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center font-bold text-zinc-900">{row.points}</td>
-                      <td className="px-4 py-3">
-                        <AnimatedFormDots form={row.form} />
-                      </td>
-                    </tr>
-                  ))}
-                  {rows.length === 0 && (
-                    <tr>
-                      <td colSpan={10} className="px-4 py-8 text-center text-zinc-400">
-                        Brak rozegranych meczów w tym sezonie.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+              <StandingsTable rows={rows} currentUserId={session?.userId ?? null} />
             </div>
 
             <p className="hidden sm:block text-xs text-zinc-400">

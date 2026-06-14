@@ -12,6 +12,7 @@ import CommentsSection from "./comments-section"
 import MvpVoteSection from "./mvp-vote"
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
+import ScoreCount from "@/app/ui/score-count"
 
 export default async function MatchDetailPage({
   params,
@@ -178,9 +179,11 @@ export default async function MatchDetailPage({
 
             {/* Score / VS */}
             <div className="shrink-0 flex flex-col items-center gap-1">
-              {played ? (
+              {played && match.homeScore != null && match.awayScore != null ? (
+                <ScoreCount home={match.homeScore} away={match.awayScore} />
+              ) : played ? (
                 <span className="text-4xl sm:text-5xl font-black tabular-nums text-zinc-900 tracking-tight">
-                  {match.homeScore}<span className="text-zinc-300 mx-1">:</span>{match.awayScore}
+                  {match.homeScore ?? 0}<span className="text-zinc-300 mx-1">:</span>{match.awayScore ?? 0}
                 </span>
               ) : (
                 <span className="text-2xl font-light text-zinc-300">vs</span>
@@ -460,7 +463,7 @@ function LineupColumn({
               )}
             </span>
             {playerBadges.map((b, i) => (
-              <BadgeChip key={i} type={b.type} />
+              <BadgeChip key={i} type={b.type} index={i} />
             ))}
           </div>
         )

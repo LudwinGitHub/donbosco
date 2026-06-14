@@ -2,6 +2,7 @@
 import { useState, useEffect, useTransition, useOptimistic } from "react"
 import { useRouter } from "next/navigation"
 import { castDrawVote } from "@/app/actions/draws"
+import PollBar from "@/app/ui/poll-bar"
 
 type PlayerInfo = { id: string; firstName: string; lastName: string; nickname: string | null }
 type DrawOption = { team1: PlayerInfo[]; team2: PlayerInfo[]; rating1: number; rating2: number }
@@ -123,12 +124,7 @@ export default function VotePanel(props: VotePanelProps) {
             <span className="font-medium text-zinc-500">{opt.totalVotes}/{maxVotes}</span>
             <span>Opcja B — {opt.votesB} {voteLabel(opt.votesB)}</span>
           </div>
-          <div className="flex h-2 overflow-hidden rounded-full bg-amber-100">
-            <div
-              className="h-full rounded-full bg-blue-400 transition-all duration-500"
-              style={{ width: `${pctA}%` }}
-            />
-          </div>
+          <PollBar pct={pctA} color="bg-blue-400" />
         </div>
       )}
 

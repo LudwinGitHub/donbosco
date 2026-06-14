@@ -1,6 +1,7 @@
 import React from "react"
 import Link from "next/link"
 import CountUp from "@/app/ui/count-up"
+import StaggerReveal from "@/app/ui/stagger-reveal"
 import {
   getMatchHighlights,
   getTopSingleMatchScorers,
@@ -81,7 +82,7 @@ export default async function StatystykiPage() {
       {(streaks.goalStreak || streaks.matchStreak || streaks.bestSeasonScorer) && (
         <section className="space-y-3">
           <SectionHeading>Rekordy zawodników</SectionHeading>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <StaggerReveal className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {streaks.goalStreak && (
               <StreakCard
                 icon={<IconFlame />}
@@ -110,14 +111,14 @@ export default async function StatystykiPage() {
                 sub={streaks.bestSeasonScorer.seasonName}
               />
             )}
-          </div>
+          </StaggerReveal>
         </section>
       )}
 
       {/* Match records */}
       <section className="space-y-3">
         <SectionHeading>Rekordy meczu</SectionHeading>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StaggerReveal className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <MatchRecordCard
             title="Najbardziej bramkowy mecz"
             matches={highestScoring}
@@ -128,7 +129,7 @@ export default async function StatystykiPage() {
             matches={biggestWin}
             valueLabel={(v) => `+${v}`}
           />
-        </div>
+        </StaggerReveal>
       </section>
 
       {/* Player records — single match */}

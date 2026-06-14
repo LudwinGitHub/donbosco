@@ -307,7 +307,7 @@ export default async function MyProfilePage({
                     const myBadges = badges.get(p.id) ?? []
                     return myBadges.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-1">
-                        {myBadges.map((b, i) => <BadgeChip key={i} type={b.type} />)}
+                        {myBadges.map((b, i) => <BadgeChip key={i} type={b.type} index={i} />)}
                       </div>
                     ) : null
                   })()}

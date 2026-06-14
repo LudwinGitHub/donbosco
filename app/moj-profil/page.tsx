@@ -89,14 +89,14 @@ export default async function MyProfilePage({
       <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Moje zapisy</h2>
 
       {myRegistrations.length === 0 ? (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-400">
+        <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white px-4 py-8 text-center text-sm text-zinc-400">
           Nie jesteś zapisany na żaden mecz.{" "}
           <Link href="/mecze" className="font-medium text-zinc-600 hover:underline">
             Sprawdź nadchodzące mecze →
           </Link>
         </div>
       ) : (
-        <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden divide-y divide-zinc-100">
+        <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white overflow-hidden divide-y divide-zinc-100">
           {upcomingRegs.length > 0 && (
             <>
               <div className="bg-zinc-50 px-4 py-2">
@@ -285,7 +285,7 @@ export default async function MyProfilePage({
         {!tab && (
           <>
             {/* Profil gracza */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-5">
+            <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-6 space-y-5">
               <div className="flex items-start gap-4">
                 <PlayerAvatar
                   firstName={p.firstName}
@@ -321,7 +321,7 @@ export default async function MyProfilePage({
             </div>
 
             {/* Wybór awatara */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
+            <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-5 space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Awatar</p>
               <AvatarPicker current={p.avatarId} />
             </div>
@@ -373,7 +373,7 @@ export default async function MyProfilePage({
             )}
 
             {seasonStats.length >= 2 && (
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
+              <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-5 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Postęp sezonowy</p>
                 <SeasonChart data={seasonStats} />
               </div>

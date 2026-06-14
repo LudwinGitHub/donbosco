@@ -1,10 +1,12 @@
 "use client"
 import { useOptimistic, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { AVATARS, AvatarCircle } from "@/app/ui/avatars"
 import { updatePlayerAvatar } from "@/app/actions/update-avatar"
 import { toast } from "sonner"
 
 export default function AvatarPicker({ current }: { current: number | null }) {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [selected, setSelected] = useOptimistic(current)
 
@@ -14,6 +16,7 @@ export default function AvatarPicker({ current }: { current: number | null }) {
       setSelected(next)
       try {
         await updatePlayerAvatar(next)
+        router.refresh()
       } catch {
         toast.error("Nie udało się zapisać awatara.")
       }

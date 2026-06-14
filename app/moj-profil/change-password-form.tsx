@@ -15,7 +15,7 @@ export default function ChangePasswordSection() {
   }, [state])
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

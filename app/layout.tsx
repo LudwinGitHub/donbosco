@@ -14,6 +14,8 @@ import ThemeProvider from "./theme-provider"
 import ChatFab from "./components/chat-fab"
 import BottomNav from "./components/bottom-nav"
 import NavHeader from "./components/nav-header"
+import SwRegister from "./sw-register"
+import InstallBanner from "./install-banner"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
@@ -111,6 +113,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           isOrganizer={session?.role === "ORGANIZER"}
           logoutAction={logout}
         />
+        <InstallBanner />
+        <SwRegister />
         </ThemeProvider>
         <Analytics />
       </body>

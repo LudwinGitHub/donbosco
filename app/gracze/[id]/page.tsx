@@ -4,6 +4,7 @@ import { getPlayerProfile, getPlayerForms, getFavoritePartner, type PlayerForm }
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
 import SeasonChart from "@/app/moj-profil/season-chart"
+import CountUp from "@/app/ui/count-up"
 
 export default async function PlayerProfilePage({
   params,
@@ -33,7 +34,7 @@ export default async function PlayerProfilePage({
       </div>
 
       {/* Hero */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
+      <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-6">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-bold text-zinc-900">
             {player.firstName} {player.lastName}
@@ -73,7 +74,7 @@ export default async function PlayerProfilePage({
               <div className="mt-auto pt-3 flex items-baseline gap-2">
                 {bestMatch.goals > 0 && (
                   <span className="text-2xl font-black text-zinc-900">
-                    {bestMatch.goals}
+                    <CountUp value={bestMatch.goals} />
                     <span className="ml-1 text-sm font-semibold text-orange-500">{goalLabel(bestMatch.goals)}</span>
                   </span>
                 )}
@@ -89,13 +90,13 @@ export default async function PlayerProfilePage({
               href={`/gracze/${favoritePartner.id}`}
               className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-4 transition-colors hover:bg-zinc-50"
             >
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Ulubiony partner</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Deadly Duo</p>
               <p className="mt-2 truncate text-sm font-semibold text-zinc-900 leading-tight">
                 {favoritePartner.firstName} {favoritePartner.lastName}
               </p>
               <div className="mt-auto pt-3">
                 <span className="text-2xl font-black text-zinc-900">
-                  {favoritePartner.count}
+                  <CountUp value={favoritePartner.count} />
                   <span className="ml-1 text-sm font-semibold text-zinc-400">{actionLabel(favoritePartner.count)}</span>
                 </span>
               </div>
@@ -108,7 +109,7 @@ export default async function PlayerProfilePage({
       {player.seasons.length > 0 && (
         <section className="space-y-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Statystyki sezonowe</h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -171,7 +172,7 @@ export default async function PlayerProfilePage({
       {player.matches.length > 0 && (
         <section className="space-y-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Historia meczów</h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white divide-y divide-zinc-100">
             {player.matches.map((m) => {
               const myScore  = m.isHome ? m.homeScore : m.awayScore
               const oppScore = m.isHome ? m.awayScore : m.homeScore
@@ -247,7 +248,7 @@ function FormArrow({ form }: { form: PlayerForm | undefined }) {
 function StatCell({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
-      <p className="text-3xl font-bold text-zinc-900">{value}</p>
+      <p className="text-3xl font-bold text-zinc-900"><CountUp value={value} /></p>
       <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
     </div>
   )

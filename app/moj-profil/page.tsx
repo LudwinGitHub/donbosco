@@ -9,6 +9,8 @@ import BadgeChip from "@/app/ui/badge-chip"
 import PlayerAvatar from "@/app/ui/player-avatar"
 import AvatarPicker from "./avatar-picker"
 import SeasonChart from "./season-chart"
+import EditPlayerSection from "./edit-player-form"
+import CountUp from "@/app/ui/count-up"
 import { getSeasonStatsForPlayer, getBestMatch, getFavoritePartner } from "@/lib/players"
 
 export default async function MyProfilePage({
@@ -343,7 +345,7 @@ export default async function MyProfilePage({
                     </p>
                     <div className="mt-auto pt-3 flex items-baseline gap-2">
                       <span className="text-2xl font-black text-zinc-900">
-                        {bestMatch.goals}
+                        <CountUp value={bestMatch.goals} />
                         <span className="ml-1 text-sm font-semibold text-orange-500">{goalLabel(bestMatch.goals)}</span>
                       </span>
                       {bestMatch.assists > 0 && (
@@ -357,13 +359,13 @@ export default async function MyProfilePage({
                     href={`/gracze/${favoritePartner.id}`}
                     className="flex flex-col rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-4 transition-colors hover:bg-zinc-50"
                   >
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Ulubiony partner</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Deadly Duo</p>
                     <p className="mt-2 truncate text-sm font-semibold text-zinc-900 leading-tight">
                       {favoritePartner.firstName} {favoritePartner.lastName}
                     </p>
                     <div className="mt-auto pt-3">
                       <span className="text-2xl font-black text-zinc-900">
-                        {favoritePartner.count}
+                        <CountUp value={favoritePartner.count} />
                         <span className="ml-1 text-sm font-semibold text-zinc-400">{actionLabel(favoritePartner.count)}</span>
                       </span>
                     </div>
@@ -380,6 +382,12 @@ export default async function MyProfilePage({
             )}
 
             {registrationsSection}
+
+            <EditPlayerSection
+              firstName={p.firstName}
+              lastName={p.lastName}
+              nickname={p.nickname}
+            />
 
             <ChangePasswordSection />
           </>
@@ -565,7 +573,7 @@ function RegistrationRow({ reg }: { reg: RegEntry }) {
 function StatCell({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
-      <p className="text-2xl font-bold text-zinc-900">{value}</p>
+      <p className="text-2xl font-bold text-zinc-900"><CountUp value={value} /></p>
       <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
     </div>
   )

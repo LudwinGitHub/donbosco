@@ -150,6 +150,33 @@ export async function linkPlayerToUser(
   return { success: true }
 }
 
+// ─── updateMyPlayerProfile (logged-in user) ───────────────────────────────────
+
+export async function updateMyPlayerProfile(
+  state: PlayerFormState,
+  formData: FormData,
+): Promise<PlayerFormState> {
+  const session = await verifySession()
+  const player = await prisma.player.findUnique({ where: { userId: session.userId } })
+  if (!player) return { message: "Nie masz powiązanego profilu gracza." }
+
+  const firstName = ((formData.get("firstName") as string) ?? "").trim()
+  const lastName  = ((formData.get("lastName")  as string) ?? "").trim()
+  const nickname  = ((formData.get("nickname")  as string) ?? "").trim() || null
+
+  const errors: Record<string, string[]> = {}
+  if (firstName.length < 2) errors.firstName = ["Imię musi mieć co najmniej 2 znaki."]
+  if (lastName.length  < 2) errors.lastName  = ["Nazwisko musi mieć co najmniej 2 znaki."]
+  if (Object.keys(errors).length) return { errors }
+
+  await prisma.player.update({ where: { id: player.id }, data: { firstName, lastName, nickname } })
+
+  revalidatePath("/moj-profil")
+  revalidatePath(`/gracze/${player.id}`)
+  revalidatePath("/gracze")
+  return { success: true }
+}
+
 // ─── claimPlayerProfile (logged-in user) ──────────────────────────────────────
 
 export async function claimPlayerProfile(

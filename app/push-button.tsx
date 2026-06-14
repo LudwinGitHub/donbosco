@@ -61,9 +61,19 @@ export default function PushButton() {
       onClick={toggle}
       disabled={loading}
       title={subscribed ? "Wyłącz powiadomienia push" : "Włącz powiadomienia push"}
-      className="rounded-md px-2 py-1.5 text-base leading-none transition-colors hover:bg-zinc-100 disabled:opacity-50"
+      className="rounded-md p-1.5 transition-colors hover:bg-orange-50 disabled:opacity-50"
     >
-      {subscribed ? "🔔" : "🔕"}
+      {subscribed ? (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-orange-500">
+          <path d="M5.85 3.5a.75.75 0 0 0-1.117-1 9.719 9.719 0 0 0-2.348 4.876.75.75 0 0 0 1.479.248A8.219 8.219 0 0 1 5.85 3.5ZM19.267 2.5a.75.75 0 1 0-1.118 1 8.22 8.22 0 0 1 1.987 4.124.75.75 0 0 0 1.48-.248A9.72 9.72 0 0 0 19.267 2.5Z" />
+          <path fillRule="evenodd" d="M12 2.25A6.75 6.75 0 0 0 5.25 9v.75a8.217 8.217 0 0 1-2.119 5.52.75.75 0 0 0 .298 1.206c1.544.57 3.16.99 4.831 1.243a3.75 3.75 0 1 0 7.48 0 24.583 24.583 0 0 0 4.83-1.244.75.75 0 0 0 .298-1.205 8.217 8.217 0 0 1-2.118-5.52V9A6.75 6.75 0 0 0 12 2.25ZM9.75 18c0-.034 0-.067.002-.1a25.05 25.05 0 0 0 4.496 0l.002.1a2.25 2.25 0 1 1-4.5 0Z" clipRule="evenodd" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-zinc-400">
+          <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM20.57 16.476c-.223.082-.448.161-.674.238L7.319 4.137A6.75 6.75 0 0 1 18.75 9v.75a8.217 8.217 0 0 0 2.118 5.52.75.75 0 0 1-.297 1.206Z" />
+          <path fillRule="evenodd" d="M5.25 9c0-.184.007-.366.022-.546l10.384 10.384a3.751 3.751 0 0 1-7.396-1.119 24.585 24.585 0 0 1-3.384-.878.75.75 0 0 1-.297-1.205A8.217 8.217 0 0 0 6.272 9.75 6.753 6.753 0 0 1 5.25 9Zm4.5 9c0-.034 0-.067.002-.1a25.112 25.112 0 0 0 4.496 0l.002.1a2.25 2.25 0 1 1-4.5 0Z" clipRule="evenodd" />
+        </svg>
+      )}
     </button>
   )
 }

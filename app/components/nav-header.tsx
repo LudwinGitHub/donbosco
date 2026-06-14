@@ -187,24 +187,49 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
 
       {/* ── Desktop navbar ── */}
       <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
-        {/* flex row: links left, controls right; logo absolutely centered */}
+
+        {/* ── Football pitch SVG decoration ── */}
+        <svg
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 1024 64"
+          preserveAspectRatio="xMidYMid meet"
+          fill="none"
+          stroke="rgba(255,90,0,0.11)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        >
+          {/* halfway line */}
+          <line x1="512" y1="0" x2="512" y2="64" />
+          {/* center circle (r=80 — clips above/below, only arc visible) */}
+          <circle cx="512" cy="32" r="80" />
+          {/* center spot */}
+          <circle cx="512" cy="32" r="3" fill="rgba(255,90,0,0.22)" stroke="none" />
+          {/* corner arcs */}
+          <path d="M 20 0 A 20 20 0 0 0 0 20" />
+          <path d="M 1004 0 A 20 20 0 0 1 1024 20" />
+          <path d="M 0 44 A 20 20 0 0 1 20 64" />
+          <path d="M 1024 44 A 20 20 0 0 0 1004 64" />
+        </svg>
+
         <div className="relative flex items-center justify-between h-16">
 
-          {/* Left — nav links */}
-          <SlidingNavLinks links={navLinks} />
-
-          {/* Center — oversized logo absolutely centered */}
-          <Link
-            href="/"
-            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center group z-20"
-            style={{ top: "-24px", bottom: "-24px" }}
-          >
+          {/* Left — brand */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <Image
-              src="/donlogo.png" alt="Don Bosco Premier League"
-              width={112} height={112} quality={100} priority unoptimized
-              className="logo-img w-28 h-28 object-contain block transition-transform duration-200 group-hover:scale-105 drop-shadow-md"
+              src="/donlogo.png" alt="Don Bosco"
+              width={40} height={40} quality={100} priority unoptimized
+              className="logo-img w-10 h-10 object-contain block transition-transform duration-200 group-hover:scale-105"
             />
+            <span className="font-black italic text-orange-500 text-xl leading-none tracking-tight">
+              Don Bosco
+            </span>
           </Link>
+
+          {/* Center — nav links (absolutely centered) */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <SlidingNavLinks links={navLinks} />
+          </div>
 
           {/* Right — controls */}
           <div className="flex items-center gap-1">

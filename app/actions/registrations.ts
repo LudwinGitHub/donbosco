@@ -4,57 +4,56 @@ import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { sendPushToUser } from "@/lib/push"
 
-export async function signUp(matchId: string) {
+export async function confirmPresence(matchId: string) {
   const session = await verifySession()
 
-  const match = await prisma.match.findUnique({
-    where: { id: matchId },
-    select: { status: true, playerLimit: true },
-  })
-  if (!match) throw new Error("Mecz nie istnieje.")
-  if (match.status !== "SCHEDULED") throw new Error("Zapisy na ten mecz są zamknięte.")
-
-  const existing = await prisma.matchRegistration.findUnique({
+  const reg = await prisma.matchRegistration.findUnique({
     where: { matchId_userId: { matchId, userId: session.userId } },
   })
-  if (existing) return
+  if (!reg) throw new Error("Nie jesteś na liście tego meczu.")
+  if (reg.status !== "PENDING") return
 
-  const confirmedCount = await prisma.matchRegistration.count({
-    where: { matchId, status: "CONFIRMED" },
-  })
-  const status = confirmedCount < match.playerLimit ? "CONFIRMED" : "WAITLIST"
-
-  await prisma.matchRegistration.create({
-    data: { matchId, userId: session.userId, status },
+  await prisma.matchRegistration.update({
+    where: { id: reg.id },
+    data: { status: "CONFIRMED", confirmedAt: new Date() },
   })
 
   revalidatePath(`/mecze/${matchId}`)
 }
 
-export async function signOut(matchId: string) {
+export async function declinePresence(matchId: string) {
   const session = await verifySession()
 
-  const registration = await prisma.matchRegistration.findUnique({
+  const reg = await prisma.matchRegistration.findUnique({
     where: { matchId_userId: { matchId, userId: session.userId } },
   })
-  if (!registration) return
+  if (!reg) return
 
   let promotedUserId: string | null = null
 
   await prisma.$transaction(async (tx) => {
-    await tx.matchRegistration.delete({ where: { id: registration.id } })
+    await tx.matchRegistration.delete({ where: { id: reg.id } })
 
-    if (registration.status === "CONFIRMED") {
-      const firstWaiting = await tx.matchRegistration.findFirst({
-        where: { matchId, status: "WAITLIST" },
-        orderBy: { createdAt: "asc" },
+    if (reg.status === "CONFIRMED" || reg.status === "PENDING") {
+      const match = await tx.match.findUnique({
+        where: { id: matchId },
+        select: { playerLimit: true },
       })
-      if (firstWaiting) {
-        await tx.matchRegistration.update({
-          where: { id: firstWaiting.id },
-          data: { status: "CONFIRMED" },
+      const confirmedCount = await tx.matchRegistration.count({
+        where: { matchId, status: "CONFIRMED" },
+      })
+      if (match && confirmedCount < match.playerLimit) {
+        const firstWaiting = await tx.matchRegistration.findFirst({
+          where: { matchId, status: "WAITLIST" },
+          orderBy: [{ slot: "asc" }, { createdAt: "asc" }],
         })
-        promotedUserId = firstWaiting.userId
+        if (firstWaiting) {
+          await tx.matchRegistration.update({
+            where: { id: firstWaiting.id },
+            data: { status: "PENDING" },
+          })
+          promotedUserId = firstWaiting.userId
+        }
       }
     }
   })
@@ -66,12 +65,40 @@ export async function signOut(matchId: string) {
     })
     if (match) {
       sendPushToUser(promotedUserId, {
-        title: "Masz miejsce na meczu!",
-        body: `Twoje miejsce na liście rezerwowej zostało potwierdzone — ${match.homeTeam.name} vs ${match.awayTeam.name}`,
+        title: "🟠 Miejsce na meczu!",
+        body: `Trafiłeś na listę w meczu ${match.homeTeam.name} vs ${match.awayTeam.name}. Potwierdź obecność!`,
         url: `/mecze/${matchId}`,
       }).catch(() => {})
     }
   }
+
+  revalidatePath(`/mecze/${matchId}`)
+}
+
+// Kept for organizer manual use
+export async function signUp(matchId: string) {
+  const session = await verifySession()
+  if (session.role !== "ORGANIZER") return
+
+  const match = await prisma.match.findUnique({
+    where: { id: matchId },
+    select: { status: true, playerLimit: true },
+  })
+  if (!match || match.status !== "SCHEDULED") return
+
+  const existing = await prisma.matchRegistration.findUnique({
+    where: { matchId_userId: { matchId, userId: session.userId } },
+  })
+  if (existing) return
+
+  const confirmedCount = await prisma.matchRegistration.count({
+    where: { matchId, status: "CONFIRMED" },
+  })
+  const status = confirmedCount < match.playerLimit ? "PENDING" : "WAITLIST"
+
+  await prisma.matchRegistration.create({
+    data: { matchId, userId: session.userId, status },
+  })
 
   revalidatePath(`/mecze/${matchId}`)
 }

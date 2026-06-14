@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { getMatchById, type GoalDetail, type LineupEntry } from "@/lib/matches"
 import { getOptionalSession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
+import { processMatchDeadlines, getMatchDeadlines } from "@/lib/deadlines"
 import RegistrationSection from "./registration-section"
 import DeleteMatchButton from "./delete-match-button"
 import Countdown from "./countdown"
@@ -17,13 +18,15 @@ export default async function MatchDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  await processMatchDeadlines(id)
+
   const [match, session, registrations, comments] = await Promise.all([
     getMatchById(id),
     getOptionalSession(),
     prisma.matchRegistration.findMany({
       where:   { matchId: id },
       include: { user: { select: { firstName: true, lastName: true } } },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ slot: "asc" }, { createdAt: "asc" }],
     }),
     prisma.matchComment.findMany({
       where: { matchId: id },
@@ -70,8 +73,21 @@ export default async function MatchDetailPage({
     : [[], null]
 
   const played    = match.status === "PLAYED"
+  const pending   = registrations.filter((r) => r.status === "PENDING")
   const confirmed = registrations.filter((r) => r.status === "CONFIRMED")
   const waitlist  = registrations.filter((r) => r.status === "WAITLIST")
+  const dropped   = registrations.filter((r) => r.status === "DROPPED")
+
+  const deadlines = match.status === "SCHEDULED"
+    ? getMatchDeadlines(match.scheduledAt)
+    : null
+
+  const matchPhases = match.status === "SCHEDULED"
+    ? await prisma.match.findUnique({
+        where: { id },
+        select: { phase1Processed: true, phase2Processed: true },
+      })
+    : null
 
   const badges = played && match.matchLineups.length > 0
     ? await getActiveBadges()
@@ -298,9 +314,15 @@ export default async function MatchDetailPage({
         matchId={id}
         playerLimit={match.playerLimit}
         matchStatus={match.status}
+        pending={pending}
         confirmed={confirmed}
         waitlist={waitlist}
+        dropped={dropped}
         currentUserId={session?.userId ?? null}
+        deadline1={deadlines?.deadline1?.toISOString() ?? null}
+        deadline2={deadlines?.deadline2?.toISOString() ?? null}
+        phase1Processed={matchPhases?.phase1Processed ?? false}
+        phase2Processed={matchPhases?.phase2Processed ?? false}
       />
 
       {/* Comments */}

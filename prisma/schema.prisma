@@ -22,8 +22,10 @@ enum Role {
 }
 
 enum RegistrationStatus {
+  PENDING
   CONFIRMED
   WAITLIST
+  DROPPED
 }
 
 enum PaymentStatus {
@@ -69,6 +71,7 @@ model User {
   announcementReactions  AnnouncementReaction[]
   announcementPollVotes  AnnouncementPollVote[]
   chatMessages           ChatMessage[]
+  groupSlot              MatchGroupSlot?
 
   @@map("users")
 }
@@ -165,6 +168,8 @@ model Match {
   round       Int?
   playerLimit   Int         @default(14)
   reminderSent  Boolean     @default(false)
+  phase1Processed Boolean  @default(false)
+  phase2Processed Boolean  @default(false)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -188,11 +193,23 @@ model MatchRegistration {
   match     Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
   userId    String
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status    RegistrationStatus
-  createdAt DateTime           @default(now())
+  status      RegistrationStatus
+  slot        Int?
+  confirmedAt DateTime?
+  createdAt   DateTime           @default(now())
 
   @@unique([matchId, userId])
   @@map("match_registrations")
+}
+
+model MatchGroupSlot {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@map("match_group_slots")
 }
 
 // Bramka – strzelec, opcjonalna asysta, minuta

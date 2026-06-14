@@ -48,6 +48,7 @@ const panelLinks = [
   { href: "/panel/losowanie", label: "Losowanie", icon: "🎲" },
   { href: "/panel/sezony",    label: "Sezony",    icon: "🏆" },
   { href: "/panel/gracze",    label: "Gracze",    icon: "👥" },
+  { href: "/panel/sklad",     label: "Skład",     icon: "📋" },
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

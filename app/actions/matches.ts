@@ -56,6 +56,22 @@ export async function createMatch(
     include: { homeTeam: true, awayTeam: true },
   })
 
+  // Auto-populate registrations from group slots
+  const groupSlots = await prisma.matchGroupSlot.findMany({
+    orderBy: { position: "asc" },
+  })
+  if (groupSlots.length > 0) {
+    await prisma.matchRegistration.createMany({
+      data: groupSlots.map((slot) => ({
+        matchId: match.id,
+        userId: slot.userId,
+        status: slot.position <= match.playerLimit ? "PENDING" : "WAITLIST",
+        slot: slot.position,
+      })),
+      skipDuplicates: true,
+    })
+  }
+
   revalidatePath("/mecze")
 
   const dateStr = new Date(match.scheduledAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })

@@ -109,6 +109,77 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
       {/* Border */}
       <div className="absolute inset-0 border-b border-black/8 dark:border-white/8 pointer-events-none" />
 
+      {/* ── Desktop full-bleed decorative layer (fades on scroll) ── */}
+      <div
+        className="hidden sm:block absolute inset-0 overflow-hidden pointer-events-none z-[2]"
+        style={{ opacity: scrolled ? 0 : 1, transition: "opacity 0.3s ease" }}
+      >
+        {/* Texture + gradients */}
+        <div className="hero-stripes absolute inset-0" />
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-orange-500/[0.04] to-transparent" />
+
+        {/* Glow blobs — both edges */}
+        <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute -top-8 -left-8  w-40 h-40 rounded-full bg-orange-500/[0.06] blur-3xl" />
+
+        {/* Edge accent lines */}
+        <div className="absolute left-0  top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
+        <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
+
+        {/* ── LEFT: speed lines + small flames (connect with left page edge) ── */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 220 64"
+          className="absolute left-0 top-0 h-full w-[220px] text-orange-500/[0.09] dark:text-orange-500/[0.13]"
+          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+        >
+          {/* Speed lines extending right */}
+          <line x1="0" y1="16" x2="140" y2="19" />
+          <line x1="0" y1="24" x2="180" y2="27" />
+          <line x1="0" y1="32" x2="200" y2="36" />
+          <line x1="0" y1="40" x2="160" y2="44" />
+          <line x1="0" y1="48" x2="95"  y2="52" />
+          {/* Tiny flames at left edge */}
+          <path d="M 8 62 C 4 50 0 40 5 28 C 7 20 15 24 13 12" />
+          <path d="M 19 60 C 17 48 21 40 17 28 C 14 20 8 22 10 12" />
+        </svg>
+
+        {/* ── RIGHT: football + flames (from right edge) ── */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 280 86"
+          className="absolute right-0 bottom-[-20px] h-[86px] w-[280px] text-orange-500/[0.11] dark:text-orange-500/[0.17]"
+          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+        >
+          {/* Speed lines (left of composition, going left) */}
+          <line x1="30" y1="38" x2="0"  y2="36" />
+          <line x1="28" y1="46" x2="0"  y2="50" />
+          <line x1="32" y1="30" x2="4"  y2="26" />
+          {/* Flames */}
+          <path d="M 100 82 C 96 66 87 56 93 39 C 97 27 106 31 104 14" />
+          <path d="M 113 82 C 111 68 115 58 111 44 C 108 34 101 36 104 16" />
+          <path d="M  88 78 C 83 64 75 54 82 42" />
+          <path d="M 125 76 C 129 64 133 56 128 47" />
+          {/* Football: cx=195 cy=52 r=28 */}
+          <circle cx="195" cy="52" r="28" strokeWidth="2" />
+          <polygon points="195,38 208,48 203,63 187,63 182,48" strokeWidth="1.5" />
+          <line x1="195" y1="38" x2="195" y2="24" strokeWidth="1.5" />
+          <line x1="208" y1="48" x2="222" y2="43" strokeWidth="1.5" />
+          <line x1="203" y1="63" x2="212" y2="75" strokeWidth="1.5" />
+          <line x1="187" y1="63" x2="179" y2="75" strokeWidth="1.5" />
+          <line x1="182" y1="48" x2="168" y2="43" strokeWidth="1.5" />
+        </svg>
+
+        {/* "DB" watermark */}
+        <div
+          className="absolute -bottom-2 right-0 font-black italic leading-none select-none text-orange-500/[0.055] dark:text-orange-500/[0.09]"
+          style={{ fontSize: "84px" }}
+          aria-hidden
+        >
+          DB
+        </div>
+      </div>
+
       {/* ── Mobile hero — collapses on scroll ── */}
       <div
         className="sm:hidden relative overflow-hidden"
@@ -186,50 +257,8 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
       </div>
 
       {/* ── Desktop navbar ── */}
-      <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4 overflow-hidden">
-
-        {/* Decorative layer — mirrors mobile hero, fades to 0 on scroll (glass takes over) */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-          style={{ opacity: scrolled ? 0 : 1 }}
-        >
-          <div className="hero-stripes absolute inset-0" />
-          <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-orange-500/10 blur-3xl" />
-          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-orange-500/[0.04] to-transparent" />
-          <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
-
-          {/* Football SVG watermark */}
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 80 80"
-            className="absolute right-28 bottom-[-18px] w-[76px] h-[76px] text-orange-500/[0.10] dark:text-orange-500/[0.16]"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="40" cy="40" r="34" />
-            <polygon points="40,26 53,36 48,51 32,51 27,36" strokeWidth="1.5" />
-            <line x1="40" y1="26" x2="40" y2="6"   strokeWidth="1.5" />
-            <line x1="53" y1="36" x2="72" y2="30"  strokeWidth="1.5" />
-            <line x1="48" y1="51" x2="60" y2="68"  strokeWidth="1.5" />
-            <line x1="32" y1="51" x2="20" y2="68"  strokeWidth="1.5" />
-            <line x1="27" y1="36" x2="8"  y2="30"  strokeWidth="1.5" />
-          </svg>
-
-          {/* "DB" watermark */}
-          <div
-            className="absolute -bottom-2 right-1 font-black italic leading-none select-none text-orange-500/[0.055] dark:text-orange-500/[0.09]"
-            style={{ fontSize: "84px" }}
-            aria-hidden
-          >
-            DB
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="relative flex items-center justify-between h-16">
+      <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
+        <div className="flex items-center justify-between h-16">
 
           {/* Left — text branding (no logo image) */}
           <Link href="/" className="shrink-0">

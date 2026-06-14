@@ -1,5 +1,6 @@
 import React from "react"
 import Link from "next/link"
+import CountUp from "@/app/ui/count-up"
 import {
   getMatchHighlights,
   getTopSingleMatchScorers,
@@ -86,7 +87,8 @@ export default async function StatystykiPage() {
                 icon={<IconFlame />}
                 title="Najdłuższa seria z golem"
                 player={streaks.goalStreak}
-                value={`${streaks.goalStreak.streak} ${matchLabel(streaks.goalStreak.streak)}`}
+                statValue={streaks.goalStreak.streak}
+                statLabel={matchLabel(streaks.goalStreak.streak)}
               />
             )}
             {streaks.matchStreak && (
@@ -94,7 +96,8 @@ export default async function StatystykiPage() {
                 icon={<IconShield />}
                 title="Najdłuższa seria meczów"
                 player={streaks.matchStreak}
-                value={`${streaks.matchStreak.streak} ${matchLabel(streaks.matchStreak.streak)}`}
+                statValue={streaks.matchStreak.streak}
+                statLabel={matchLabel(streaks.matchStreak.streak)}
               />
             )}
             {streaks.bestSeasonScorer && (
@@ -102,7 +105,8 @@ export default async function StatystykiPage() {
                 icon={<IconStar />}
                 title="Najlepszy sezon"
                 player={streaks.bestSeasonScorer}
-                value={`${streaks.bestSeasonScorer.goals} ${goalLabel(streaks.bestSeasonScorer.goals)}`}
+                statValue={streaks.bestSeasonScorer.goals}
+                statLabel={goalLabel(streaks.bestSeasonScorer.goals)}
                 sub={streaks.bestSeasonScorer.seasonName}
               />
             )}
@@ -216,12 +220,13 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 // ─── Streak card ─────────────────────────────────────────────────────────────
 
 function StreakCard({
-  icon, title, player, value, sub,
+  icon, title, player, statValue, statLabel, sub,
 }: {
   icon: React.ReactNode
   title: string
   player: PlayerStreak | BestSeasonScorer
-  value: string
+  statValue: number
+  statLabel: string
   sub?: string
 }) {
   return (
@@ -240,7 +245,9 @@ function StreakCard({
         <p className="text-xs text-zinc-400 truncate">„{player.nickname}"</p>
       )}
       {sub && <p className="text-xs text-zinc-400 truncate">{sub}</p>}
-      <p className="mt-auto pt-2 text-2xl font-black text-zinc-900">{value}</p>
+      <p className="mt-auto pt-2 text-2xl font-black text-zinc-900">
+        <CountUp value={statValue} /> {statLabel}
+      </p>
     </Link>
   )
 }

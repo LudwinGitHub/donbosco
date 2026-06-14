@@ -126,83 +126,79 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
         <div className="absolute left-0  top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
         <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
 
-        {/* ── LEFT: speed fan + small flame cluster ── */}
+        {/* ── LEFT: speed lines fan ── */}
         <svg
           aria-hidden="true"
           viewBox="0 0 260 64"
-          className="absolute left-0 top-0 h-full w-[260px] text-orange-500/[0.09] dark:text-orange-500/[0.14]"
-          fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+          className="absolute left-0 top-0 h-full w-[260px] text-orange-500/[0.08] dark:text-orange-500/[0.12]"
+          fill="none" stroke="currentColor" strokeLinecap="round"
         >
-          <line x1="0" y1="10" x2="200" y2="20" strokeWidth="1" />
-          <line x1="0" y1="18" x2="240" y2="25" strokeWidth="1.2" />
-          <line x1="0" y1="26" x2="255" y2="30" strokeWidth="1.5" />
-          <line x1="0" y1="34" x2="255" y2="38" strokeWidth="1.5" />
-          <line x1="0" y1="42" x2="240" y2="44" strokeWidth="1.2" />
-          <line x1="0" y1="50" x2="190" y2="52" strokeWidth="1" />
-          <line x1="0" y1="58" x2="120" y2="60" strokeWidth="0.8" />
-          {/* flame cluster — left edge */}
-          <path d="M 7 64 C 3 52 0 42 5 28 C 8 20 16 25 14 12" strokeWidth="1.8" />
-          <path d="M 20 64 C 17 52 22 42 18 30 C 15 22 8 24 11 12" strokeWidth="1.6" />
-          <path d="M 32 62 C 28 50 22 40 28 30 C 32 22 40 26 37 16" strokeWidth="1.4" />
-          <path d="M 44 60 C 48 48 52 40 46 32" strokeWidth="1.2" />
-          <path d="M 54 58 C 50 48 46 40 52 34" strokeWidth="1" />
+          <line x1="0" y1="8"  x2="190" y2="18" strokeWidth="0.8" />
+          <line x1="0" y1="18" x2="235" y2="24" strokeWidth="1" />
+          <line x1="0" y1="26" x2="252" y2="30" strokeWidth="1.3" />
+          <line x1="0" y1="34" x2="256" y2="36" strokeWidth="1.5" />
+          <line x1="0" y1="42" x2="248" y2="44" strokeWidth="1.3" />
+          <line x1="0" y1="50" x2="210" y2="51" strokeWidth="1" />
+          <line x1="0" y1="58" x2="150" y2="59" strokeWidth="0.8" />
+          {/* zigzag flame silhouette at left edge */}
+          <path d="M 0 64 L 6 46 L 12 56 L 18 32 L 24 48 L 30 18 L 36 38 L 42 24 L 48 40 L 54 30 L 60 46 L 66 36 L 72 48" strokeWidth="1.6" />
+          <path d="M 0 64 L 10 54 L 18 60 L 26 44 L 34 56 L 42 36 L 50 50 L 60 42 L 70 52" strokeWidth="1.1" />
         </svg>
 
-        {/* ── RIGHT: wall of fire + classic football ── */}
+        {/* ── RIGHT: layered fire crown + radiating lines + football ── */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 380 92"
-          className="absolute right-0 bottom-[-22px] h-[92px] w-[380px] text-orange-500/[0.10] dark:text-orange-500/[0.17]"
+          viewBox="0 0 390 96"
+          className="absolute right-0 bottom-[-24px] h-[96px] w-[390px] text-orange-500/[0.11] dark:text-orange-500/[0.18]"
           fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
         >
-          {/* Speed lines entering */}
-          <line x1="0" y1="38" x2="28" y2="41" strokeWidth="1" />
-          <line x1="0" y1="48" x2="22" y2="52" strokeWidth="1.2" />
-          <line x1="0" y1="28" x2="20" y2="30" strokeWidth="0.8" />
-
-          {/* ── TALL flames (6) ── */}
-          <path d="M 80  90 C 75 72 65 60 72 42 C 77 28 88 34 85 12"  strokeWidth="2.2" />
-          <path d="M 100 90 C 97 74 102 62 97 46 C 93 32 84 36 87 14"  strokeWidth="2.2" />
-          <path d="M 120 90 C 114 72 104 58 112 40 C 117 26 128 32 125 10" strokeWidth="2.4" />
-          <path d="M 142 90 C 139 74 144 62 139 46 C 135 32 126 36 129 12" strokeWidth="2.4" />
-          <path d="M 162 90 C 158 72 148 58 156 40 C 161 26 172 32 169 10" strokeWidth="2.2" />
-          <path d="M 182 90 C 179 74 184 62 179 46 C 175 32 166 36 169 14" strokeWidth="2.2" />
-
-          {/* ── MEDIUM flames (8) ── */}
-          <path d="M 62  88 C 57 72 48 62 55 48 C 59 38 68 42 65 28" strokeWidth="1.7" />
-          <path d="M 200 88 C 196 72 188 62 195 48 C 200 38 210 42 207 28" strokeWidth="1.7" />
-          <path d="M 45  86 C 40 70 32 60 39 48 C 43 38 52 42 49 30" strokeWidth="1.5" />
-          <path d="M 218 86 C 222 70 228 60 221 48 C 217 38 208 42 211 30" strokeWidth="1.5" />
-          <path d="M 110 90 C 115 74 120 62 114 50" strokeWidth="1.7" />
-          <path d="M 152 90 C 148 74 144 62 150 50" strokeWidth="1.7" />
-          <path d="M 232 84 C 236 70 240 60 234 50" strokeWidth="1.5" />
-          <path d="M 36  84 C 32 70 28 60 34 50" strokeWidth="1.5" />
-
-          {/* ── SHORT / wispy flames (8) ── */}
-          <path d="M 24  82 C 20 70 15 60 21 50" strokeWidth="1.2" />
-          <path d="M 242 80 C 246 68 250 60 244 52" strokeWidth="1.2" />
-          <path d="M 16  78 C 12 68  8 58 14 50" strokeWidth="1" />
-          <path d="M 252 78 C 256 66 260 58 254 50" strokeWidth="1" />
-          <path d="M  8  76 C  4 66  0 56  6 50" strokeWidth="0.8" />
-          <path d="M 260 76 C 264 64 268 56 262 50" strokeWidth="0.8" />
-          <path d="M 258 82 C 262 70 267 62 261 54" strokeWidth="1" />
-          <path d="M 22  80 C 18 70 14 62 20 54" strokeWidth="1" />
-
-          {/* ── Football: cx=305 cy=54 r=30 (classic pentagon style) ── */}
-          <circle cx="305" cy="54" r="30" strokeWidth="2.5" />
-          {/* pentagon: inner r=15, top vertex up */}
-          <polygon points="305,39 319,49 314,66 296,66 291,49" strokeWidth="1.6" />
-          {/* 5 lines from pentagon vertices to circle perimeter */}
-          <line x1="305" y1="39" x2="305" y2="24" strokeWidth="1.5" />
-          <line x1="319" y1="49" x2="333" y2="45" strokeWidth="1.5" />
-          <line x1="314" y1="66" x2="323" y2="78" strokeWidth="1.5" />
-          <line x1="296" y1="66" x2="287" y2="78" strokeWidth="1.5" />
-          <line x1="291" y1="49" x2="277" y2="45" strokeWidth="1.5" />
+          {/* ── LAYER 1 — outer flame crown (tallest zigzag) ── */}
+          <path
+            d="M 0 96 L 14 68 L 26 80 L 40 50 L 54 70 L 68 32 L 82 56 L 96 14 L 110 50 L 122 10 L 136 44 L 148 14 L 162 46 L 174 20 L 188 52 L 200 28 L 212 54 L 224 40 L 236 58 L 248 50"
+            strokeWidth="2.2"
+          />
+          {/* ── LAYER 2 — mid flame zigzag ── */}
+          <path
+            d="M 0 96 L 10 76 L 18 84 L 30 60 L 42 74 L 56 42 L 70 62 L 84 28 L 98 56 L 112 22 L 126 50 L 140 30 L 154 54 L 166 38 L 180 58 L 194 44 L 208 60 L 224 50 L 238 60 L 248 54"
+            strokeWidth="1.6"
+          />
+          {/* ── LAYER 3 — inner base zigzag ── */}
+          <path
+            d="M 0 96 L 18 84 L 36 90 L 58 74 L 78 86 L 100 66 L 122 78 L 144 68 L 166 78 L 188 70 L 210 76 L 234 70 L 248 66"
+            strokeWidth="1.1"
+          />
+          {/* ── SPIKE LINES (individual flame tongues) ── */}
+          <line x1="68"  y1="80" x2="52"  y2="22" strokeWidth="1.6" />
+          <line x1="96"  y1="82" x2="88"  y2="12" strokeWidth="1.8" />
+          <line x1="122" y1="80" x2="120" y2="8"  strokeWidth="2" />
+          <line x1="148" y1="80" x2="152" y2="12" strokeWidth="2" />
+          <line x1="174" y1="80" x2="186" y2="16" strokeWidth="1.8" />
+          <line x1="200" y1="82" x2="212" y2="24" strokeWidth="1.6" />
+          <line x1="44"  y1="78" x2="30"  y2="36" strokeWidth="1.4" />
+          <line x1="224" y1="78" x2="236" y2="36" strokeWidth="1.4" />
+          {/* ── RADIATING LINES FROM FOOTBALL ── */}
+          <line x1="280" y1="38" x2="232" y2="20" strokeWidth="1.2" />
+          <line x1="272" y1="28" x2="218" y2="10" strokeWidth="1" />
+          <line x1="260" y1="22" x2="202" y2="6"  strokeWidth="1" />
+          <line x1="258" y1="52" x2="200" y2="52" strokeWidth="1.2" />
+          <line x1="272" y1="66" x2="228" y2="80" strokeWidth="1" />
+          <line x1="282" y1="72" x2="252" y2="86" strokeWidth="1" />
+          <line x1="264" y1="40" x2="214" y2="26" strokeWidth="1" />
+          <line x1="264" y1="64" x2="218" y2="76" strokeWidth="1" />
+          {/* ── FOOTBALL: cx=314 cy=52 r=32 ── */}
+          <circle cx="314" cy="52" r="32" strokeWidth="2.5" />
+          {/* pentagon inner r=16, top vertex up */}
+          <polygon points="314,36 329,47 324,65 304,65 299,47" strokeWidth="1.6" />
+          <line x1="314" y1="36" x2="314" y2="20" strokeWidth="1.5" />
+          <line x1="329" y1="47" x2="344" y2="42" strokeWidth="1.5" />
+          <line x1="324" y1="65" x2="334" y2="78" strokeWidth="1.5" />
+          <line x1="304" y1="65" x2="294" y2="78" strokeWidth="1.5" />
+          <line x1="299" y1="47" x2="284" y2="42" strokeWidth="1.5" />
         </svg>
 
         {/* "DB" watermark */}
         <div
-          className="absolute -bottom-2 right-0 font-black italic leading-none select-none text-orange-500/[0.055] dark:text-orange-500/[0.09]"
+          className="absolute -bottom-2 right-0 font-black italic leading-none select-none text-orange-500/[0.05] dark:text-orange-500/[0.08]"
           style={{ fontSize: "84px" }}
           aria-hidden
         >

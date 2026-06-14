@@ -284,7 +284,8 @@ export default async function MyProfilePage({
 
         {!tab && (
           <>
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-4">
+            {/* Profil gracza */}
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 space-y-5">
               <div className="flex items-start gap-4">
                 <PlayerAvatar
                   firstName={p.firstName}
@@ -311,15 +312,18 @@ export default async function MyProfilePage({
                 </div>
               </div>
 
-              <hr className="border-zinc-100" />
-              <AvatarPicker current={p.avatarId} />
-
-              <div className="grid grid-cols-4 gap-4 border-t border-zinc-100 pt-4">
+              <div className="grid grid-cols-4 gap-4 border-t border-zinc-100 pt-5">
                 <StatCell label="Mecze"  value={p.matchLineups.length} />
                 <StatCell label="Gole"   value={p.goalsScored.length} />
                 <StatCell label="Asysty" value={p.goalsAssisted.length} />
                 <StatCell label="MVP"    value={mvpCount} />
               </div>
+            </div>
+
+            {/* Wybór awatara */}
+            <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Awatar</p>
+              <AvatarPicker current={p.avatarId} />
             </div>
 
             {(bestMatch || favoritePartner) && (

@@ -22,9 +22,8 @@ export default function AvatarPicker({ current }: { current: number | null }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Awatar</p>
-        {selected && (
+      {selected && (
+        <div className="flex justify-end">
           <button
             onClick={() => pick(selected)}
             disabled={pending}
@@ -32,8 +31,8 @@ export default function AvatarPicker({ current }: { current: number | null }) {
           >
             Usuń awatar
           </button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
         {AVATARS.map((av) => {
           const active = selected === av.id

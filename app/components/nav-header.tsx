@@ -187,22 +187,26 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
 
       {/* ── Desktop navbar ── */}
       <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 shrink-0">
+        {/* 3-column grid: links | logo | controls */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center h-16">
+
+          {/* Left — nav links */}
+          <SlidingNavLinks links={navLinks} />
+
+          {/* Center — logo */}
+          <Link href="/" className="flex flex-col items-center gap-0.5 group px-4">
             <Image
               src="/donlogo.png" alt="Don Bosco Premier League"
-              width={56} height={56} quality={100} priority unoptimized
-              className="logo-img w-14 h-14 object-contain block"
+              width={48} height={48} quality={100} priority unoptimized
+              className="logo-img w-12 h-12 object-contain block transition-transform duration-200 group-hover:scale-105"
             />
-            <span className="font-extrabold tracking-tight leading-tight">
-              <span className="text-base text-orange-500 italic">Don Bosco</span>
-              <span className="block text-[10px] font-bold tracking-widest uppercase text-zinc-400 dark:text-zinc-500">Premier League</span>
+            <span className="text-[8px] font-bold tracking-[0.28em] uppercase text-zinc-400 dark:text-zinc-500 leading-none">
+              Premier League
             </span>
           </Link>
 
-          <SlidingNavLinks links={navLinks} />
-
-          <div className="flex items-center gap-1">
+          {/* Right — controls */}
+          <div className="flex items-center justify-end gap-1">
             {isOrganizer && <PanelDropdown links={panelLinks} />}
             {isLoggedIn ? (
               <>

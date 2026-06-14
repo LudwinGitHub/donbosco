@@ -186,44 +186,61 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
       </div>
 
       {/* ── Desktop navbar ── */}
-      <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
+      <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4 overflow-hidden">
 
-        {/* ── Football pitch SVG decoration ── */}
-        <svg
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox="0 0 1024 64"
-          preserveAspectRatio="xMidYMid meet"
-          fill="none"
-          stroke="rgba(255,90,0,0.11)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
+        {/* Decorative layer — mirrors mobile hero, fades to 0 on scroll (glass takes over) */}
+        <div
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          style={{ opacity: scrolled ? 0 : 1 }}
         >
-          {/* halfway line */}
-          <line x1="512" y1="0" x2="512" y2="64" />
-          {/* center circle (r=80 — clips above/below, only arc visible) */}
-          <circle cx="512" cy="32" r="80" />
-          {/* center spot */}
-          <circle cx="512" cy="32" r="3" fill="rgba(255,90,0,0.22)" stroke="none" />
-          {/* corner arcs */}
-          <path d="M 20 0 A 20 20 0 0 0 0 20" />
-          <path d="M 1004 0 A 20 20 0 0 1 1024 20" />
-          <path d="M 0 44 A 20 20 0 0 1 20 64" />
-          <path d="M 1024 44 A 20 20 0 0 0 1004 64" />
-        </svg>
+          <div className="hero-stripes absolute inset-0" />
+          <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-orange-500/10 blur-3xl" />
+          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-orange-500/[0.04] to-transparent" />
+          <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
 
+          {/* Football SVG watermark */}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 80 80"
+            className="absolute right-28 bottom-[-18px] w-[76px] h-[76px] text-orange-500/[0.10] dark:text-orange-500/[0.16]"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="40" cy="40" r="34" />
+            <polygon points="40,26 53,36 48,51 32,51 27,36" strokeWidth="1.5" />
+            <line x1="40" y1="26" x2="40" y2="6"   strokeWidth="1.5" />
+            <line x1="53" y1="36" x2="72" y2="30"  strokeWidth="1.5" />
+            <line x1="48" y1="51" x2="60" y2="68"  strokeWidth="1.5" />
+            <line x1="32" y1="51" x2="20" y2="68"  strokeWidth="1.5" />
+            <line x1="27" y1="36" x2="8"  y2="30"  strokeWidth="1.5" />
+          </svg>
+
+          {/* "DB" watermark */}
+          <div
+            className="absolute -bottom-2 right-1 font-black italic leading-none select-none text-orange-500/[0.055] dark:text-orange-500/[0.09]"
+            style={{ fontSize: "84px" }}
+            aria-hidden
+          >
+            DB
+          </div>
+        </div>
+
+        {/* Content */}
         <div className="relative flex items-center justify-between h-16">
 
-          {/* Left — brand */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <Image
-              src="/donlogo.png" alt="Don Bosco"
-              width={40} height={40} quality={100} priority unoptimized
-              className="logo-img w-10 h-10 object-contain block transition-transform duration-200 group-hover:scale-105"
-            />
-            <span className="font-black italic text-orange-500 text-xl leading-none tracking-tight">
+          {/* Left — text branding (no logo image) */}
+          <Link href="/" className="shrink-0">
+            <p className="font-black italic text-orange-500 leading-none tracking-tight" style={{ fontSize: "1.65rem" }}>
               Don Bosco
-            </span>
+            </p>
+            <div className="flex items-center gap-2 mt-[5px]">
+              <span className="block h-px w-5 bg-orange-500/40" />
+              <p className="text-[7px] font-bold tracking-[0.30em] uppercase text-zinc-400 dark:text-zinc-500">Premier League</p>
+              <span className="block h-px w-5 bg-orange-500/40" />
+            </div>
           </Link>
 
           {/* Center — nav links (absolutely centered) */}

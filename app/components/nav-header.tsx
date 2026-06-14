@@ -126,48 +126,60 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
         <div className="absolute left-0  top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/30 to-transparent" />
         <div className="absolute right-0 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-orange-500/50 to-transparent" />
 
-        {/* ── LEFT: speed lines + small flames (connect with left page edge) ── */}
+        {/* ── LEFT: fan of speed lines + flame cluster ── */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 220 64"
-          className="absolute left-0 top-0 h-full w-[220px] text-orange-500/[0.09] dark:text-orange-500/[0.13]"
-          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+          viewBox="0 0 260 64"
+          className="absolute left-0 top-0 h-full w-[260px] text-orange-500/[0.09] dark:text-orange-500/[0.14]"
+          fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
         >
-          {/* Speed lines extending right */}
-          <line x1="0" y1="16" x2="140" y2="19" />
-          <line x1="0" y1="24" x2="180" y2="27" />
-          <line x1="0" y1="32" x2="200" y2="36" />
-          <line x1="0" y1="40" x2="160" y2="44" />
-          <line x1="0" y1="48" x2="95"  y2="52" />
-          {/* Tiny flames at left edge */}
-          <path d="M 8 62 C 4 50 0 40 5 28 C 7 20 15 24 13 12" />
-          <path d="M 19 60 C 17 48 21 40 17 28 C 14 20 8 22 10 12" />
+          {/* Fan of speed lines from left edge */}
+          <line x1="0" y1="10" x2="200" y2="20" strokeWidth="1" />
+          <line x1="0" y1="18" x2="240" y2="25" strokeWidth="1.2" />
+          <line x1="0" y1="26" x2="255" y2="30" strokeWidth="1.5" />
+          <line x1="0" y1="34" x2="255" y2="38" strokeWidth="1.5" />
+          <line x1="0" y1="42" x2="240" y2="44" strokeWidth="1.2" />
+          <line x1="0" y1="50" x2="190" y2="52" strokeWidth="1" />
+          <line x1="0" y1="58" x2="120" y2="60" strokeWidth="0.8" />
+          {/* Flame cluster at far left */}
+          <path d="M 6 64 C 2 52 0 42 4 30 C 6 22 13 26 11 14 C 15 26 22 20 19 32 C 22 22 30 24 27 36 C 30 26 36 30 33 42 C 38 30 44 34 40 48 C 36 62 28 66 6 64" strokeWidth="1.2" />
+          <path d="M 18 64 C 16 54 20 46 16 36" strokeWidth="1" />
+          <path d="M 30 62 C 28 50 34 42 30 34" strokeWidth="1" />
         </svg>
 
-        {/* ── RIGHT: football + flames (from right edge) ── */}
+        {/* ── RIGHT: flame storm + football ── */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 280 86"
-          className="absolute right-0 bottom-[-20px] h-[86px] w-[280px] text-orange-500/[0.11] dark:text-orange-500/[0.17]"
-          fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          viewBox="0 0 320 90"
+          className="absolute right-0 bottom-[-22px] h-[90px] w-[320px] text-orange-500/[0.11] dark:text-orange-500/[0.18]"
+          fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
         >
-          {/* Speed lines (left of composition, going left) */}
-          <line x1="30" y1="38" x2="0"  y2="36" />
-          <line x1="28" y1="46" x2="0"  y2="50" />
-          <line x1="32" y1="30" x2="4"  y2="26" />
-          {/* Flames */}
-          <path d="M 100 82 C 96 66 87 56 93 39 C 97 27 106 31 104 14" />
-          <path d="M 113 82 C 111 68 115 58 111 44 C 108 34 101 36 104 16" />
-          <path d="M  88 78 C 83 64 75 54 82 42" />
-          <path d="M 125 76 C 129 64 133 56 128 47" />
-          {/* Football: cx=195 cy=52 r=28 */}
-          <circle cx="195" cy="52" r="28" strokeWidth="2" />
-          <polygon points="195,38 208,48 203,63 187,63 182,48" strokeWidth="1.5" />
-          <line x1="195" y1="38" x2="195" y2="24" strokeWidth="1.5" />
-          <line x1="208" y1="48" x2="222" y2="43" strokeWidth="1.5" />
-          <line x1="203" y1="63" x2="212" y2="75" strokeWidth="1.5" />
-          <line x1="187" y1="63" x2="179" y2="75" strokeWidth="1.5" />
-          <line x1="182" y1="48" x2="168" y2="43" strokeWidth="1.5" />
+          {/* Speed lines entering from left */}
+          <line x1="0"  y1="32" x2="55"  y2="35" strokeWidth="1" />
+          <line x1="0"  y1="40" x2="65"  y2="44" strokeWidth="1.2" />
+          <line x1="0"  y1="48" x2="50"  y2="53" strokeWidth="1" />
+          {/* Tall main flames (left of ball) */}
+          <path d="M 90  88 C 85 70 74 58 81 40 C 85 27 96 32 93 14" strokeWidth="1.8" />
+          <path d="M 107 88 C 104 72 109 60 104 44 C 100 32 91 35 93 16" strokeWidth="1.8" />
+          {/* Medium secondary flames */}
+          <path d="M 75  84 C 70 68 62 56 70 44 C 73 36 81 40 79 28" strokeWidth="1.4" />
+          <path d="M 122 84 C 127 68 132 58 126 46" strokeWidth="1.4" />
+          <path d="M 136 80 C 140 66 145 56 139 46" strokeWidth="1.4" />
+          {/* Small wispy flames */}
+          <path d="M 62  78 C 58 66 54 56 60 46" strokeWidth="1" />
+          <path d="M 150 76 C 154 64 158 56 153 48" strokeWidth="1" />
+          <path d="M 160 72 C 164 62 167 54 162 46" strokeWidth="1" />
+          {/* Football: cx=228 cy=56 r=32 */}
+          {/* Outer circle */}
+          <circle cx="228" cy="56" r="32" strokeWidth="2.5" />
+          {/* Curved panel lines — 3 arcs suggesting ball surface */}
+          <path d="M 210 30 C 220 38 226 50 222 64" strokeWidth="1.4" />
+          <path d="M 228 24 C 236 34 240 48 234 64" strokeWidth="1.4" />
+          <path d="M 244 28 C 250 38 252 52 246 66" strokeWidth="1.4" />
+          {/* Horizontal band */}
+          <path d="M 197 50 C 210 46 226 46 246 50 C 252 52 255 56 250 60" strokeWidth="1.2" />
+          {/* Top seam dot */}
+          <circle cx="228" cy="26" r="2.5" fill="currentColor" strokeWidth="0" />
         </svg>
 
         {/* "DB" watermark */}
@@ -258,9 +270,9 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
 
       {/* ── Desktop navbar ── */}
       <div className="hidden sm:block relative z-10 mx-auto max-w-5xl px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16">
 
-          {/* Left — text branding (no logo image) */}
+          {/* Left — text branding */}
           <Link href="/" className="shrink-0">
             <p className="font-black italic text-orange-500 leading-none tracking-tight" style={{ fontSize: "1.65rem" }}>
               Don Bosco
@@ -272,24 +284,24 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
             </div>
           </Link>
 
-          {/* Center — nav links (absolutely centered) */}
-          <div className="absolute left-1/2 -translate-x-1/2">
+          {/* Center — nav links (flex-1 → no overlap with controls) */}
+          <div className="flex-1 flex justify-center">
             <SlidingNavLinks links={navLinks} />
           </div>
 
-          {/* Right — controls */}
-          <div className="flex items-center gap-1">
+          {/* Right — controls (shrink-0 so they never squeeze nav) */}
+          <div className="flex items-center gap-1 shrink-0">
             {isOrganizer && <PanelDropdown links={panelLinks} />}
             {isLoggedIn ? (
               <>
                 <Link
                   href="/moj-profil"
-                  className="hidden md:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors"
+                  className="hidden lg:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors"
                 >
                   Mój profil
                 </Link>
                 <PushButton />
-                <form action={logoutAction} className="hidden md:block">
+                <form action={logoutAction} className="hidden lg:block">
                   <button
                     type="submit"
                     className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors"
@@ -302,7 +314,7 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
               <>
                 <Link
                   href="/rejestracja"
-                  className="hidden md:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors"
+                  className="hidden lg:block rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors"
                 >
                   Zarejestruj się
                 </Link>
@@ -315,13 +327,16 @@ export default function NavHeader({ isLoggedIn, isOrganizer, navLinks, panelLink
               </>
             )}
             <ThemeToggle />
-            <MobileMenu
-              navLinks={navLinks}
-              panelLinks={panelLinks}
-              isLoggedIn={isLoggedIn}
-              isOrganizer={isOrganizer}
-              logoutAction={logoutAction}
-            />
+            {/* hamburger only at sm–md (nav links hidden at those sizes) */}
+            <div className="md:hidden">
+              <MobileMenu
+                navLinks={navLinks}
+                panelLinks={panelLinks}
+                isLoggedIn={isLoggedIn}
+                isOrganizer={isOrganizer}
+                logoutAction={logoutAction}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -118,7 +118,7 @@ function SeasonTab({ href, label, active }: { href: string; label: string; activ
   return (
     <Link
       href={href}
-      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+      className={`rounded-lg px-3 py-3 sm:py-1.5 text-sm font-medium transition-colors ${
         active
           ? "bg-orange-500 text-white border border-orange-600 shadow-sm shadow-orange-500/30"
           : "bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50"

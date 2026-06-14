@@ -99,7 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
 
-        <main className="mx-auto max-w-5xl px-4 py-4 pb-28 sm:py-8 sm:pb-8">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 py-4 pb-28 sm:py-8 sm:pb-20">{children}</main>
         <Toaster richColors position="bottom-left" />
         <Suspense><ToastConsumer /></Suspense>
         <ChatFab

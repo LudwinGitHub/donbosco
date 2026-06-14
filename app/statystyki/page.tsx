@@ -51,7 +51,7 @@ export default async function StatystykiPage() {
       {allTimeScorerRanking.length > 0 && (
         <section className="space-y-3">
           <SectionHeading>Klasyfikacja strzelców</SectionHeading>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
+          <div className="overflow-x-auto overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -136,7 +136,7 @@ export default async function StatystykiPage() {
       {topScorers.length > 0 && (
         <section className="space-y-3">
           <SectionHeading>Rekord strzelecki (w jednym meczu)</SectionHeading>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
+          <div className="overflow-x-auto overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -159,7 +159,7 @@ export default async function StatystykiPage() {
       {/* Season overview */}
       <section className="space-y-3">
         <SectionHeading>Podsumowanie sezonów</SectionHeading>
-        <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
+        <div className="overflow-x-auto overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
@@ -183,7 +183,7 @@ export default async function StatystykiPage() {
       {activeSeason && teamStats.length > 0 && (
         <section className="space-y-3">
           <SectionHeading>Statystyki drużyn — {activeSeason.name}</SectionHeading>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
+          <div className="overflow-x-auto overflow-hidden rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">

@@ -113,7 +113,7 @@ function PollSection({
               onClick={() => handleVote(opt)}
               disabled={!currentUserId}
               title={!currentUserId ? "Zaloguj się, aby głosować" : undefined}
-              className={`relative w-full flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-all overflow-hidden
+              className={`relative w-full flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all overflow-hidden
                 ${isActive
                   ? "border-orange-400 bg-orange-50 font-semibold text-orange-700"
                   : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"

@@ -9,6 +9,62 @@ export type SeasonChartEntry = {
   played: number
 }
 
+export type FormEntry = {
+  matchId:  string
+  date:     Date
+  result:   "W" | "D" | "L" | null
+  goals:    number
+  assists:  number
+  opponent: { name: string; color: string }
+}
+
+export async function getPlayerFormHistory(playerId: string, take = 10): Promise<FormEntry[]> {
+  const lineups = await prisma.matchLineup.findMany({
+    where:   { playerId, match: { status: "PLAYED" } },
+    include: {
+      match: {
+        select: {
+          id: true, scheduledAt: true, homeScore: true, awayScore: true,
+          homeTeam: { select: { id: true, name: true, color: true } },
+          awayTeam: { select: { id: true, name: true, color: true } },
+        },
+      },
+      team: { select: { id: true } },
+    },
+    orderBy: { match: { scheduledAt: "desc" } },
+    take,
+  })
+
+  const matchIds = lineups.map(l => l.matchId)
+  const [goals, assists] = await Promise.all([
+    prisma.goal.findMany({ where: { scorerId: playerId, matchId: { in: matchIds }, isOwnGoal: false }, select: { matchId: true } }),
+    prisma.goal.findMany({ where: { assisterId: playerId, matchId: { in: matchIds } }, select: { matchId: true } }),
+  ])
+
+  const gMap = new Map<string, number>()
+  const aMap = new Map<string, number>()
+  for (const g of goals)   gMap.set(g.matchId, (gMap.get(g.matchId) ?? 0) + 1)
+  for (const a of assists) aMap.set(a.matchId, (aMap.get(a.matchId) ?? 0) + 1)
+
+  return [...lineups].reverse().map(l => {
+    const m      = l.match
+    const isHome = m.homeTeam.id === l.team.id
+    const my     = isHome ? m.homeScore : m.awayScore
+    const opp    = isHome ? m.awayScore : m.homeScore
+    const result: "W" | "D" | "L" | null =
+      my == null || opp == null ? null
+      : my > opp ? "W" : my < opp ? "L" : "D"
+    return {
+      matchId:  l.matchId,
+      date:     m.scheduledAt,
+      result,
+      goals:    gMap.get(l.matchId) ?? 0,
+      assists:  aMap.get(l.matchId) ?? 0,
+      opponent: isHome ? m.awayTeam : m.homeTeam,
+    }
+  })
+}
+
 export async function getBestMatch(playerId: string): Promise<{
   matchId:   string
   date:      Date
@@ -266,6 +322,7 @@ export type PlayerProfile = {
   firstName:    string
   lastName:     string
   nickname:     string | null
+  avatarId:     number | null
   totalPlayed:  number
   totalGoals:   number
   totalAssists: number
@@ -363,6 +420,7 @@ export async function getPlayerProfile(id: string): Promise<PlayerProfile | null
     firstName:    player.firstName,
     lastName:     player.lastName,
     nickname:     player.nickname,
+    avatarId:     player.avatarId,
     totalPlayed:  player.matchLineups.length,
     totalGoals:   player.goalsScored.length,
     totalAssists: player.goalsAssisted.length,

@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { getPlayerProfile, getPlayerForms, getFavoritePartner, type PlayerForm } from "@/lib/players"
+import { getPlayerProfile, getPlayerForms, getFavoritePartner, type PlayerForm, type FormEntry } from "@/lib/players"
+import FormChart from "@/app/ui/form-chart"
 import { getActiveBadges } from "@/lib/badges"
 import BadgeChip from "@/app/ui/badge-chip"
+import PlayerAvatar from "@/app/ui/player-avatar"
 import SeasonChart from "@/app/moj-profil/season-chart"
 import CountUp from "@/app/ui/count-up"
 
@@ -24,6 +26,23 @@ export default async function PlayerProfilePage({
     : null
   const hasBestMatch = bestMatch && (bestMatch.goals > 0 || bestMatch.assists > 0)
 
+  const formData: FormEntry[] = player.matches
+    .filter(m => m.homeScore != null && m.awayScore != null)
+    .slice(0, 10)
+    .reverse()
+    .map(m => {
+      const my  = m.isHome ? m.homeScore! : m.awayScore!
+      const opp = m.isHome ? m.awayScore! : m.homeScore!
+      return {
+        matchId:  m.matchId,
+        date:     m.date,
+        result:   my > opp ? "W" : my < opp ? "L" : "D",
+        goals:    m.goals,
+        assists:  m.assists,
+        opponent: m.opponent,
+      }
+    })
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       {/* Breadcrumb */}
@@ -35,18 +54,28 @@ export default async function PlayerProfilePage({
 
       {/* Hero */}
       <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold text-zinc-900">
-            {player.firstName} {player.lastName}
-          </h1>
-          <FormArrow form={form} />
-          {playerBadges.map((b, i) => (
-            <BadgeChip key={i} type={b.type} index={i} />
-          ))}
+        <div className="flex items-start gap-4">
+          <PlayerAvatar
+            firstName={player.firstName}
+            lastName={player.lastName}
+            avatarId={player.avatarId}
+            size="lg"
+          />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold text-zinc-900">
+                {player.firstName} {player.lastName}
+              </h1>
+              <FormArrow form={form} />
+              {playerBadges.map((b, i) => (
+                <BadgeChip key={i} type={b.type} index={i} />
+              ))}
+            </div>
+            {player.nickname && (
+              <p className="mt-0.5 text-sm text-zinc-400">„{player.nickname}"</p>
+            )}
+          </div>
         </div>
-        {player.nickname && (
-          <p className="mt-0.5 text-sm text-zinc-400">„{player.nickname}"</p>
-        )}
         <div className={`mt-5 grid gap-4 border-t border-zinc-100 pt-5 ${player.totalMvp > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
           <StatCell label="Mecze"  value={player.totalPlayed} />
           <StatCell label="Gole"   value={player.totalGoals} />
@@ -103,6 +132,16 @@ export default async function PlayerProfilePage({
             </Link>
           )}
         </div>
+      )}
+
+      {/* Form chart */}
+      {formData.length >= 2 && (
+        <section className="space-y-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Forma (ostatnie mecze)</h2>
+          <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-5">
+            <FormChart data={formData} />
+          </div>
+        </section>
       )}
 
       {/* Per-season breakdown */}

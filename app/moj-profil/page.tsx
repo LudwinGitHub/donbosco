@@ -11,7 +11,8 @@ import AvatarPicker from "./avatar-picker"
 import SeasonChart from "./season-chart"
 import EditPlayerSection from "./edit-player-form"
 import CountUp from "@/app/ui/count-up"
-import { getSeasonStatsForPlayer, getBestMatch, getFavoritePartner } from "@/lib/players"
+import { getSeasonStatsForPlayer, getBestMatch, getFavoritePartner, getPlayerFormHistory } from "@/lib/players"
+import FormChart from "@/app/ui/form-chart"
 
 export default async function MyProfilePage({
   searchParams,
@@ -223,13 +224,14 @@ export default async function MyProfilePage({
     }
 
     let matchHistory: MatchHistoryEntry[] = []
-    const [seasonStats, bestMatch, favoritePartner] = !tab
+    const [seasonStats, bestMatch, favoritePartner, formHistory] = !tab
       ? await Promise.all([
           getSeasonStatsForPlayer(p.id),
           getBestMatch(p.id),
           getFavoritePartner(p.id),
+          getPlayerFormHistory(p.id),
         ])
-      : [[], null, null]
+      : [[], null, null, []]
 
     if (tab === "historia") {
       const rawLineups = await prisma.matchLineup.findMany({
@@ -322,12 +324,6 @@ export default async function MyProfilePage({
               </div>
             </div>
 
-            {/* Wybór awatara */}
-            <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-5 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Awatar</p>
-              <AvatarPicker current={p.avatarId} />
-            </div>
-
             {(bestMatch || favoritePartner) && (
               <div className="grid grid-cols-2 gap-3">
                 {bestMatch && (
@@ -374,6 +370,14 @@ export default async function MyProfilePage({
               </div>
             )}
 
+            {/* Wykres formy */}
+            {formHistory.length >= 2 && (
+              <div className="rounded-xl border border-zinc-200 border-t-2 border-t-orange-500 bg-white p-5 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Forma (ostatnie mecze)</p>
+                <FormChart data={formHistory} />
+              </div>
+            )}
+
             {seasonStats.length >= 2 && (
               <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-5 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Postęp sezonowy</p>
@@ -382,6 +386,12 @@ export default async function MyProfilePage({
             )}
 
             {registrationsSection}
+
+            {/* Wybór awatara */}
+            <div className="rounded-xl border border-zinc-200 border-t-2 border-t-zinc-300 bg-white p-5 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Awatar</p>
+              <AvatarPicker current={p.avatarId} />
+            </div>
 
             <EditPlayerSection
               firstName={p.firstName}

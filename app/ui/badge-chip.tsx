@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import type { BadgeType } from "@/lib/badges"
 
 // ── SVG icons — 14×14, stroke-based, currentColor ────────────────────────────
@@ -133,13 +133,24 @@ const BADGE_CONFIG: Record<BadgeType, { Icon: React.FC; label: string }> = {
 export default function BadgeChip({ type, index = 0 }: { type: BadgeType; index?: number }) {
   const { Icon, label } = BADGE_CONFIG[type]
   const [open, setOpen] = useState(false)
+  const [side, setSide] = useState<'left' | 'right'>('left')
+  const chipRef = useRef<HTMLSpanElement>(null)
+
+  const openTooltip = () => {
+    if (chipRef.current) {
+      const { left } = chipRef.current.getBoundingClientRect()
+      setSide(left > window.innerWidth / 2 ? 'right' : 'left')
+    }
+    setOpen(true)
+  }
 
   return (
     <span
+      ref={chipRef}
       className="relative inline-flex"
-      onMouseEnter={() => setOpen(true)}
+      onMouseEnter={openTooltip}
       onMouseLeave={() => setOpen(false)}
-      onClick={(e) => { e.stopPropagation(); setOpen(o => !o) }}
+      onClick={(e) => { e.stopPropagation(); open ? setOpen(false) : openTooltip() }}
       style={{ animation: `badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both`, animationDelay: `${index * 60}ms` }}
     >
       {/* Chip */}
@@ -147,11 +158,11 @@ export default function BadgeChip({ type, index = 0 }: { type: BadgeType; index?
         <Icon />
       </span>
 
-      {/* Tooltip */}
+      {/* Tooltip — left/right side computed at open time to stay in viewport */}
       {open && (
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-zinc-700/60 bg-zinc-900 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-lg dark:border-white/10 dark:bg-zinc-800 max-sm:left-0 max-sm:right-auto max-sm:translate-x-0 max-sm:max-w-[min(8rem,calc(100vw-1rem))]">
+        <span className={`pointer-events-none absolute bottom-full z-50 mb-2 whitespace-nowrap rounded-lg border border-zinc-700/60 bg-zinc-900 px-2.5 py-1.5 text-[11px] font-semibold text-white shadow-lg dark:border-white/10 dark:bg-zinc-800 max-sm:max-w-[min(8rem,calc(100vw-1rem))] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 ${side === 'right' ? 'right-0 left-auto' : 'left-0'}`}>
           {label}
-          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-800 max-sm:left-3 max-sm:translate-x-0" />
+          <span className={`absolute top-full border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-800 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 ${side === 'right' ? 'right-2 left-auto' : 'left-3'}`} />
         </span>
       )}
     </span>

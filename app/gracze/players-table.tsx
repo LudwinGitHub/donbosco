@@ -27,15 +27,15 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
   })
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-100 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            <th className="px-4 py-3 text-right w-8">#</th>
-            <th className="px-4 py-3 text-left">Gracz</th>
+            <th className="px-2 sm:px-4 py-3 text-right w-8">#</th>
+            <th className="px-2 sm:px-4 py-3 text-left">Gracz</th>
             {seasonId && <th className="px-4 py-3 text-left hidden sm:table-cell">Drużyna</th>}
-            <th className="px-4 py-3 text-center w-10" title="Forma">F</th>
-            <SortTh label="M" title="Mecze"  k="played"  sort={sort} onSort={setSort} />
+            <th className="px-2 sm:px-4 py-3 text-center w-10" title="Forma">F</th>
+            <SortTh label="M" title="Mecze"  k="played"  sort={sort} onSort={setSort} className="hidden sm:table-cell" />
             <SortTh label="G" title="Gole"   k="goals"   sort={sort} onSort={setSort} />
             <SortTh label="A" title="Asysty" k="assists" sort={sort} onSort={setSort} />
           </tr>
@@ -43,8 +43,8 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
         <tbody className="divide-y divide-zinc-100 stagger">
           {display.map((p, i) => (
             <tr key={p.id} className="transition-colors hover:bg-zinc-50">
-              <td className="px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
-              <td className="px-4 py-3">
+              <td className="px-2 sm:px-4 py-3 text-right text-xs text-zinc-300">{i + 1}</td>
+              <td className="px-2 sm:px-4 py-3">
                 <div className="flex items-center gap-2.5">
                   <PlayerAvatar firstName={p.firstName} lastName={p.lastName} color={p.team?.color} avatarId={p.avatarId} size="sm" />
                   <div className="flex flex-wrap items-center gap-1.5 min-w-0">
@@ -68,18 +68,18 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
                   ) : <span className="text-zinc-300">—</span>}
                 </td>
               )}
-              <td className="px-4 py-3 text-center">
+              <td className="px-2 sm:px-4 py-3 text-center">
                 <FormArrow form={forms[p.id]} />
               </td>
-              <td className="px-4 py-3 text-center text-zinc-600">
+              <td className="px-2 sm:px-4 py-3 text-center text-zinc-600 hidden sm:table-cell">
                 <CountUp value={p.played} duration={600} />
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="px-2 sm:px-4 py-3 text-center">
                 <span className={p.goals > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
                   <CountUp value={p.goals} duration={600} />
                 </span>
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="px-2 sm:px-4 py-3 text-center">
                 <span className={p.assists > 0 ? "font-semibold text-zinc-900" : "text-zinc-400"}>
                   <CountUp value={p.assists} duration={600} />
                 </span>
@@ -92,13 +92,13 @@ export default function PlayersTable({ players, badges, forms, seasonId, initial
   )
 }
 
-function SortTh({ label, title, k, sort, onSort }: {
-  label: string; title: string; k: SortKey; sort: SortKey; onSort: (k: SortKey) => void
+function SortTh({ label, title, k, sort, onSort, className = "" }: {
+  label: string; title: string; k: SortKey; sort: SortKey; onSort: (k: SortKey) => void; className?: string
 }) {
   const active = sort === k
   return (
     <th
-      className={`px-4 py-3 text-center w-14 cursor-pointer select-none transition-colors hover:text-zinc-600 ${active ? "text-orange-600" : ""}`}
+      className={`px-2 sm:px-4 py-3 text-center w-10 sm:w-14 cursor-pointer select-none transition-colors hover:text-zinc-600 ${active ? "text-orange-600" : ""} ${className}`}
       title={title}
       onClick={() => onSort(k)}
     >
